@@ -15,5 +15,4 @@ Esta segunda versión incorpora mejoras sustanciales respecto a la versión prev
 - Mejorar la eficiencia en el análisis mediante procesamiento automático.
 
 
-Este proyecto está bajo licencia MIT - consulta el archivo [LICENSE](LICENSE) para más detalles.
 
