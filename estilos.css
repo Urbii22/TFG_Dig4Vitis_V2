@@ -1,0 +1,16 @@
+[data-testid='stFileUploader'] {
+    width: 333px;
+    margin: 0 auto;
+}
+[data-testid='stFileUploader'] section > button{
+    display: none;
+}
+[data-testid="stFileUploaderDropzone"] div div::before {
+    content:"Cargar archivos"
+}
+[data-testid="stFileUploaderDropzone"] div div span{
+    display:none;
+}
+[data-testid="stFileUploaderDropzone"] div div small{
+    display:none;
+}

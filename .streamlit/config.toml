@@ -1,0 +1,11 @@
+[server]
+enableXsrfProtection = false
+enableCORS = false
+maxUploadSize=5120
+port = 8501
+[theme]
+primaryColor="#367C2B"
+backgroundColor="#161616"
+secondaryBackgroundColor="#353535"
+textColor="#FAFAFA"
+font="sans serif"
