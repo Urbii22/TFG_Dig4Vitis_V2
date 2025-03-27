@@ -92,7 +92,7 @@ def main():
         - Banda 30 para detección de hoja (binarizada automáticamente con Otsu)
         - Banda 60 para detección de cuprocol, usando:
               * Umbral fijo: se usan los valores 50 y 800 (convertidos a escala 0-255)
-              * Umbral adaptativo: se calcula automáticamente con Otsu y se ajusta con una tolerancia (±10%)
+              * Umbral adaptativo: recorre la banda para elegir el umbral que maximiza la detección
         """
         # Procesar banda para detección de hoja (Banda 30)
         banda_hoja = imagen.read_band(30)
@@ -107,11 +107,23 @@ def main():
             # Convertir umbrales fijos de 50 y 800 (escala 0-1000) a escala 0-255
             cupro_min = int(50 * 255 / 1000)   # Aproximadamente 12
             cupro_max = int(800 * 255 / 1000)  # Aproximadamente 204
-        else:  # Adaptativo
-            T, _ = cv2.threshold(banda_cuprocol, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
+        else:  # Adaptativo: iteramos para encontrar el mejor umbral
             tolerancia = 0.10  # ±10%
-            cupro_min = int(max(0, T * (1 - tolerancia)))
-            cupro_max = int(min(255, T * (1 + tolerancia)))
+            mejor_T = 0
+            max_detectados = -1
+            
+            # Recorrer posibles umbrales de 0 a 255
+            for T_candidate in range(0, 256):
+                cupro_min_candidate = int(max(0, T_candidate * (1 - tolerancia)))
+                cupro_max_candidate = int(min(255, T_candidate * (1 + tolerancia)))
+                mask_candidate = cv2.inRange(banda_cuprocol, cupro_min_candidate, cupro_max_candidate)
+                num_detectados = np.count_nonzero(mask_candidate)
+                if num_detectados > max_detectados:
+                    max_detectados = num_detectados
+                    mejor_T = T_candidate
+                    
+            cupro_min = int(max(0, mejor_T * (1 - tolerancia)))
+            cupro_max = int(min(255, mejor_T * (1 + tolerancia)))
         
         # Crear la máscara para detectar cuprocol en la banda 60
         gotas_bin = cv2.inRange(banda_cuprocol, cupro_min, cupro_max)
