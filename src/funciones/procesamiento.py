@@ -26,14 +26,15 @@ def aplicar_procesamiento(imagen, modo_umbral="Fijo"):
 
     # Extraer la Banda 10 y la Banda 164
     banda_10 = imagen[:, :, 9].squeeze() * factor
-    banda_164 = imagen[:, :, 163].squeeze() * factor
+    banda_164 = imagen[:, :, 165].squeeze() * factor
 
     # Crear la máscara de la hoja: píxeles con valor < 2000 en la Banda 10
     leaf_mask = (banda_10 < 2000)
     leaf_mask = remove_small_holes(leaf_mask, area_threshold=200)
 
-    # Detección inicial de gotas en la Banda 164 (rango [3500, 4000]) y restringir a la zona de la hoja
-    mask_droplets = (banda_164 >= 3500) & (banda_164 <= 4000)
+    # Detección inicial de gotas en la Banda 164 (rango [4092, 4558]) y restringir a la zona de la hoja
+    mask_droplets = ((banda_164 >= 4200) & (banda_164 <= 4558) ) | ((banda_164 >= 4900) & (banda_164 <= 5200))
+
     mask_droplets = mask_droplets & leaf_mask
 
     # Reducir ruido mediante operaciones morfológicas
@@ -49,7 +50,7 @@ def aplicar_procesamiento(imagen, modo_umbral="Fijo"):
         if prop.perimeter == 0:
             continue
         circularidad = 4.0 * math.pi * prop.area / (prop.perimeter ** 2)
-        if circularidad < 0.25:
+        if circularidad < 0.0:
             labels[labels == prop.label] = 0
     mask_droplets_final = (labels > 0)
 
