@@ -22,7 +22,7 @@ def cargar_hyper_bin():
         """, unsafe_allow_html=True)
     
     archivos_subidos = st.file_uploader("Archivos BIL", accept_multiple_files=True, type=["bil", "bil.hdr"], label_visibility="collapsed")
-    modo_umbral = st.radio("Selecciona el método de umbral para la detección de cuprocol (Banda 60):",
+    modo_umbral = st.radio("Selecciona el método de umbral para la detección de cuprocol (Banda 164):",
                            options=["Fijo", "Adaptativo"], index=0)
     
     if len(archivos_subidos) == 2:
@@ -43,6 +43,7 @@ def cargar_hyper_bin():
                 img = spectral.open_image(hdr_file)
                 progress_bar = st.progress(0)
                 status_text = st.empty()
+                
                 status_text.text("Procesando banda 30 para detección de hoja...")
                 progress_bar.progress(25)
                 status_text.text("Procesando banda 60 para detección de cuprocol...")
@@ -70,7 +71,7 @@ def cargar_hyper_bin():
                 tabs = st.tabs(["🎯 Imagen trinarizada", "📊 Imagen normal", "🔍 Superposición"])
                 with tabs[0]:
                     st.markdown("**Imagen trinarizada**")
-                    st.markdown("*Zonas negras: hojas, zonas verdes: cuprocol, zonas rojas: fondo*")
+                    st.markdown("*Zonas negras: fondo, zonas verdes: hoja, zonas rojas: cupracol*")
                     image_zoom(trinarizada)
                 with tabs[1]:
                     st.markdown("**Imagen normal (Banda 30)**")

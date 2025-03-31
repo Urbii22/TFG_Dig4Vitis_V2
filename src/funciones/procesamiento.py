@@ -1,68 +1,70 @@
-import cv2
+import spectral
 import numpy as np
-from skimage import measure
+from skimage.morphology import remove_small_objects, remove_small_holes, disk, opening, closing
+from skimage.measure import label, regionprops
+import math
 
 def aplicar_procesamiento(imagen, modo_umbral="Fijo"):
     """
-    Aplica el procesamiento de trinarización utilizando:
-    - Banda 30 para detección de hoja (binarizada automáticamente con Otsu)
-    - Banda 60 para detección de cuprocol, usando umbral fijo o adaptativo
+    Realiza el análisis de la imagen hiperespectral utilizando la nueva versión de procesamiento:
+      - Se utiliza la Banda 10 (índice 9) para la detección de la hoja (píxeles con valor < 2000).
+      - Se utiliza la Banda 164 (índice 163) para la detección de gotas (píxeles en el rango [3500, 4000]).
+      - Se aplican operaciones morfológicas para reducir el ruido y se filtran las gotas en función de su circularidad.
+    
+    Parámetros:
+      imagen: objeto de imagen hiperespectral (resultado de spectral.open_image).
+      modo_umbral: parámetro heredado (en la nueva versión se ignora).
+    
+    Retorna:
+      Imagen trinarizada (array RGB uint8) donde:
+        - Fondo es negro.
+        - Hoja sin gotas es verde ([0,255,0]).
+        - Gotas son rojas ([255,0,0]).
     """
-    # Procesar banda para detección de hoja (Banda 30)
-    banda_hoja = imagen.read_band(30)
-    banda_hoja = cv2.normalize(banda_hoja, None, 0, 255, cv2.NORM_MINMAX, dtype=cv2.CV_8U)
-    _, hoja_bin = cv2.threshold(banda_hoja, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
-    
-    # Procesar banda para detección de cuprocol (Banda 60)
-    banda_cuprocol = imagen.read_band(60)
-    banda_cuprocol = cv2.normalize(banda_cuprocol, None, 0, 255, cv2.NORM_MINMAX, dtype=cv2.CV_8U)
-    
-    if modo_umbral == "Fijo":
-        cupro_min = int(50 * 255 / 1000)
-        cupro_max = int(800 * 255 / 1000)
-    else:
-        tolerancia = 0.10
-        mejor_T = 0
-        max_detectados = -1
-        for T_candidate in range(0, 256):
-            cupro_min_candidate = int(max(0, T_candidate * (1 - tolerancia)))
-            cupro_max_candidate = int(min(255, T_candidate * (1 + tolerancia)))
-            mask_candidate = cv2.inRange(banda_cuprocol, cupro_min_candidate, cupro_max_candidate)
-            num_detectados = np.count_nonzero(mask_candidate)
-            if num_detectados > max_detectados:
-                max_detectados = num_detectados
-                mejor_T = T_candidate
-        cupro_min = int(max(0, mejor_T * (1 - tolerancia)))
-        cupro_max = int(min(255, mejor_T * (1 + tolerancia)))
-    
-    gotas_bin = cv2.inRange(banda_cuprocol, cupro_min, cupro_max)
-    
-    trinarizada = np.zeros((banda_hoja.shape[0], banda_hoja.shape[1], 3), dtype=np.uint8)
-    trinarizada[(hoja_bin == 0) & (gotas_bin == 0)] = [255, 0, 0]
-    trinarizada[(hoja_bin == 0) & (gotas_bin == 255)] = [0, 255, 0]
-    trinarizada[hoja_bin == 255] = [0, 0, 0]
-    
+    # Factor para recuperar el rango original (0-10000)
+    factor = 10000
+
+    # Extraer la Banda 10 y la Banda 164
+    banda_10 = imagen[:, :, 9].squeeze() * factor
+    banda_164 = imagen[:, :, 163].squeeze() * factor
+
+    # Crear la máscara de la hoja: píxeles con valor < 2000 en la Banda 10
+    leaf_mask = (banda_10 < 2000)
+    leaf_mask = remove_small_holes(leaf_mask, area_threshold=200)
+
+    # Detección inicial de gotas en la Banda 164 (rango [3500, 4000]) y restringir a la zona de la hoja
+    mask_droplets = (banda_164 >= 3500) & (banda_164 <= 4000)
+    mask_droplets = mask_droplets & leaf_mask
+
+    # Reducir ruido mediante operaciones morfológicas
+    mask_droplets = remove_small_objects(mask_droplets, min_size=100)
+    mask_droplets = remove_small_holes(mask_droplets, area_threshold=50)
+    mask_droplets = opening(mask_droplets, disk(2))
+    mask_droplets = closing(mask_droplets, disk(2))
+
+    # Filtrado por circularidad: se eliminan regiones que no sean aproximadamente circulares
+    labels = label(mask_droplets)
+    props = regionprops(labels)
+    for prop in props:
+        if prop.perimeter == 0:
+            continue
+        circularidad = 4.0 * math.pi * prop.area / (prop.perimeter ** 2)
+        if circularidad < 0.25:
+            labels[labels == prop.label] = 0
+    mask_droplets_final = (labels > 0)
+
+    # Crear imagen trinarizada: fondo negro, hoja verde y gotas rojas
+    filas, columnas = banda_10.shape
+    trinarizada = np.zeros((filas, columnas, 3), dtype=np.uint8)
+    trinarizada[leaf_mask] = [0, 255, 0]         # Hoja
+    trinarizada[mask_droplets_final] = [255, 0, 0] # Gotas
+
     return trinarizada
 
 def realizar_post_procesamiento(trinarizada):
-    """Realiza el post-procesamiento de la imagen trinarizada."""
-    mascara_cobre = (trinarizada[:, :, 0] == 255) & (trinarizada[:, :, 1] == 0) & (trinarizada[:, :, 2] == 0)
-    mascara_dilatada = cv2.dilate(mascara_cobre.astype(np.uint8), 
-                                   np.ones((5, 5), np.uint8), iterations=1)
-    mascara_rellenada = cv2.morphologyEx(mascara_dilatada, cv2.MORPH_CLOSE, 
-                                          np.ones((5, 5), np.uint8))
-    mascara_final = cv2.erode(mascara_rellenada, 
-                              np.ones((3, 3), np.uint8), iterations=1)
-    
-    etiquetas = measure.label(mascara_final, connectivity=2)
-    propiedades = measure.regionprops(etiquetas)
-    
-    area_min_umbral = 100
-    area_max_umbral = 500
-    
-    trinarizada[(mascara_final == 1) & ~mascara_cobre] = [255, 0, 0]
-    for prop in propiedades:
-        if prop.area > area_max_umbral or prop.area < area_min_umbral:
-            for coord in prop.coords:
-                trinarizada[coord[0], coord[1]] = [0, 255, 0]
+    """
+    Función de post-procesamiento de la imagen trinarizada.
+    En esta nueva versión no se requiere realizar modificaciones adicionales,
+    por lo que se retorna la imagen tal y como ha sido procesada.
+    """
     return trinarizada
