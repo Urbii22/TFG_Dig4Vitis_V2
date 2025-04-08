@@ -57,15 +57,15 @@ def cargar_hyper_bin():
                 st.session_state['trinarizada'] = trinarizada
                 st.success("La imagen ha sido procesada con éxito!")
                 
-                # Obtener imagen normal (Banda 30) y crear superposición
-                banda_hoja = img.read_band(30)
+                # Obtener imagen normal (Banda 165) y crear superposición
+                banda_hoja = img.read_band(164)
                 banda_hoja_norm = cv2.normalize(banda_hoja, None, 0, 255, cv2.NORM_MINMAX, dtype=cv2.CV_8U)
                 imagen_normal = cv2.cvtColor(banda_hoja_norm, cv2.COLOR_GRAY2BGR)
                 mask_cupro = (trinarizada[:, :, 0] == 0) & (trinarizada[:, :, 1] == 255) & (trinarizada[:, :, 2] == 0)
                 imagen_superpuesta = imagen_normal.copy()
                 overlay = np.zeros_like(imagen_normal)
                 overlay[mask_cupro] = [0, 255, 0]
-                imagen_superpuesta = cv2.addWeighted(imagen_normal, 0.7, overlay, 0.3, 0)
+                imagen_superpuesta = cv2.addWeighted(imagen_normal, 0.7, overlay, 0.2, 0)
                 
                 st.markdown("### 🖼️ Visualización de resultados")
                 tabs = st.tabs(["🎯 Imagen trinarizada", "📊 Imagen normal", "🔍 Superposición"])
@@ -74,7 +74,7 @@ def cargar_hyper_bin():
                     st.markdown("*Zonas negras: fondo, zonas verdes: hoja, zonas rojas: cupracol*")
                     image_zoom(trinarizada)
                 with tabs[1]:
-                    st.markdown("**Imagen normal (Banda 30)**")
+                    st.markdown("**Imagen normal (Banda 164)**")
                     image_zoom(imagen_normal)
                 with tabs[2]:
                     st.markdown("**Superposición: detección de cuprocol**")
