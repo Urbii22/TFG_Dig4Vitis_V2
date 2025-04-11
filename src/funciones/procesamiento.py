@@ -4,7 +4,7 @@ from skimage.morphology import remove_small_objects, remove_small_holes, disk, o
 from skimage.measure import label, regionprops
 import math
 
-def aplicar_procesamiento(imagen, modo_umbral="Fijo"):
+def aplicar_procesamiento(imagen):
     """
     Realiza el análisis de la imagen hiperespectral utilizando la nueva versión de procesamiento:
       - Se utiliza la Banda 10 (índice 9) para la detección de la hoja (píxeles con valor < 2000).
@@ -26,7 +26,7 @@ def aplicar_procesamiento(imagen, modo_umbral="Fijo"):
 
     # Extraer la Banda 10 y la Banda 164
     banda_10 = imagen[:, :, 9].squeeze() * factor
-    banda_164 = imagen[:, :, 165].squeeze() * factor
+    banda_164 = imagen[:, :, 164].squeeze() * factor
 
     # Crear la máscara de la hoja: píxeles con valor < 2000 en la Banda 10
     leaf_mask = (banda_10 < 2000)
@@ -35,7 +35,7 @@ def aplicar_procesamiento(imagen, modo_umbral="Fijo"):
     # Detección inicial de gotas en la Banda 164 (rango [4092, 4558]) y restringir a la zona de la hoja
     mask_droplets = ((banda_164 >= 4150) & (banda_164 <= 4450) ) | ((banda_164 >= 5000) & (banda_164 <= 5100))| ((banda_164 >= 5700) & (banda_164 <= 6000)) | ((banda_164 >= 7000) & (banda_164 <= 10000))
 
-    #mask_droplets = ((banda_164 >= 3500) & (banda_164 <= 4000) ) 
+    # mask_droplets = ((banda_164 >= 4092) & (banda_164 <= 4558) ) 
 
     mask_droplets = mask_droplets & leaf_mask
  
