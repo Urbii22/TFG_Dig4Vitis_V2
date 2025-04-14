@@ -1,5 +1,6 @@
 import streamlit as st
 
+
 # ¡Coloca esta llamada inmediatamente después de importar streamlit!
 st.set_page_config(
     page_title="VitiScan - Análisis de Viticultura",
@@ -10,12 +11,8 @@ st.set_page_config(
 
 import os
 import atexit
-from funciones.archivos import limpiar_carpeta
-from funciones.interfaz import cargar_hyper_bin
+from funciones.interfaz import cargar_video
 
-# Creamos la carpeta para archivos subidos
-os.makedirs('archivos_subidos', exist_ok=True)
-atexit.register(limpiar_carpeta)
 
 def main():
     # Aplicar estilos globales desde el archivo CSS
@@ -30,7 +27,7 @@ def main():
     st.markdown("<h1 style='text-align: center;'>🍇 VitiScan: Análisis de Viticultura</h1>", unsafe_allow_html=True)
     
     # Llamada a la interfaz que muestra el vídeo streaming y la captura de la cámara
-    cargar_hyper_bin()
+    cargar_video()
     
     # Footer
     st.markdown(
