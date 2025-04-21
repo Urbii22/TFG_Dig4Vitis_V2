@@ -47,7 +47,7 @@ def cargar_video():
 
       <!-- Columna Derecha: Imagen capturada y botón para Guardar -->
       <div class="column">
-        <img id="capturedImage" src="" alt="Imagen capturada" />
+        <img id="capturedImage" src="" alt="" />
         <br>
         <button id="saveButton">Guardar foto</button>
       </div>
