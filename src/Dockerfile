@@ -14,7 +14,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY . .
 
 # Exponer el puerto que utilizará Streamlit
-EXPOSE 8501
+EXPOSE 8502
 
 # Comando para ejecutar la aplicación
-CMD ["streamlit", "run", "vitiscan.py"]
+CMD ["streamlit", "run", "main.py"]
