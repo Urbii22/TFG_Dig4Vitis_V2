@@ -23,8 +23,8 @@ def cargar_video():
       }
       /* Forzamos un tamaño igual en video y en img para mantener la misma altura */
       video, img {
-        width: 400px;   /* Ajusta a tu preferencia */
-        height: 300px;  /* Ajusta a tu preferencia */
+        width: 600px;   /* Ajusta a tu preferencia */
+        height: 500px;  /* Ajusta a tu preferencia */
         border: 1px solid #ccc;
         object-fit: cover; /* Para recortar la imagen si la relación de aspecto no coincide exactamente */
       }
