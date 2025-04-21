@@ -17,4 +17,4 @@ COPY . .
 EXPOSE 8501
 
 # Comando para ejecutar la aplicación
-CMD ["streamlit", "run", "vitiscan.py"]
+CMD ["streamlit", "run", "main.py"]
