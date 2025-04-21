@@ -26,7 +26,7 @@ def main():
     # Encabezado principal centrado
     st.markdown("<h1 style='text-align: center;'>🍇 VitiScan: Análisis de Viticultura</h1>", unsafe_allow_html=True)
     
-    # Llamada a la interfaz que muestra el vídeo streaming y la captura de la cámara
+    # Llamada a la interfaz que muestra el vídeo  streaming y la captura de la cámara
     cargar_video()
     
     # Footer
