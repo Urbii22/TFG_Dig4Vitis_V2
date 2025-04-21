@@ -2,7 +2,7 @@ import streamlit as st
 import streamlit.components.v1 as components
 
 def cargar_video():
-    st.markdown("<h2 style='text-align: center;'>Streaming y Captura de Webcam</h2>", unsafe_allow_html=True)
+    st.markdown("<h2 style='text-align: center;'>Evaluación en tiempo real</h2>", unsafe_allow_html=True)
 
     # Código HTML, CSS y JavaScript para el streaming y la captura/descarga de la imagen
     html_code = """
