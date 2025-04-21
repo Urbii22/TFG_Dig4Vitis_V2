@@ -6,7 +6,6 @@ from funciones.archivos import guardar_archivos_subidos
 from funciones.procesamiento import aplicar_procesamiento, realizar_post_procesamiento
 
 def cargar_hyper_bin():
-    st.markdown("<h2 style='text-align: center;'>Interfaz Simplificada</h2>", unsafe_allow_html=True)
 
     # Mostrar dos columnas para los dos botones: uno para seleccionar la imagen y otro para procesarla
     col_botones = st.columns(2)
