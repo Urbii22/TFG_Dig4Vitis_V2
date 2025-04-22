@@ -7,7 +7,7 @@ from funciones.interfaz import cargar_hyper_bin
 
 # Configuración de la página
 st.set_page_config(
-    page_title="VitiScan - Análisis de Viticultura",
+    page_title="Dig4Vitis",
     page_icon="🍇",
     layout="wide",
     initial_sidebar_state="collapsed"
@@ -24,7 +24,7 @@ def main():
     st.markdown(f"<style>{css}</style>", unsafe_allow_html=True)
     
     # Encabezado simplificado
-    st.markdown("<h1 style='text-align: center;'>🍇 VitiScan: Análisis de Viticultura</h1>", unsafe_allow_html=True)
+    st.markdown("<h1 style='text-align: center;'>Dig4Vitis</h1>", unsafe_allow_html=True)
     
     # Interfaz simplificada con solo dos botones e imágenes dispuestas en dos columnas
     cargar_hyper_bin()
