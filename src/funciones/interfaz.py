@@ -135,3 +135,36 @@ def cargar_hyper_bin():
             """, 
             unsafe_allow_html=True
         )
+
+        # --- Botones para descargar imágenes en la misma fila ---
+        import io
+        from PIL import Image
+
+        # Convertir arrays a imágenes PNG en memoria
+        img_pil_trinarizada = Image.fromarray(trinarizada)
+        buffer_trinarizada = io.BytesIO()
+        img_pil_trinarizada.save(buffer_trinarizada, format="PNG")
+        buffer_trinarizada.seek(0)
+
+        imagen_normal = st.session_state['imagen_normal']
+        img_pil_color = Image.fromarray(imagen_normal)
+        buffer_color = io.BytesIO()
+        img_pil_color.save(buffer_color, format="PNG")
+        buffer_color.seek(0)
+
+        col_descarga = st.columns(2)
+        with col_descarga[0]:
+            st.download_button(
+                label="Descargar imagen a color",
+                data=buffer_color,
+                file_name="imagen_color.png",
+                mime="image/png"
+            )
+        with col_descarga[1]:
+            st.download_button(
+                label="Descargar imagen trinarizada",
+                data=buffer_trinarizada,
+                file_name="trinarizada.png",
+                mime="image/png"
+            )
+
