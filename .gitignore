@@ -1,2 +1,7 @@
-src/archivos_subidos
-*.pyc
+# Ignorar directorio de archivos subidos
+src/archivos_subidos/
+
+# Ignorar byte-compilados de Python
+__pycache__/
+*.py[cod]
+*$py.class
