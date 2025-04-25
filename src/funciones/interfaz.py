@@ -165,7 +165,7 @@ def cargar_hyper_bin():
         # Superposición RGB para feedback
         canvas = np.zeros((h, w, 3), dtype=np.uint8)
         canvas[st.session_state["leaf_con"]] = [0, 255, 0]      # hoja CON
-        canvas[warped_drop_sin]              = [0,   0, 255]    # gotas SIN alineadas
+        canvas[warped_drop_sin]              = [0,   0, 255]  # gotas SIN alineadas
 
         ov_col.markdown("### Máscara sólida de ajuste")
         ov_col.image(
@@ -189,6 +189,40 @@ def cargar_hyper_bin():
                 trinarizada_final,
                 caption="Verde = hoja, Rojo = gotas únicas (>5 px)",
                 width=350,
+            )
+
+            # ----- Cálculo del porcentaje de recubrimiento de gotas -----
+            num_pixeles_hoja = np.count_nonzero(st.session_state["leaf_con"])
+            num_pixeles_gotas = np.count_nonzero(
+                (trinarizada_final == [255, 0, 0]).all(axis=-1)
+            )
+            porcentaje_cobre = (
+                round(num_pixeles_gotas / num_pixeles_hoja * 100, 2)
+                if num_pixeles_hoja
+                else 0
+            )
+
+            # Mostrar el porcentaje de recubrimiento en una fila aparte pero con estilo destacado
+            color = "red" if porcentaje_cobre > 50 else "orange" if porcentaje_cobre > 20 else "green"
+
+            ov_col.markdown(
+                f"""
+                <div style="padding: 8px; border-radius: 5px; background-color: #f0f0f0;
+                            border: 2px solid {color}; text-align: center; margin-top: 10px;
+                            display: flex; align-items: center; justify-content: center;">
+                    <div style="font-weight: bold; font-size: 25px; color: #000000; margin-right: 10px;">
+                        Recubrimiento de cobre:
+                    </div>
+                    <div style="width: 60%; height: 15px; background-color: #e0e0e0;
+                                border-radius: 3px; overflow: hidden;">
+                        <div style="width: {porcentaje_cobre}%; height: 100%; background-color: {color};"></div>
+                    </div>
+                    <div style="margin-left: 10px; font-weight: bold; color: #000000; font-size: 25px;">
+                        {porcentaje_cobre:.2f}%
+                    </div>
+                </div>
+                """,
+                unsafe_allow_html=True
             )
 
             # Descarga de la trinarizada final
