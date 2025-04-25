@@ -106,13 +106,14 @@ def cargar_hyper_bin():
         # Transformación base por extremos
         R0, t0 = estimar_transformacion_por_extremos(leaf_sin, leaf_con)
 
-        # Guardar en sesión
+        # Guardar en sesión (añadido leaf_sin)
         st.session_state.update(
             {
                 "rgb_sin": rgb_sin,
                 "trin_sin": trin_sin,
                 "rgb_con": rgb_con,
                 "trin_con": trin_con,
+                "leaf_sin": leaf_sin,
                 "leaf_con": leaf_con,
                 "drop_con": drop_con,
                 "drop_sin": drop_sin,
@@ -145,8 +146,8 @@ def cargar_hyper_bin():
 
         scale_adj = ctl_col.slider("Escala adicional", 0.5, 2.0, 1.0, 0.01)
         rot_adj   = ctl_col.slider("Rotación extra (º)", -180, 180, 0, 1)
-        dx        = ctl_col.slider("Desplaz. X (px)", -200, 200, 0, 1)
-        dy        = ctl_col.slider("Desplaz. Y (px)", -200, 200, 0, 1)
+        dx        = ctl_col.slider("Desplaz. X (px)", -800, 800, 0, 1)
+        dy        = ctl_col.slider("Desplaz. Y (px)", -800, 800, 0, 1)
 
         # Reconstruimos la transformación definitiva
         h, w = st.session_state["size"]
@@ -159,18 +160,18 @@ def cargar_hyper_bin():
             dy,
         )
 
-        # Warp de la máscara de gotas SIN
-        warped_drop_sin = warp_mask(st.session_state["drop_sin"], M, (h, w))
+        # Warp de la máscara de hoja SIN
+        warped_leaf_sin = warp_mask(st.session_state["leaf_sin"], M, (h, w))
 
-        # Superposición RGB para feedback
+        # Superposición de las dos máscaras de hoja
         canvas = np.zeros((h, w, 3), dtype=np.uint8)
-        canvas[st.session_state["leaf_con"]] = [0, 255, 0]      # hoja CON
-        canvas[warped_drop_sin]              = [0,   0, 255]  # gotas SIN alineadas
+        canvas[st.session_state["leaf_con"]] = [0, 255, 0]     # verde = hoja CON
+        canvas[warped_leaf_sin]            = [0,   0, 255]    # azul  = hoja SIN alineada
 
         ov_col.markdown("### Máscara sólida de ajuste")
         ov_col.image(
             canvas,
-            caption="Verde = hoja CON, Azul = gotas SIN alineadas",
+            caption="Verde = hoja CON, Azul = hoja SIN alineada",
             width=350,
         )
 
@@ -181,7 +182,7 @@ def cargar_hyper_bin():
             trinarizada_final = trinarizar_final(
                 st.session_state["leaf_con"],
                 st.session_state["drop_con"],
-                warped_drop_sin,
+                warp_mask(st.session_state["drop_sin"], M, (h, w)),
             )
 
             ov_col.markdown("### Trinarizada final (ruido reducido)")
@@ -190,6 +191,8 @@ def cargar_hyper_bin():
                 caption="Verde = hoja, Rojo = gotas únicas (>5 px)",
                 width=350,
             )
+
+
 
             # ----- Cálculo del porcentaje de recubrimiento de gotas -----
             num_pixeles_hoja = np.count_nonzero(st.session_state["leaf_con"])
@@ -203,7 +206,7 @@ def cargar_hyper_bin():
             )
 
             # Mostrar el porcentaje de recubrimiento en una fila aparte pero con estilo destacado
-            color = "red" if porcentaje_cobre > 50 else "orange" if porcentaje_cobre > 20 else "green"
+            color = "red" if porcentaje_cobre < 20 else "orange" if porcentaje_cobre < 50 else "green"
 
             ov_col.markdown(
                 f"""
