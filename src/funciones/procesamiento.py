@@ -160,7 +160,7 @@ def warp_mask(mask, M, shape):
     ).astype(bool)
 
 
-def trinarizar_final(leaf_con, drop_con, drop_sin_aligned, min_px=75):
+def trinarizar_final(leaf_con, drop_con, drop_sin_aligned, min_px=0):
     """
     Genera trinarizada definitiva eliminando gotas comunes.
 
