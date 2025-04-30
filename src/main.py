@@ -22,7 +22,7 @@ def main():
         st.warning("No se han aplicado estilos globales (no se encontró estilos.css).")
 
     # Encabezado principal centrado
-    st.markdown("<h1 style='text-align: center;'>Dig4Vitis</h1>", unsafe_allow_html=True)
+    st.markdown("<h1 style='text-align: center;'>Evaluación inteligente y en tiempo real de la deposición de pesticidas en viñedo mediante procesamiento de imágenes (DIG4VITIS)</h1>", unsafe_allow_html=True)
     
     # Llamada a la interfaz que muestra el vídeo streaming y la captura de la cámara
     cargar_video()
