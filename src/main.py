@@ -29,7 +29,7 @@ def main():
         st.warning(f"No se encontró el archivo de estilos: {css_path}")
     
     # Encabezado simplificado
-    st.markdown("<h1 style='text-align: center;'>Dig4Vitis</h1>", unsafe_allow_html=True)
+    st.markdown("<h1 style='text-align: center;'>Evaluación inteligente y en tiempo real de la deposición de pesticidas en viñedo mediante procesamiento de imágenes (DIG4VITIS)</h1>", unsafe_allow_html=True)
     
     # Interfaz simplificada con solo dos botones e imágenes dispuestas en dos columnas
     cargar_imagenes()
