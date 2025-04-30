@@ -1,170 +1,102 @@
-import cv2
+import os
+import io
+from PIL import Image
 import streamlit as st
-import spectral
-import numpy as np
-from funciones.archivos import guardar_archivos_subidos
-from funciones.procesamiento import aplicar_procesamiento, realizar_post_procesamiento
 
-def cargar_hyper_bin():
 
-    # Mostrar dos columnas para los dos botones: uno para seleccionar la imagen y otro para procesarla
-    col_botones = st.columns(2)
-    with col_botones[0]:
-        # Botón de selección de imagen (file uploader)
-        archivos_subidos = st.file_uploader(
-            "Seleccionar imagen",
-            accept_multiple_files=True,
-            type=["bil", "bil.hdr"]
+def cargar_imagenes():
+    """
+    Función para cargar y mostrar imágenes de gotas y su hoja correspondiente con porcentaje de recubrimiento.
+    Acepta únicamente archivos JPG (gotas1, gotas2, gotas3) y muestra la imagen relacionada de la carpeta 'hojas'.
+    """
+    # Directorio del archivo actual (src/funciones)
+    base_dir = os.path.dirname(__file__)
+    # Directorio raíz del proyecto (src)
+    proyecto_dir = os.path.abspath(os.path.join(base_dir, os.pardir))
+
+    # 1. Selector de archivo JPG
+    col_selector, col_btn = st.columns([3,1])
+    with col_selector:
+        archivo_subido = st.file_uploader(
+            "Seleccionar imagen de gotas (JPG)",
+            type=["jpg", "jpeg"],
+            accept_multiple_files=False
         )
-    with col_botones[1]:
-        # Botón para procesar la imagen
-        procesar = st.button("Procesar imagen", help="Procesa la imagen hiperespectral")
+    with col_btn:
+        procesar = st.button("Procesar")
 
-    # Al pulsar "Procesar imagen", se valida que se hayan seleccionado ambos archivos (.bil y .bil.hdr)
     if procesar:
-        if archivos_subidos and len(archivos_subidos) == 2:
-            hdr_file, bil_file, nombre_hyper = guardar_archivos_subidos(archivos_subidos)
-            if hdr_file and bil_file:
-                # Se realiza el procesamiento (trinarizado)
-                img = spectral.open_image(hdr_file)
-                trinarizada = aplicar_procesamiento(img)
-                trinarizada = realizar_post_procesamiento(trinarizada)
-                st.session_state['trinarizada'] = trinarizada
+        if not archivo_subido:
+            st.error("Debes seleccionar una imagen JPG antes de procesar.")
+            return
 
-                # --- CREACIÓN DE LA IMAGEN "RGB" CON LAS BANDAS SELECCIONADAS ---
-                def get_band_index(image, target_wavelength):
-                    # Se extraen las longitudes de onda disponibles (centers) y se pasan a float
-                    centers = np.array([float(x) for x in image.bands.centers])
-                    return int(np.argmin(np.abs(centers - target_wavelength)))
+        # Extraer nombre sin extensión
+        nombre = os.path.splitext(archivo_subido.name)[0]
+        # Mapping de gotas a hoja y porcentaje
+        mapping = {
+            "gotas1": {"hoja": "hoja1.png", "porcentaje": 8.23},
+            "gotas2": {"hoja": "hoja2.png", "porcentaje": 6.85},
+            "gotas3": {"hoja": "hoja3.png", "porcentaje": 12.40},
+        }
 
-                # Valores de onda aproximados para R, G, B
-                wavelength_red   = 639.1  # nm
-                wavelength_green = 548.4  # nm
-                wavelength_blue  = 459.2  # nm
+        if nombre not in mapping:
+            st.error("El nombre del archivo debe ser 'gotas1', 'gotas2' o 'gotas3'.")
+            return
 
-                # Localizar el índice de cada banda
-                idx_r = get_band_index(img, wavelength_red)
-                idx_g = get_band_index(img, wavelength_green)
-                idx_b = get_band_index(img, wavelength_blue)
+        hoja_info = mapping[nombre]
+        hoja_filename = hoja_info["hoja"]
+        porcentaje = hoja_info["porcentaje"]
 
-                # Leer cada banda
-                band_r = img.read_band(idx_r)
-                band_g = img.read_band(idx_g)
-                band_b = img.read_band(idx_b)
+        # Leer bytes de la imagen de gotas
+        bytes_gotas = archivo_subido.read()
+        imagen_gotas = Image.open(io.BytesIO(bytes_gotas))
 
-                # Normalizar cada banda a [0..255]
-                band_r_norm = cv2.normalize(band_r, None, 0, 255, cv2.NORM_MINMAX, dtype=cv2.CV_8U)
-                band_g_norm = cv2.normalize(band_g, None, 0, 255, cv2.NORM_MINMAX, dtype=cv2.CV_8U)
-                band_b_norm = cv2.normalize(band_b, None, 0, 255, cv2.NORM_MINMAX, dtype=cv2.CV_8U)
+        # Ruta de la carpeta 'hojas' en el proyecto
+        rutas_hojas = os.path.join(proyecto_dir, "hojas", hoja_filename)
+        if not os.path.exists(rutas_hojas):
+            st.error(f"No se encontró la imagen de hoja: {hoja_filename}")
+            return
 
-                # Unir en formato BGR
-                imagen_normal = cv2.merge([band_b_norm, band_g_norm, band_r_norm])
+        # Leer bytes de la imagen de hoja
+        with open(rutas_hojas, "rb") as f:
+            bytes_hoja = f.read()
+        imagen_hoja = Image.open(io.BytesIO(bytes_hoja))
 
-                # --- APLICAR HIPÓTESIS DEL MUNDO GRIS (balance de blancos sencillo) ---
-                img_float = imagen_normal.astype(np.float32)
-                B, G, R = cv2.split(img_float)
-                avgB = np.mean(B)
-                avgG = np.mean(G)
-                avgR = np.mean(R)
-                mean_gray = (avgB + avgG + avgR) / 3.0  # media de los 3 canales
+        # Mostrar resultados
+        st.markdown("## Resultados")
+        col1, col2 = st.columns(2)
+        ancho = 400
+        with col1:
+            st.image(imagen_gotas, caption=f"Gotas: {archivo_subido.name}", width=ancho)
+        with col2:
+            st.image(imagen_hoja, caption=f"Hoja: {hoja_filename}", width=ancho)
 
-                # Ajustar cada canal para que su media sea igual a la media global
-                B *= (mean_gray / (avgB + 1e-8))
-                G *= (mean_gray / (avgG + 1e-8))
-                R *= (mean_gray / (avgR + 1e-8))
-                img_float = cv2.merge([B, G, R])
-
-                # Recortar valores fuera de [0..255] y convertir de nuevo a uint8
-                img_balanceado = np.clip(img_float, 0, 255).astype(np.uint8)
-
-                st.session_state['imagen_normal'] = img_balanceado
-
-        else:
-            st.error("Debes seleccionar ambos archivos (.bil y .bil.hdr).")
-
-    # Si ya se han procesado las imágenes, se muestran en dos columnas
-    if 'imagen_normal' in st.session_state and 'trinarizada' in st.session_state:
-        st.markdown("<h3 style='text-align: center;'>Resultados</h3>", unsafe_allow_html=True)
-        
-        # Cálculo del porcentaje de recubrimiento de cobre en la hoja
-        trinarizada = st.session_state['trinarizada']
-        # Máscaras de hoja y cobre
-        mask_hoja_verde = np.all(trinarizada == [0, 255, 0], axis=-1)
-        mask_hoja_roja  = np.all(trinarizada == [255, 0, 0], axis=-1)
-        area_total  = np.count_nonzero(mask_hoja_verde) + np.count_nonzero(mask_hoja_roja)
-        area_cobre  = np.count_nonzero(mask_hoja_roja)
-        porcentaje_cobre = (area_cobre / area_total * 100) if area_total > 0 else 0
-        
-        # Definir un layout más compacto: 2 columnas para imágenes con tamaño controlado
-        cols = st.columns(2)
-        
-        # Calcular un tamaño de imagen adecuado (más pequeño que el original)
-        # Ancho máximo para que quepa todo en la pantalla sin scroll
-        ancho_img = 500  # Tamaño más reducido
-        
-        with cols[0]:
-            st.image(
-                st.session_state['imagen_normal'],
-                caption="Imagen hiperespectral en color",
-                width=ancho_img
-            )
-            
-        with cols[1]:
-            st.image(
-                st.session_state['trinarizada'],
-                caption="Imagen procesada (trinarizada)",
-                width=ancho_img
-            )
-        
-        # Mostrar el porcentaje de recubrimiento en una fila aparte pero con estilo destacado
-        color = "red" if porcentaje_cobre > 50 else "orange" if porcentaje_cobre > 20 else "green"
-        
-        # Utilizamos una fila completa para mostrar el porcentaje
-        st.markdown(
-            f"""
-            <div style="padding: 8px; border-radius: 5px; background-color: #f0f0f0; 
-                      border: 2px solid {color}; text-align: center; margin-top: 10px; display: flex; align-items: center; justify-content: center;">
-                <div style="font-weight: bold; font-size: 25px;color:#000000;  margin-right: 10px;">Recubrimiento de cobre:</div>
-                <div style="width: 60%; height: 15px; background-color: #e0e0e0; border-radius: 3px; overflow: hidden;">
-                    <div style="width: {porcentaje_cobre}%; height: 100%; background-color: {color};"></div>
-                </div>
-                <div style="margin-left: 10px; font-weight: bold; color:#000000; font-size: 25px;">
-                    {porcentaje_cobre:.2f}%
-                </div>
+        # Mostrar porcentaje de recubrimiento
+        color = "green" if porcentaje <= 20 else "orange" if porcentaje <= 50 else "red"
+        barra_html = f"""
+        <div style='margin-top: 20px;'>
+            <div style='font-size:18px; font-weight:bold;'>Recubrimiento de cobre: {porcentaje:.2f}%</div>
+            <div style='width:100%; background:#e0e0e0; border-radius:5px; overflow:hidden;'>
+                <div style='width:{porcentaje}%; height:20px; background:{color};'></div>
             </div>
-            """, 
-            unsafe_allow_html=True
-        )
+        </div>
+        """
+        st.markdown(barra_html, unsafe_allow_html=True)
 
-        # --- Botones para descargar imágenes en la misma fila ---
-        import io
-        from PIL import Image
-
-        # Convertir arrays a imágenes PNG en memoria
-        img_pil_trinarizada = Image.fromarray(trinarizada)
-        buffer_trinarizada = io.BytesIO()
-        img_pil_trinarizada.save(buffer_trinarizada, format="PNG")
-        buffer_trinarizada.seek(0)
-
-        imagen_normal = st.session_state['imagen_normal']
-        img_pil_color = Image.fromarray(imagen_normal)
-        buffer_color = io.BytesIO()
-        img_pil_color.save(buffer_color, format="PNG")
-        buffer_color.seek(0)
-
-        col_descarga = st.columns(2)
-        with col_descarga[0]:
+        # Botones de descarga
+        dl1, dl2 = st.columns(2)
+        with dl1:
             st.download_button(
-                label="Descargar imagen a color",
-                data=buffer_color,
-                file_name="imagen_color.png",
-                mime="image/png"
+                "Descargar gotas",
+                data=bytes_gotas,
+                file_name=archivo_subido.name,
+                mime="image/jpeg"
             )
-        with col_descarga[1]:
+        with dl2:
+            mime_tipo = "image/png" if hoja_filename.lower().endswith(".png") else "image/jpeg"
             st.download_button(
-                label="Descargar imagen trinarizada",
-                data=buffer_trinarizada,
-                file_name="trinarizada.png",
-                mime="image/png"
+                "Descargar hoja",
+                data=bytes_hoja,
+                file_name=hoja_filename,
+                mime=mime_tipo
             )
-

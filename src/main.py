@@ -3,7 +3,7 @@ import atexit
 import base64
 import streamlit as st
 from funciones.archivos import limpiar_carpeta
-from funciones.interfaz import cargar_hyper_bin
+from funciones.interfaz import cargar_imagenes
 
 # Configuración de la página
 st.set_page_config(
@@ -32,7 +32,7 @@ def main():
     st.markdown("<h1 style='text-align: center;'>Dig4Vitis</h1>", unsafe_allow_html=True)
     
     # Interfaz simplificada con solo dos botones e imágenes dispuestas en dos columnas
-    cargar_hyper_bin()
+    cargar_imagenes()
     
     # Footer con múltiples logos y texto
     logos = [
