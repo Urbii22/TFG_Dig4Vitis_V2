@@ -32,6 +32,7 @@ def main():
     # Encabezado simplificado
     st.markdown("<h1 style='text-align: center;'>Dig4Vitis</h1>", unsafe_allow_html=True)
     
+    
     # Interfaz simplificada con solo dos botones e imágenes dispuestas en dos columnas
     cargar_hyper_bin()
     
