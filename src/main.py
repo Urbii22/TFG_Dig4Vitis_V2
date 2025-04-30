@@ -19,8 +19,8 @@ atexit.register(limpiar_carpeta)
 
 def main():
     # Aplicar estilos globales desde el archivo CSS
-    """
-        base_dir = os.path.dirname(__file__)
+ 
+    base_dir = os.path.dirname(__file__)
     css_path = os.path.join(base_dir, "estilos.css")
     try:
         with open(css_path, "r", encoding="utf-8") as f:
@@ -28,8 +28,6 @@ def main():
             st.markdown(f"<style>{css}</style>", unsafe_allow_html=True)
     except FileNotFoundError:
         st.warning(f"No se encontró el archivo de estilos: {css_path}")
-    """
-
     
     # Encabezado simplificado
     st.markdown("<h1 style='text-align: center;'>Dig4Vitis</h1>", unsafe_allow_html=True)
