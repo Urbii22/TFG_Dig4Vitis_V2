@@ -35,16 +35,7 @@ def aplicar_procesamiento(imagen):
     # Detección inicial de gotas en la Banda 164 (rango [4092, 4558]) y restringir a la zona de la hoja
     
     #rangos buenos
-    #mask_droplets = ((banda_164 >= 4098) & (banda_164 <= 4230) ) |((banda_164 >= 4350) & (banda_164 <= 4500) )| ((banda_164 >= 5000) & (banda_164 <= 5100)) | ((banda_164 >= 5800) & (banda_164 <= 6000))
-
-    #mask_droplets = ((banda_164 >= 4098) & (banda_164 <= 4450) ) | ((banda_164 >= 5000) & (banda_164 <= 5100)) | ((banda_164 >= 5700) & (banda_164 <= 6000))
-
-    # mask_droplets = ((banda_164 >= 4092) & (banda_164 <= 4558) ) 
-
-    
-    #rangos para inversa
-    #mask_droplets = ((banda_164 >= 3300) & (banda_164 <= 4150) ) 
-    mask_droplets = ((banda_164 >= 4050) & (banda_164 <= 4150) ) 
+    mask_droplets = ((banda_164 >= 3900) & (banda_164 <= 4100) )| ((banda_164 >= 4900) & (banda_164 <= 5200))
     
     mask_droplets = mask_droplets & leaf_mask
  
