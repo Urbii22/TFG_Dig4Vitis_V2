@@ -33,7 +33,7 @@ def _obtener_mascaras(imagen):
     b164 = imagen[:, :, 164].squeeze() * factor
 
     leaf  = remove_small_holes(b10 < 2000, area_threshold=200)
-    drops = (b164 >= 3300) & (b164 <= 4150)
+    drops = ((b164 >= 4200) & (b164 <= 4400)) | ((b164 >= 4900) & (b164 <= 5200))
 
     return leaf, drops
 
@@ -160,7 +160,7 @@ def warp_mask(mask, M, shape):
     ).astype(bool)
 
 
-def trinarizar_final(leaf_con, drop_con, drop_sin_aligned, min_px=75):
+def trinarizar_final(leaf_con, drop_con, drop_sin_aligned, min_px=0):
     """
     Genera trinarizada definitiva eliminando gotas comunes.
 
