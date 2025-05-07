@@ -18,7 +18,6 @@ from funciones.procesamiento import (
     aplicar_procesamiento,
     _obtener_mascaras,
     to_rgb,
-    estimar_transformacion_por_extremos,
     matriz_transformacion,
     warp_mask,
     trinarizar_final,
@@ -103,10 +102,7 @@ def cargar_hyper_bin():
         trin_sin = trin_sin[:h, :w]
         trin_con = trin_con[:h, :w]
 
-        # Transformación base por extremos
-        R0, t0 = estimar_transformacion_por_extremos(leaf_sin, leaf_con)
-
-        # Guardar en sesión (añadido leaf_sin)
+        # Guardar en sesión (sin R0 y t0 iniciales)
         st.session_state.update(
             {
                 "rgb_sin": rgb_sin,
@@ -117,16 +113,15 @@ def cargar_hyper_bin():
                 "leaf_con": leaf_con,
                 "drop_con": drop_con,
                 "drop_sin": drop_sin,
-                "R0": R0,
-                "t0": t0,
                 "size": (h, w),
+                "processed": True, # Añadir flag para saber si se procesó
             }
         )
 
     # -----------------------------------------------------------------
     # Controles y resultados
     # -----------------------------------------------------------------
-    if "R0" in st.session_state:
+    if st.session_state.get("processed", False): # Usar el flag
         st.markdown("## Resultados")
 
         # Vista previa de imágenes
@@ -144,16 +139,20 @@ def cargar_hyper_bin():
         ov_col, ctl_col = st.columns([3, 1])
         ctl_col.markdown("### Ajuste manual")
 
-        scale_adj = ctl_col.slider("Escala adicional", 0.5, 2.0, 1.0, 0.01)
-        rot_adj   = ctl_col.slider("Rotación extra (º)", -180, 180, 0, 1)
+        scale_adj = ctl_col.slider("Escala", 0.5, 2.0, 1.0, 0.01) # Renombrado
+        rot_adj   = ctl_col.slider("Rotación (º)", -180, 180, 0, 1) # Renombrado
         dx        = ctl_col.slider("Desplaz. X (px)", -800, 800, 0, 1)
         dy        = ctl_col.slider("Desplaz. Y (px)", -800, 800, 0, 1)
 
-        # Reconstruimos la transformación definitiva
+        # Reconstruimos la transformación definitiva desde cero
         h, w = st.session_state["size"]
+        # Inicializar R0 (identidad) y t0 (ceros) como base neutra
+        R0_base = np.array([[1.0, 0.0], [0.0, 1.0]])
+        t0_base = np.array([0.0, 0.0])
+
         M = matriz_transformacion(
-            st.session_state["R0"],
-            st.session_state["t0"],
+            R0_base, # Usar base neutra
+            t0_base, # Usar base neutra
             scale_adj,
             rot_adj,
             dx,

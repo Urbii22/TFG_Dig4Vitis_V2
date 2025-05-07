@@ -57,7 +57,7 @@ def _trinarizar(leaf, drops, color_drops=(255, 0, 0)):
 def band_idx(im, wl):
     """
     Índice de la banda cuya longitud de onda central es más
-    cercana a `wl` (en nm).
+    cercana a wl (en nm).
     """
     centers = np.array([float(x) for x in im.bands.centers])
     return int(np.abs(centers - wl).argmin())
@@ -100,7 +100,7 @@ def to_rgb(im, wl_r=639.1, wl_g=548.4, wl_b=459.2):
 def estimar_transformacion_por_extremos(leaf_sin, leaf_con):
     """
     Estima una transformación euclídea (escala + rotación + traslación)
-    que alinee la hoja `leaf_sin` sobre `leaf_con` usando los extremos
+    que alinee la hoja leaf_sin sobre leaf_con usando los extremos
     de la hoja (arriba/abajo).
 
     Devuelve
@@ -153,7 +153,7 @@ def matriz_transformacion(R0, t0, scale_adj=1.0, rot_deg=0.0, dx=0, dy=0):
 
 
 def warp_mask(mask, M, shape):
-    """Aplica la matriz afín `M` sobre `mask` (bool) devolviendo bool."""
+    """Aplica la matriz afín M sobre mask (bool) devolviendo bool."""
     h, w = shape
     return cv2.warpAffine(
         mask.astype(np.uint8),
