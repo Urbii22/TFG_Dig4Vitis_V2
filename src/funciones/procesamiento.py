@@ -33,7 +33,11 @@ def _obtener_mascaras(imagen):
     b164 = imagen[:, :, 164].squeeze() * factor
 
     leaf  = remove_small_holes(b10 < 2000, area_threshold=200)
+    #cumprantol duo
     drops = ((b164 >= 4200) & (b164 <= 4400)) | ((b164 >= 4900) & (b164 <= 5200))
+    
+    #cuprocol
+    drops = ((b164 >= 3900) & (b164 <= 4100)) | ((b164 >= 4900) & (b164 <= 5200))
 
     return leaf, drops
 
