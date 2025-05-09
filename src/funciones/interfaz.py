@@ -124,16 +124,6 @@ def cargar_hyper_bin():
         st.image(overlay_viz, caption="Superposición Alineación (Verde: CON, Rojo: SIN alineada a CON)", width=300)
         st.image(resultado_trinarizado, caption="Trinarizada Automática", width=300)
 
-        # Calcular y mostrar porcentaje de recubrimiento
-        num_pixeles_hoja = np.count_nonzero(np.all(resultado_trinarizado == [0, 255, 0], axis=-1))
-        num_pixeles_producto = np.count_nonzero(np.all(resultado_trinarizado == [255, 0, 0], axis=-1))
-
-        porcentaje_recubrimiento = 0
-        if num_pixeles_hoja > 0:
-            porcentaje_recubrimiento = (num_pixeles_producto / num_pixeles_hoja) * 100
-        
-        st.metric(label="Recubrimiento de Producto en Hoja", value=f"{porcentaje_recubrimiento:.2f}%")
-
         # Botón de descarga
         buf = io.BytesIO()
         Image.fromarray(resultado_trinarizado).save(buf, format="PNG")

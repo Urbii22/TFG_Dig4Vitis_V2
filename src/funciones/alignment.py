@@ -40,20 +40,62 @@ def compute_affine_transform(edges1: np.ndarray,
                              edges2: np.ndarray,
                              reproj_thresh: float = 3.0,
                              max_iters: int = 5000,
-                             confidence: float = 0.995) -> np.ndarray:
-    pts1, pts2 = _detect_and_match(edges1, edges2)
-    if len(pts1) < 10:
-        raise RuntimeError("Pocos matches para calcular transform_affine")
-    M, _ = cv2.estimateAffinePartial2D(
-        pts2, pts1,
+                             confidence: float = 0.995,
+                             nfeatures: int = 4000,  # Nuevo parámetro para nfeatures de ORB
+                             detection_scale_factor: float = 1.0  # Nuevo parámetro para escalado
+                             ) -> np.ndarray:
+    
+    current_reproj_thresh = reproj_thresh
+    
+    if detection_scale_factor < 1.0 and detection_scale_factor > 0.0:
+        # Escalar imágenes para detección
+        h1, w1 = edges1.shape[:2]
+        edges1_proc = cv2.resize(
+            edges1,
+            (int(w1 * detection_scale_factor), int(h1 * detection_scale_factor)),
+            interpolation=cv2.INTER_AREA
+        )
+        h2, w2 = edges2.shape[:2]
+        edges2_proc = cv2.resize(
+            edges2,
+            (int(w2 * detection_scale_factor), int(h2 * detection_scale_factor)),
+            interpolation=cv2.INTER_AREA
+        )
+        # Ajustar el umbral de reproyección para las imágenes escaladas
+        current_reproj_thresh = reproj_thresh * detection_scale_factor
+    else:
+        edges1_proc = edges1
+        edges2_proc = edges2
+        # detection_scale_factor es efectivamente 1.0 para los cálculos si no se escala
+
+    # Detección y emparejamiento de puntos en las imágenes procesadas (posiblemente escaladas)
+    pts1_matched, pts2_matched = _detect_and_match(edges1_proc, edges2_proc, nfeatures=nfeatures)
+
+    if len(pts1_matched) < 10:
+        raise RuntimeError(f"Pocos matches ({len(pts1_matched)}) para calcular transform_affine. Considere ajustar nfeatures o detection_scale_factor.")
+
+    # M_estimated transforma coordenadas del espacio de edges2_proc al espacio de edges1_proc
+    # pts2_matched (de edges2_proc) son origen, pts1_matched (de edges1_proc) son destino.
+    M_estimated, _ = cv2.estimateAffinePartial2D(
+        pts2_matched, pts1_matched,
         method=cv2.RANSAC,
-        ransacReprojThreshold=reproj_thresh,
+        ransacReprojThreshold=current_reproj_thresh, # Usar umbral posiblemente escalado
         maxIters=max_iters,
         confidence=confidence
     )
-    if M is None:
+
+    if M_estimated is None:
         raise RuntimeError("No pudo estimarse la matriz afín")
-    return M
+
+    if detection_scale_factor < 1.0 and detection_scale_factor > 0.0:
+        # M_estimated es para imágenes escaladas. Ajustar su parte de traslación para el tamaño original.
+        final_M = M_estimated.copy()
+        final_M[0, 2] /= detection_scale_factor  # tx_original = tx_escalado / factor_escala
+        final_M[1, 2] /= detection_scale_factor  # ty_original = ty_escalado / factor_escala
+        return final_M
+    else:
+        # M_estimated ya es para el tamaño de imagen original (o detection_scale_factor fue 1.0)
+        return M_estimated
 
 # --------------------------------------------------
 # Función principal de alineación y sustracción
@@ -66,7 +108,13 @@ def align_and_substract(img_no_drops: np.ndarray,
                         canny_high: int = 150,
                         thresh_val: int = 25,
                         morph_kernel_size: tuple[int, int] = (5, 5),
-                        debug: bool = False
+                        debug: bool = False,
+                        # Nuevos parámetros para eficiencia y control
+                        orb_nfeatures: int = 4000,
+                        detection_scale_factor: float = 1.0, # 1.0 para comportamiento original
+                        ransac_reproj_thresh: float = 3.0,
+                        ransac_max_iters: int = 5000,
+                        ransac_confidence: float = 0.995
                         ) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
     """
     Alinea la máscara CON gotas sobre la SIN gotas (usando solo contornos de hoja)
@@ -84,7 +132,14 @@ def align_and_substract(img_no_drops: np.ndarray,
     edges2 = cv2.Canny(limbo2, canny_low, canny_high)
 
     # 3) Estimación afín
-    M = compute_affine_transform(edges1, edges2)
+    M = compute_affine_transform(
+        edges1, edges2,
+        reproj_thresh=ransac_reproj_thresh,
+        max_iters=ransac_max_iters,
+        confidence=ransac_confidence,
+        nfeatures=orb_nfeatures,
+        detection_scale_factor=detection_scale_factor
+    )
 
     # 4) Warp de la máscara CON gotas
     h, w = mask_no_drops.shape
