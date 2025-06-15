@@ -20,8 +20,4 @@ from .alignment import (
 from .csv import generar_datos_csv
 from .interfaz import cargar_hyper_bin
 
-# Alias para compatibilidad con imports antiguos
-# Ensure these aliases point to functions that are actually being exported above.
-# For example, if procesar_datos was intended to be trinarizar_final, that would be an issue.
-procesar_datos = aplicar_procesamiento_dual
-procesar_datos_csv = generar_datos_csv
+

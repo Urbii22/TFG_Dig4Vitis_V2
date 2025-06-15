@@ -160,7 +160,7 @@ def to_rgb(im, wl_r: float = 639.1,
 # Procesamientos principales
 # -------------------------------------------------------------------
 def aplicar_procesamiento_dual(img_con: np.ndarray,
-                               img_sin: np.ndarray) -> tuple[np.ndarray, np.ndarray, np.ndarray, tuple[int, int]]:
+                               img_sin: np.ndarray) -> tuple[np.ndarray, np.ndarray, np.ndarray, tuple[int, int], np.ndarray, np.ndarray]:
     """
     Flujo completo SIN/CON con alineación por ORB/RANSAC.
 
@@ -169,6 +169,8 @@ def aplicar_procesamiento_dual(img_con: np.ndarray,
       - leaf_con_cropped: máscara de hoja CON gotas, recortada al área común.
       - leaf_sin_aligned: máscara de hoja SIN gotas, recortada y alineada a CON.
       - common_shape: tupla (filas, cols) del área común.
+      - hoja_comun: máscara booleana de la hoja común después de la alineación.
+      - gotas_final: máscara booleana de las gotas finales sobre la hoja común.
     """
     # 1) Máscaras crudas
     leaf_con, drops_con_raw = _obtener_mascaras(img_con)
@@ -246,7 +248,7 @@ def aplicar_procesamiento_dual(img_con: np.ndarray,
     
     # Return leaf_con_cropped (original CON mask, cropped) and leaf_sin_aligned (SIN mask, cropped and warped)
     # for visualization purposes.
-    return trinarizada_result, leaf_con_cropped, leaf_sin_aligned, (filas, cols)
+    return trinarizada_result, leaf_con_cropped, leaf_sin_aligned, (filas, cols), hoja_comun, gotas_final
 
 
 def aplicar_procesamiento(imagen: np.ndarray) -> np.ndarray:

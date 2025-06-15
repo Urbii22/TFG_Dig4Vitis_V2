@@ -89,19 +89,37 @@ def cargar_hyper_bin():
 
     # 2. Previsualización
     st.markdown("### 2. Previsualización")
+
+    # Definir el tamaño deseado para la previsualización (ancho, alto)
+    preview_size = (300, 496)
+
+    # Redimensionar imágenes para previsualización
+    # Convertir arrays de NumPy a objetos Image de PIL, redimensionar y usar directamente con st.image
+    img_rgb_sin_pil = Image.fromarray(rgb_sin)
+    img_rgb_sin_resized = img_rgb_sin_pil.resize(preview_size)
+
+    img_rgb_con_pil = Image.fromarray(rgb_con)
+    img_rgb_con_resized = img_rgb_con_pil.resize(preview_size)
+
+    img_trin_sin_pil = Image.fromarray(trin_sin)
+    img_trin_sin_resized = img_trin_sin_pil.resize(preview_size)
+
+    img_trin_con_pil = Image.fromarray(trin_con)
+    img_trin_con_resized = img_trin_con_pil.resize(preview_size)
+
     colA, colB = st.columns(2)
-    colA.image(rgb_sin, caption="RGB SIN gotas", width=300)
-    colB.image(rgb_con, caption="RGB CON gotas", width=300)
-    colA.image(trin_sin, caption="Trinarizada SIN", width=300)
-    colB.image(trin_con, caption="Trinarizada CON", width=300)
+    colA.image(img_rgb_sin_resized, caption="RGB SIN gotas")
+    colB.image(img_rgb_con_resized, caption="RGB CON gotas")
+    colA.image(img_trin_sin_resized, caption="Trinarizada SIN")
+    colB.image(img_trin_con_resized, caption="Trinarizada CON")
 
     # 3. Alineación automática + trinarización final
-    st.markdown("---")
+   
     st.markdown("### 3. Alineación automática + trinarización final")
     if st.button("Ejecutar alineación automática"):
         # Aplicar procesamiento dual completo
-        # Ahora devuelve: resultado_trinarizado, leaf_con_recortada, leaf_sin_alineada, forma_comun
-        resultado_trinarizado, leaf_con_crop, leaf_sin_aligned, common_shape = aplicar_procesamiento_dual(cube_con, cube_sin)
+        # Ahora devuelve: resultado_trinarizado, leaf_con_recortada, leaf_sin_alineada, forma_comun, hoja_comun, gotas_final
+        resultado_trinarizado, leaf_con_crop, leaf_sin_aligned, common_shape, hoja_comun, gotas_final = aplicar_procesamiento_dual(cube_con, cube_sin)
 
         # Crear visualización de superposición
         h, w = common_shape
@@ -113,16 +131,21 @@ def cargar_hyper_bin():
         temp_sin_mask_viz[leaf_sin_aligned] = [255, 0, 0] # Hoja SIN alineada en Rojo
         
         # Combinar: donde ambas hojas están, podría mostrarse un color mixto o priorizar una.
-        # Aquí, simplemente superponemos, el rojo sobreescribirá el verde si hay solapamiento.
-        # Para una mejor visualización de solapamiento, podríamos hacer:
-        # overlay_viz[leaf_con_crop & leaf_sin_aligned] = [255, 255, 0] # Amarillo para solapamiento
-        # overlay_viz[leaf_con_crop & ~leaf_sin_aligned] = [0, 255, 0] # Verde solo CON
-        # overlay_viz[~leaf_con_crop & leaf_sin_aligned] = [255, 0, 0] # Rojo solo SIN
-        # Por simplicidad, mantenemos la superposición directa:
         overlay_viz[leaf_sin_aligned] = [255, 0, 0] # Hoja SIN alineada en Rojo sobreescribe/se añade
 
         st.image(overlay_viz, caption="Superposición Alineación (Verde: CON, Rojo: SIN alineada a CON)", width=300)
         st.image(resultado_trinarizado, caption="Trinarizada Automática", width=300)
+
+        # Calcular y mostrar porcentaje de recubrimiento
+        num_pixeles_hoja_comun = np.count_nonzero(hoja_comun)
+        num_pixeles_gotas_final = np.count_nonzero(gotas_final)
+
+        if num_pixeles_hoja_comun > 0:
+            porcentaje_recubrimiento = (num_pixeles_gotas_final / num_pixeles_hoja_comun) * 100
+        else:
+            porcentaje_recubrimiento = 0.0
+        
+        st.metric(label="Porcentaje de Recubrimiento de Producto en Hoja", value=f"{porcentaje_recubrimiento:.2f}%")
 
         # Botón de descarga
         buf = io.BytesIO()
@@ -136,7 +159,6 @@ def cargar_hyper_bin():
         )
 
     # 4. Descarga de trinarizadas base
-    st.markdown("---")
     st.markdown("### 4. Descarga de trinarizadas base")
     for tag, arr in [("sin", trin_sin), ("con", trin_con)]:
         buf = io.BytesIO()
