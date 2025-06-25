@@ -28,11 +28,9 @@ def _obtener_mascaras(imagen):
     leaf  = remove_small_holes(b10 < 2000, area_threshold=200)
     
     #cuprocol
-    
     #drops = ((b164 >= 3900) & (b164 <= 4100)) | ((b164 >= 4900) & (b164 <= 5200))
     
     #cuporantol duo
-    
     drops = ((b164 >= 3900) & (b164 <= 4300)) | ((b164 >= 4900) & (b164 <= 5200))
     
 
