@@ -1,37 +1,95 @@
 import os
+import re
+import uuid
 import streamlit as st
 
-def limpiar_carpeta():
-    """Limpia la carpeta 'archivos_subidos' al cerrar la aplicación."""
-    carpeta = 'archivos_subidos'
+
+# ------------------------------------------------------------------
+# Utilidad interna
+# ------------------------------------------------------------------
+
+def _limpiar_base(nombre: str) -> str:
+    """
+    Extrae la parte base de un nombre (.bil o .bil.hdr) sin extensión.
+    """
+    lower = nombre.lower()
+    if lower.endswith('.bil.hdr'):
+        return nombre[:-len('.bil.hdr')]
+    elif lower.endswith('.bil'):
+        return nombre[:-len('.bil')]
+    else:
+        return os.path.splitext(nombre)[0]
+
+
+# ------------------------------------------------------------------
+# API pública
+# ------------------------------------------------------------------
+
+def limpiar_carpeta() -> None:
+    """Borra todos los ficheros de la carpeta temporal al cerrar la app."""
+    carpeta = "archivos_subidos"
     if os.path.exists(carpeta):
         for archivo in os.listdir(carpeta):
-            ruta_archivo = os.path.join(carpeta, archivo)
-            os.unlink(ruta_archivo)
+            os.unlink(os.path.join(carpeta, archivo))
 
-def guardar_archivos_subidos(archivos_subidos):
+
+def guardar_archivos_subidos(archivos_subidos, prefijo: str = ""):
     """
-    Guarda los archivos subidos y retorna las rutas de los archivos .bil y .bil.hdr.
+    Guarda los archivos .bil y .bil.hdr seleccionados por el usuario con nombres únicos
+    para evitar problemas de caracteres y colisiones.
+
+    Parámetros
+    ----------
+    archivos_subidos : list[streamlit.UploadedFile]
+    prefijo : str
+        Texto que se antepone al nombre de cada fichero (p.ej. "sin_" o "con_").
+
+    Devuelve
+    -------
+    tuple[str | None, str | None, str]
+        (ruta_hdr, ruta_bil, nombre_base_muestra)
     """
-    hdr_file = None
-    bil_file = None
-    nombre_hyper = ""
-    
+    hdr_file = bil_file = None
+    nombre_base = ""
+
+    os.makedirs("archivos_subidos", exist_ok=True)
+
     with st.spinner("Procesando archivos..."):
         for archivo in archivos_subidos:
-            ruta_archivos = os.path.join('archivos_subidos', archivo.name)
-            with open(ruta_archivos, 'wb') as f:
+            # Extraer base original (sin extensión)
+            base = _limpiar_base(archivo.name)
+            # Generar nombre único
+            lower = archivo.name.lower()
+            if lower.endswith('.bil.hdr'):
+                ext = '.bil.hdr'
+            elif lower.endswith('.bil'):
+                ext = '.bil'
+            else:
+                ext = os.path.splitext(archivo.name)[1]
+
+            unique = uuid.uuid4().hex
+            nombre_almac = f"{prefijo}{unique}{ext}"
+            ruta = os.path.join("archivos_subidos", nombre_almac)
+
+            # Guardar en disco
+            with open(ruta, "wb") as f:
                 f.write(archivo.read())
-            if archivo.name.endswith('.bil.hdr'):
-                hdr_file = ruta_archivos
-            elif archivo.name.endswith('.bil'):
-                bil_file = ruta_archivos
-                nombre_hyper = os.path.splitext(archivo.name)[0]
-                st.markdown(f"""
-                    <div style="background-color: #303030; padding: 10px; border-radius: 5px; margin-bottom: 10px;">
-                        <p style="color: #a5d6a7; font-weight: 600; margin: 0;">
-                            Archivo cargado: {nombre_hyper}
-                        </p>
+
+            # Identificar rutas
+            if ext == '.bil.hdr':
+                hdr_file = ruta
+            elif ext == '.bil':
+                bil_file = ruta
+                nombre_base = base  # para mostrar al usuario
+                st.markdown(
+                    f"""
+                    <div style="background:#303030;padding:8px;border-radius:5px;margin-bottom:6px;">
+                        <span style="color:#a5d6a7;font-weight:600;">
+                            Archivo cargado: {prefijo}{base}
+                        </span>
                     </div>
-                    """, unsafe_allow_html=True)
-    return hdr_file, bil_file, nombre_hyper
+                    """,
+                    unsafe_allow_html=True,
+                )
+
+    return hdr_file, bil_file, nombre_base

@@ -1,170 +1,172 @@
-import cv2
-import streamlit as st
-import spectral
+"""
+Interfaz Streamlit.
+Carga, muestra y aplica alineación + trinarización automática usando las funciones del módulo de procesamiento.
+"""
+
+import io
 import numpy as np
+import streamlit as st
+from PIL import Image
+from spectral.io import envi
+
 from funciones.archivos import guardar_archivos_subidos
-from funciones.procesamiento import aplicar_procesamiento, realizar_post_procesamiento
+from funciones.procesamiento import (
+    to_rgb,
+    _obtener_mascaras,
+    trinarizar_final,
+    aplicar_procesamiento_dual,
+)
+
 
 def cargar_hyper_bin():
+    st.markdown("### 1. Selecciona las imágenes hiperespectrales")
 
-    # Mostrar dos columnas para los dos botones: uno para seleccionar la imagen y otro para procesarla
-    col_botones = st.columns(2)
-    with col_botones[0]:
-        # Botón de selección de imagen (file uploader)
-        archivos_subidos = st.file_uploader(
-            "Seleccionar imagen",
+    col1, col2 = st.columns(2)
+    with col1:
+        archivos_sin = st.file_uploader(
+            "Imagen **SIN** gotas (.bil + .hdr)",
+            type=["bil", "hdr"],
             accept_multiple_files=True,
-            type=["bil", "bil.hdr"]
+            key="sin_gotas",
         )
-    with col_botones[1]:
-        # Botón para procesar la imagen
-        procesar = st.button("Procesar imagen", help="Procesa la imagen hiperespectral")
+    with col2:
+        archivos_con = st.file_uploader(
+            "Imagen **CON** gotas (.bil + .hdr)",
+            type=["bil", "hdr"],
+            accept_multiple_files=True,
+            key="con_gotas",
+        )
 
-    # Al pulsar "Procesar imagen", se valida que se hayan seleccionado ambos archivos (.bil y .bil.hdr)
-    if procesar:
-        if archivos_subidos and len(archivos_subidos) == 2:
-            hdr_file, bil_file, nombre_hyper = guardar_archivos_subidos(archivos_subidos)
-            if hdr_file and bil_file:
-                # Se realiza el procesamiento (trinarizado)
-                img = spectral.open_image(hdr_file)
-                trinarizada = aplicar_procesamiento(img)
-                trinarizada = realizar_post_procesamiento(trinarizada)
-                st.session_state['trinarizada'] = trinarizada
+    if st.button("Procesar imágenes"):
+        hdr_sin, bil_sin, _ = guardar_archivos_subidos(archivos_sin)
+        hdr_con, bil_con, _ = guardar_archivos_subidos(archivos_con)
+        if hdr_sin is None or bil_sin is None:
+            st.error("Debes subir `.hdr` y `.bil` de la imagen **SIN** gotas.")
+            return
+        if hdr_con is None or bil_con is None:
+            st.error("Debes subir `.hdr` y `.bil` de la imagen **CON** gotas.")
+            return
 
-                # --- CREACIÓN DE LA IMAGEN "RGB" CON LAS BANDAS SELECCIONADAS ---
-                def get_band_index(image, target_wavelength):
-                    # Se extraen las longitudes de onda disponibles (centers) y se pasan a float
-                    centers = np.array([float(x) for x in image.bands.centers])
-                    return int(np.argmin(np.abs(centers - target_wavelength)))
+        # Abrir cubos hiperespectrales
+        cube_sin = envi.open(hdr_sin, bil_sin)
+        cube_con = envi.open(hdr_con, bil_con)
 
-                # Valores de onda aproximados para R, G, B
-                wavelength_red   = 639.1  # nm
-                wavelength_green = 548.4  # nm
-                wavelength_blue  = 459.2  # nm
+        # Conversión a RGB para previsualizar
+        rgb_sin = to_rgb(cube_sin)
+        rgb_con = to_rgb(cube_con)
 
-                # Localizar el índice de cada banda
-                idx_r = get_band_index(img, wavelength_red)
-                idx_g = get_band_index(img, wavelength_green)
-                idx_b = get_band_index(img, wavelength_blue)
+        # Máscaras crudas
+        leaf_sin, drops_sin_raw = _obtener_mascaras(cube_sin)
+        leaf_con, drops_con_raw = _obtener_mascaras(cube_con)
+        drops_sin = drops_sin_raw & leaf_sin
+        drops_con = drops_con_raw & leaf_con
 
-                # Leer cada banda
-                band_r = img.read_band(idx_r)
-                band_g = img.read_band(idx_g)
-                band_b = img.read_band(idx_b)
+        # Trinarizaciones básicas
+        trin_sin = trinarizar_final(leaf_sin, drops_sin, np.zeros_like(drops_sin))
+        trin_con = trinarizar_final(leaf_con, drops_con, np.zeros_like(drops_con))
 
-                # Normalizar cada banda a [0..255]
-                band_r_norm = cv2.normalize(band_r, None, 0, 255, cv2.NORM_MINMAX, dtype=cv2.CV_8U)
-                band_g_norm = cv2.normalize(band_g, None, 0, 255, cv2.NORM_MINMAX, dtype=cv2.CV_8U)
-                band_b_norm = cv2.normalize(band_b, None, 0, 255, cv2.NORM_MINMAX, dtype=cv2.CV_8U)
+        # Guardar datos en sesión
+        st.session_state.update({
+            "processed": True,
+            "cube_sin": cube_sin,
+            "cube_con": cube_con,
+            "rgb_sin": rgb_sin,
+            "rgb_con": rgb_con,
+            "trin_sin": trin_sin,
+            "trin_con": trin_con,
+        })
 
-                # Unir en formato BGR
-                imagen_normal = cv2.merge([band_b_norm, band_g_norm, band_r_norm])
+    if not st.session_state.get("processed", False):
+        return
 
-                # --- APLICAR HIPÓTESIS DEL MUNDO GRIS (balance de blancos sencillo) ---
-                img_float = imagen_normal.astype(np.float32)
-                B, G, R = cv2.split(img_float)
-                avgB = np.mean(B)
-                avgG = np.mean(G)
-                avgR = np.mean(R)
-                mean_gray = (avgB + avgG + avgR) / 3.0  # media de los 3 canales
+    # Recuperar variables de sesión
+    cube_sin = st.session_state["cube_sin"]
+    cube_con = st.session_state["cube_con"]
+    rgb_sin = st.session_state["rgb_sin"]
+    rgb_con = st.session_state["rgb_con"]
+    trin_sin = st.session_state["trin_sin"]
+    trin_con = st.session_state["trin_con"]
 
-                # Ajustar cada canal para que su media sea igual a la media global
-                B *= (mean_gray / (avgB + 1e-8))
-                G *= (mean_gray / (avgG + 1e-8))
-                R *= (mean_gray / (avgR + 1e-8))
-                img_float = cv2.merge([B, G, R])
+    # 2. Previsualización
+    st.markdown("### 2. Previsualización")
 
-                # Recortar valores fuera de [0..255] y convertir de nuevo a uint8
-                img_balanceado = np.clip(img_float, 0, 255).astype(np.uint8)
+    # Definir el tamaño deseado para la previsualización (ancho, alto)
+    preview_size = (300, 496)
 
-                st.session_state['imagen_normal'] = img_balanceado
+    # Redimensionar imágenes para previsualización
+    # Convertir arrays de NumPy a objetos Image de PIL, redimensionar y usar directamente con st.image
+    img_rgb_sin_pil = Image.fromarray(rgb_sin)
+    img_rgb_sin_resized = img_rgb_sin_pil.resize(preview_size)
 
+    img_rgb_con_pil = Image.fromarray(rgb_con)
+    img_rgb_con_resized = img_rgb_con_pil.resize(preview_size)
+
+    img_trin_sin_pil = Image.fromarray(trin_sin)
+    img_trin_sin_resized = img_trin_sin_pil.resize(preview_size)
+
+    img_trin_con_pil = Image.fromarray(trin_con)
+    img_trin_con_resized = img_trin_con_pil.resize(preview_size)
+
+    colA, colB = st.columns(2)
+    colA.image(img_rgb_sin_resized, caption="RGB SIN gotas")
+    colB.image(img_rgb_con_resized, caption="RGB CON gotas")
+    colA.image(img_trin_sin_resized, caption="Trinarizada SIN")
+    colB.image(img_trin_con_resized, caption="Trinarizada CON")
+
+    # 3. Alineación automática + trinarización final
+   
+    st.markdown("### 3. Alineación automática + trinarización final")
+    if st.button("Ejecutar alineación automática"):
+        # Aplicar procesamiento dual completo
+        # Ahora devuelve: resultado_trinarizado, leaf_con_recortada, leaf_sin_alineada, forma_comun, hoja_comun, gotas_final
+        resultado_trinarizado, leaf_con_crop, leaf_sin_aligned, common_shape, hoja_comun, gotas_final = aplicar_procesamiento_dual(cube_con, cube_sin)
+
+        # Crear visualización de superposición
+        h, w = common_shape
+        overlay_viz = np.zeros((h, w, 3), dtype=np.uint8)
+        overlay_viz[leaf_con_crop] = [0, 255, 0]  # Hoja CON en Verde
+        # Superponer hoja SIN alineada en Rojo para ver diferencias/coincidencias
+        # Crear una máscara temporal para la superposición sin modificar leaf_con_crop en overlay_viz
+        temp_sin_mask_viz = np.zeros_like(overlay_viz)
+        temp_sin_mask_viz[leaf_sin_aligned] = [255, 0, 0] # Hoja SIN alineada en Rojo
+        
+        # Combinar: donde ambas hojas están, podría mostrarse un color mixto o priorizar una.
+        overlay_viz[leaf_sin_aligned] = [255, 0, 0] # Hoja SIN alineada en Rojo sobreescribe/se añade
+
+        st.image(overlay_viz, caption="Superposición Alineación (Verde: CON, Rojo: SIN alineada a CON)", width=300)
+        st.image(resultado_trinarizado, caption="Trinarizada Automática", width=300)
+
+        # Calcular y mostrar porcentaje de recubrimiento
+        num_pixeles_hoja_comun = np.count_nonzero(hoja_comun)
+        num_pixeles_gotas_final = np.count_nonzero(gotas_final)
+
+        if num_pixeles_hoja_comun > 0:
+            porcentaje_recubrimiento = (num_pixeles_gotas_final / num_pixeles_hoja_comun) * 100
         else:
-            st.error("Debes seleccionar ambos archivos (.bil y .bil.hdr).")
+            porcentaje_recubrimiento = 0.0
+        
+        st.metric(label="Porcentaje de Recubrimiento de Producto en Hoja", value=f"{porcentaje_recubrimiento:.2f}%")
 
-    # Si ya se han procesado las imágenes, se muestran en dos columnas
-    if 'imagen_normal' in st.session_state and 'trinarizada' in st.session_state:
-        st.markdown("<h3 style='text-align: center;'>Resultados</h3>", unsafe_allow_html=True)
-        
-        # Cálculo del porcentaje de recubrimiento de cobre en la hoja
-        trinarizada = st.session_state['trinarizada']
-        # Máscaras de hoja y cobre
-        mask_hoja_verde = np.all(trinarizada == [0, 255, 0], axis=-1)
-        mask_hoja_roja  = np.all(trinarizada == [255, 0, 0], axis=-1)
-        area_total  = np.count_nonzero(mask_hoja_verde) + np.count_nonzero(mask_hoja_roja)
-        area_cobre  = np.count_nonzero(mask_hoja_roja)
-        porcentaje_cobre = (area_cobre / area_total * 100) if area_total > 0 else 0
-        
-        # Definir un layout más compacto: 2 columnas para imágenes con tamaño controlado
-        cols = st.columns(2)
-        
-        # Calcular un tamaño de imagen adecuado (más pequeño que el original)
-        # Ancho máximo para que quepa todo en la pantalla sin scroll
-        ancho_img = 500  # Tamaño más reducido
-        
-        with cols[0]:
-            st.image(
-                st.session_state['imagen_normal'],
-                caption="Imagen hiperespectral en color",
-                width=ancho_img
-            )
-            
-        with cols[1]:
-            st.image(
-                st.session_state['trinarizada'],
-                caption="Imagen procesada (trinarizada)",
-                width=ancho_img
-            )
-        
-        # Mostrar el porcentaje de recubrimiento en una fila aparte pero con estilo destacado
-        color = "red" if porcentaje_cobre > 50 else "orange" if porcentaje_cobre > 20 else "green"
-        
-        # Utilizamos una fila completa para mostrar el porcentaje
-        st.markdown(
-            f"""
-            <div style="padding: 8px; border-radius: 5px; background-color: #f0f0f0; 
-                      border: 2px solid {color}; text-align: center; margin-top: 10px; display: flex; align-items: center; justify-content: center;">
-                <div style="font-weight: bold; font-size: 25px;color:#000000;  margin-right: 10px;">Recubrimiento de cobre:</div>
-                <div style="width: 60%; height: 15px; background-color: #e0e0e0; border-radius: 3px; overflow: hidden;">
-                    <div style="width: {porcentaje_cobre}%; height: 100%; background-color: {color};"></div>
-                </div>
-                <div style="margin-left: 10px; font-weight: bold; color:#000000; font-size: 25px;">
-                    {porcentaje_cobre:.2f}%
-                </div>
-            </div>
-            """, 
-            unsafe_allow_html=True
+        # Botón de descarga
+        buf = io.BytesIO()
+        Image.fromarray(resultado_trinarizado).save(buf, format="PNG")
+        buf.seek(0)
+        st.download_button(
+            "Descargar trinarizada automática",
+            data=buf,
+            file_name="trinarizada_automatica.png",
+            mime="image/png",
         )
 
-        # --- Botones para descargar imágenes en la misma fila ---
-        import io
-        from PIL import Image
-
-        # Convertir arrays a imágenes PNG en memoria
-        img_pil_trinarizada = Image.fromarray(trinarizada)
-        buffer_trinarizada = io.BytesIO()
-        img_pil_trinarizada.save(buffer_trinarizada, format="PNG")
-        buffer_trinarizada.seek(0)
-
-        imagen_normal = st.session_state['imagen_normal']
-        img_pil_color = Image.fromarray(imagen_normal)
-        buffer_color = io.BytesIO()
-        img_pil_color.save(buffer_color, format="PNG")
-        buffer_color.seek(0)
-
-        col_descarga = st.columns(2)
-        with col_descarga[0]:
-            st.download_button(
-                label="Descargar imagen a color",
-                data=buffer_color,
-                file_name="imagen_color.png",
-                mime="image/png"
-            )
-        with col_descarga[1]:
-            st.download_button(
-                label="Descargar imagen trinarizada",
-                data=buffer_trinarizada,
-                file_name="trinarizada.png",
-                mime="image/png"
-            )
-
+    # 4. Descarga de trinarizadas base
+    st.markdown("### 4. Descarga de trinarizadas base")
+    for tag, arr in [("sin", trin_sin), ("con", trin_con)]:
+        buf = io.BytesIO()
+        Image.fromarray(arr).save(buf, format="PNG")
+        buf.seek(0)
+        st.download_button(
+            f"Descargar {tag}",
+            data=buf,
+            file_name=f"trinarizada_{tag}.png",
+            mime="image/png",
+        )

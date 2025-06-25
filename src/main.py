@@ -19,6 +19,7 @@ atexit.register(limpiar_carpeta)
 
 def main():
     # Aplicar estilos globales desde el archivo CSS
+ 
     base_dir = os.path.dirname(__file__)
     css_path = os.path.join(base_dir, "estilos.css")
     try:
@@ -30,6 +31,7 @@ def main():
     
     # Encabezado simplificado
     st.markdown("<h1 style='text-align: center;'>Dig4Vitis</h1>", unsafe_allow_html=True)
+    
     
     # Interfaz simplificada con solo dos botones e imágenes dispuestas en dos columnas
     cargar_hyper_bin()
