@@ -42,9 +42,16 @@ def main():
         ("escudo_ubu.jpg", "logo-ubu"),
         ("gicap_logo.jpeg", "logo-gicap")
     ]
+    
+    # Construir una ruta robusta a la carpeta 'recursos' DENTRO de 'src'
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    recursos_dir = os.path.join(script_dir, 'recursos')
+
     img_tags = []
     for filename, css_class in logos:
-        img_path = os.path.abspath(os.path.join("./recursos", filename))
+        # 3. Crear la ruta completa y fiable para cada imagen
+        img_path = os.path.join(recursos_dir, filename)
+        
         if os.path.exists(img_path):
             with open(img_path, "rb") as img_file:
                 img_bytes = img_file.read()
