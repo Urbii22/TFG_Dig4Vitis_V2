@@ -25,12 +25,14 @@ def _limpiar_base(nombre: str) -> str:
 # API pública
 # ------------------------------------------------------------------
 
-def limpiar_carpeta() -> None:
+def limpiar_carpeta(carpeta: str) -> None:
     """Borra todos los ficheros de la carpeta temporal al cerrar la app."""
-    carpeta = "archivos_subidos"
     if os.path.exists(carpeta):
         for archivo in os.listdir(carpeta):
-            os.unlink(os.path.join(carpeta, archivo))
+            try:
+                os.unlink(os.path.join(carpeta, archivo))
+            except OSError as e:
+                print(f"Error al borrar el archivo {archivo}: {e}")
 
 
 def guardar_archivos_subidos(archivos_subidos, prefijo: str = ""):
