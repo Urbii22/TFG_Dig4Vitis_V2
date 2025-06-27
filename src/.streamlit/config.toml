@@ -4,7 +4,7 @@ enableCORS = false
 maxUploadSize=5120
 port = 8502
 [theme]
-primaryColor="#367C2B"
+primaryColor="#D9895B"
 backgroundColor="#161616"
 secondaryBackgroundColor="#353535"
 textColor="#FAFAFA"

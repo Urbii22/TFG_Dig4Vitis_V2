@@ -11,7 +11,7 @@
 [data-testid="stFileUploaderDropzone"] div div::before {
     content:"Arrastra o selecciona los archivos";
     font-weight: 600;
-    color: #4CAF50; /* Verde principal renovado */
+    color: #D9895B; /* Color cobre principal */
 }
 [data-testid="stFileUploaderDropzone"] div div span{
     display:none;
@@ -23,19 +23,19 @@
 /* Estilos generales para toda la aplicación - Tema Oscuro Moderno */
 .stApp {
     font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background-color: #121212 !important; /* Fondo principal más oscuro */
+    background-color: #121212 !important;
     color: #EAEAEA !important;
 }
 
 /* Encabezados */
 h1, h2, h3 {
-    color: #4CAF50 !important; /* Verde principal */
+    color: #D9895B !important; /* Color cobre principal */
     font-weight: 700;
     letter-spacing: -0.5px;
 }
 
 h4, h5, h6 {
-    color: #A5D6A7 !important; /* Verde secundario */
+    color: #E0A17E !important; /* Color cobre secundario */
     font-weight: 600;
 }
 
@@ -50,7 +50,7 @@ h4, h5, h6 {
 
 /* Botones */
 .stButton > button {
-    background: linear-gradient(135deg, #4CAF50 0%, #388E3C 100%);
+    background: linear-gradient(135deg, #D9895B 0%, #B5651D 100%); /* Gradiente cobre */
     color: white !important;
     border-radius: 8px;
     border: none;
@@ -61,7 +61,7 @@ h4, h5, h6 {
 }
 
 .stButton > button:hover {
-    background: linear-gradient(135deg, #45a049 0%, #337d37 100%);
+    background: linear-gradient(135deg, #E0A17E 0%, #D9895B 100%);
     box-shadow: 0 6px 8px rgba(0, 0, 0, 0.2);
     transform: translateY(-2px);
 }
@@ -75,14 +75,14 @@ h4, h5, h6 {
 /* Zona de carga de archivos */
 [data-testid="stFileUploaderDropzone"] {
     background-color: #1E1E1E;
-    border: 2px dashed #4CAF50;
+    border: 2px dashed #D9895B; /* Borde cobre */
     border-radius: 12px;
     transition: background-color 0.3s, border-color 0.3s;
 }
 
 [data-testid="stFileUploaderDropzone"]:hover {
     background-color: #242424;
-    border-color: #66BB6A;
+    border-color: #E0A17E; /* Borde cobre claro */
 }
 
 /* Alertas */
@@ -139,7 +139,7 @@ h4, h5, h6 {
     border-radius: 8px 8px 0 0;
     padding: 12px 24px;
     font-weight: 600;
-    color: #A5D6A7 !important;
+    color: #E0A17E !important; /* Cobre secundario */
     background-color: #1E1E1E !important;
     border: 1px solid #2F2F2F;
     border-bottom: none;
@@ -147,9 +147,9 @@ h4, h5, h6 {
 }
 
 .stTabs [aria-selected="true"] {
-    background-color: #4CAF50 !important;
+    background-color: #D9895B !important; /* Cobre principal */
     color: white !important;
-    border-color: #4CAF50;
+    border-color: #D9895B;
 }
 
 /* Contenido de las pestañas */
@@ -160,7 +160,7 @@ h4, h5, h6 {
 
 /* Expandibles (Expanders) */
 .streamlit-expanderHeader {
-    color: #A5D6A7 !important;
+    color: #E0A17E !important; /* Cobre secundario */
     font-weight: 600 !important;
     background-color: #242424 !important;
     border-radius: 8px;
@@ -198,7 +198,7 @@ footer img:hover {
 [data-testid="stMetricValue"] {
     font-size: 4.5rem !important;
     font-weight: 700;
-    color: #4CAF50 !important;
+    color: #D9895B !important; /* Color cobre principal */
     line-height: 1;
     padding-top: 15px;
 }
@@ -206,6 +206,6 @@ footer img:hover {
 [data-testid="stMetricLabel"] {
     font-size: 1.1rem !important;
     font-weight: 500;
-    color: #A5D6A7 !important;
+    color: #E0A17E !important; /* Cobre secundario */
     padding-bottom: 10px;
 }
