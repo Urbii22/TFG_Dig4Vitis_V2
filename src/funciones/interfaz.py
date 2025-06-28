@@ -36,11 +36,21 @@ def mostrar_subida_archivos():
 
     if st.button("🚀 Iniciar Procesamiento", use_container_width=True):
         with st.spinner("Analizando imágenes... Por favor, espere."):
-            hdr_sin, bil_sin, _ = guardar_archivos_subidos(archivos_sin, "sin_")
-            hdr_con, bil_con, _ = guardar_archivos_subidos(archivos_con, "con_")
+            hdr_sin, bil_sin, nombre_base_sin = guardar_archivos_subidos(archivos_sin, "sin_")
+            hdr_con, bil_con, nombre_base_con = guardar_archivos_subidos(archivos_con, "con_")
 
             if not (hdr_sin and bil_sin and hdr_con and bil_con):
                 st.error("Error: Asegúrate de subir los archivos .hdr y .bil para ambas imágenes.")
+                return
+
+            # Verificación de que los identificadores de muestra de los archivos coinciden
+            if nombre_base_sin != nombre_base_con:
+                st.error(
+                    "Error: Los identificadores de muestra en los nombres de archivo no coinciden. "
+                    "Asegúrate de que ambas imágenes ('CON' y 'SIN' tratamiento) pertenecen a la misma muestra."
+                    f"\n- Identificador SIN tratamiento: **{nombre_base_sin}**"
+                    f"\n- Identificador CON tratamiento: **{nombre_base_con}**"
+                )
                 return
 
             # Abrir cubos hiperespectrales y procesar
