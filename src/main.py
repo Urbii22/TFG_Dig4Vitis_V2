@@ -15,7 +15,7 @@ LOGO_PATH = os.path.join(os.path.dirname(__file__), 'recursos', 'EcoVid_logo.png
 # --- Configuración de la Página ---
 st.set_page_config(
     page_title="EcoVid",
-    page_icon=LOGO_PATH, 
+    page_icon=LOGO_PATH,
     layout="wide",
     initial_sidebar_state="collapsed",
 )
@@ -43,7 +43,7 @@ def mostrar_footer():
         ("gicap_logo.jpeg", "logo-gicap"),
     ]
     img_tags = []
-    
+
     for filename, css_class in logos:
         base_dir = os.path.dirname(__file__)
         img_path = os.path.join(base_dir, 'recursos', filename)
@@ -79,23 +79,24 @@ def main():
 
         header_html = f"""
         <div style="display: flex; align-items: center; justify-content: center; margin-bottom: 20px;">
-            <img src="data:image/png;base64,{logo_b64}" alt="EcoVid Logo" style="width: 75px; height: auto; margin-right: 20px;">
-            <h1 style='color: #4CAF50; margin: 0; text-align: left; font-size: 3.5rem; text-shadow: 2px 2px 4px rgba(0,0,0,0.1);'>EcoVid</h1>
+            <img src="data:image/png;base64,{logo_b64}" alt="EcoVid Logo" style="width: 85px; height: auto; margin-right: 25px;">
+            <h1 style='color: #D9895B; margin: 0; text-align: left; font-size: 4.5rem; text-shadow: 2px 2px 4px rgba(0,0,0,0.1);'>EcoVid</h1>
         </div>
         """
         st.markdown(header_html, unsafe_allow_html=True)
 
     except FileNotFoundError:
         st.warning(f"No se encontró el logo en '{LOGO_PATH}'. Mostrando solo el título.")
-        st.markdown("<h1 style='text-align: center; color: #4CAF50; font-size: 3.5rem; text-shadow: 2px 2px 4px rgba(0,0,0,0.1);'>EcoVid</h1>", unsafe_allow_html=True)
-    
-    st.markdown("<p style='text-align: center; margin-top: -15px;'>Herramienta para la segmentación de imágenes hiperespectrales y detección de cobre en viñedos.</p>", unsafe_allow_html=True)
+        st.markdown("<h1 style='text-align: center; color: #D9895B; font-size: 4.5rem; text-shadow: 2px 2px 4px rgba(0,0,0,0.1);'>EcoVid</h1>", unsafe_allow_html=True)
+
+    # MODIFICACIÓN: Color del subtítulo cambiado a blanco (#EAEAEA)
+    st.markdown("<p style='text-align: center; margin-top: -20px; font-size: 1.1rem; color: #EAEAEA;'>Herramienta para la segmentación de imágenes hiperespectrales y detección de cobre en viñedos.</p>", unsafe_allow_html=True)
 
     tab1, tab2 = st.tabs([" Cargar y Procesar Imágenes ", " Acerca de "])
 
     with tab1:
         st.header("Análisis de Imágenes")
-        
+
         with st.container():
             mostrar_subida_archivos()
 
@@ -104,11 +105,11 @@ def main():
 
     with tab2:
         st.header("Sobre el Proyecto EcoVid")
-        
+
         st.subheader("Resumen")
         st.markdown("""
         Este trabajo, enmarcado en el área de la agricultura de precisión, se centra en el desarrollo de una herramienta software para la detección y cuantificación de tratamientos antifúngicos con base de cobre en hojas de viñedo. El objetivo principal es analizar imágenes hiperespectrales para calcular de forma precisa el porcentaje de recubrimiento del producto sobre la superficie foliar.
-        
+
         Para ello, se ha desarrollado esta aplicación web en Python con la biblioteca Streamlit, que permite al usuario procesar dos imágenes hiperespectrales de la misma hoja: una con el tratamiento aplicado y otra sin él. La innovación clave del proyecto reside en la implementación de un algoritmo para la reducción de ruido y falsos positivos. Este sistema utiliza el algoritmo ORB (Oriented FAST and Rotated BRIEF) para alinear automáticamente ambas imágenes, permitiendo sustraer el ruido (variaciones naturales de reflectancia de la propia hoja) de la imagen tratada. Como resultado, la aplicación ofrece una visualización del análisis y el porcentaje de cobertura final, con la opción de descargar los resultados.
         """)
 
@@ -139,7 +140,7 @@ def main():
         * **Tutores:** Carlos Cambra Baseca y Ramón Sánchez Alonso
         * **Institución:** Escuela Politécnica Superior, Universidad de Burgos
         """)
-    
+
     mostrar_footer()
 
 
