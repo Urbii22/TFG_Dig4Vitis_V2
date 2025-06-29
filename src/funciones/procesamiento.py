@@ -33,7 +33,7 @@ def aplicar_procesamiento(imagen):
     leaf_mask = remove_small_holes(leaf_mask, area_threshold=200)
 
     # Detección inicial de gotas en la Banda 164 (rango [4092, 4558]) y restringir a la zona de la hoja
-    mask_droplets = ((banda_164 >= 4150) & (banda_164 <= 4450) ) | ((banda_164 >= 5000) & (banda_164 <= 5100))| ((banda_164 >= 5700) & (banda_164 <= 6000)) | ((banda_164 >= 7000) & (banda_164 <= 10000))
+    mask_droplets = ((banda_164 >= 3900) & (banda_164 <= 4300) ) | ((banda_164 >= 4900) & (banda_164 <= 5300))
 
     # mask_droplets = ((banda_164 >= 4092) & (banda_164 <= 4558) ) 
 
