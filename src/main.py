@@ -92,7 +92,7 @@ def main():
     # MODIFICACIÓN: Color del subtítulo cambiado a blanco (#EAEAEA)
     st.markdown("<p style='text-align: center; margin-top: -20px; font-size: 1.1rem; color: #EAEAEA;'>Herramienta para la segmentación de imágenes hiperespectrales y detección de cobre en viñedos.</p>", unsafe_allow_html=True)
 
-    tab1, tab2 = st.tabs([" Cargar y Procesar Imágenes ", " Acerca de "])
+    tab1, tab2 = st.tabs([" Cargar y Procesar Imágenes ", " Acerca del TFG "])
 
     with tab1:
         st.header("Análisis de Imágenes")
