@@ -10,27 +10,40 @@ import streamlit as st
 
 def _limpiar_base(nombre: str) -> str:
     """
-    Extrae la parte base de un nombre (.bil o .bil.hdr) sin extensión.
+    Extrae el identificador de la muestra desde el inicio del nombre del archivo.
+    Ej: "EM 2 (2) cuprantol 133 300823.bil" -> "EM 2 (2)".
+    Busca un patrón de letras, espacios y números entre paréntesis.
     """
-    lower = nombre.lower()
-    if lower.endswith('.bil.hdr'):
-        return nombre[:-len('.bil.hdr')]
-    elif lower.endswith('.bil'):
-        return nombre[:-len('.bil')]
-    else:
-        return os.path.splitext(nombre)[0]
+    # Intenta encontrar el patrón "Letras y números (número)" al inicio.
+    # Ej: "EM 2 (2)"
+    match = re.match(r'^[A-Za-z\s]+\d+\s\(\d+\)', nombre)
+    if match:
+        return match.group(0).strip()
+
+    # Si el patrón anterior no funciona, se usa un fallback más simple:
+    # Extraer la parte inicial antes del primer número largo (fecha) o palabra clave.
+    nombre_sin_ext = os.path.splitext(nombre)[0]
+    # Elimina sufijos comunes para no confundirlos con el identificador
+    for sufijo in ["_sin", "_con", "-sin", "-con"]:
+        if nombre_sin_ext.endswith(sufijo):
+            nombre_sin_ext = nombre_sin_ext[:-len(sufijo)]
+
+    # Devuelve la parte inicial como identificador
+    return nombre_sin_ext.strip()
 
 
 # ------------------------------------------------------------------
 # API pública
 # ------------------------------------------------------------------
 
-def limpiar_carpeta() -> None:
+def limpiar_carpeta(carpeta: str) -> None:
     """Borra todos los ficheros de la carpeta temporal al cerrar la app."""
-    carpeta = "archivos_subidos"
     if os.path.exists(carpeta):
         for archivo in os.listdir(carpeta):
-            os.unlink(os.path.join(carpeta, archivo))
+            try:
+                os.unlink(os.path.join(carpeta, archivo))
+            except OSError as e:
+                print(f"Error al borrar el archivo {archivo}: {e}")
 
 
 def guardar_archivos_subidos(archivos_subidos, prefijo: str = ""):
@@ -91,5 +104,8 @@ def guardar_archivos_subidos(archivos_subidos, prefijo: str = ""):
                     """,
                     unsafe_allow_html=True,
                 )
+
+    return hdr_file, bil_file, nombre_base
+                
 
     return hdr_file, bil_file, nombre_base
