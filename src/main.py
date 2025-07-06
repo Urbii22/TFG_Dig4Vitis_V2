@@ -42,9 +42,15 @@ def mostrar_footer():
         ("escudo_ubu.jpg", "logo-ubu"),
         ("gicap_logo.jpeg", "logo-gicap"),
     ]
+    
+    # Construir una ruta robusta a la carpeta 'recursos' DENTRO de 'src'
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    recursos_dir = os.path.join(script_dir, 'recursos')
+
     img_tags = []
 
     for filename, css_class in logos:
+
         base_dir = os.path.dirname(__file__)
         img_path = os.path.join(base_dir, 'recursos', filename)
 
