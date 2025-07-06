@@ -1,0 +1,174 @@
+\apendice{Anexo: Documentación Técnica de Programación}
+\label{apendice:tecnica}
+
+\section{Introducción}
+En este apartado se describen de manera detallada aspectos técnicos del proyecto como la organización de los ficheros, también se describe el proceso a seguir para la instalación de los componentes necesarios, así como para la ejecución de la aplicación. Además, se incluye un apartado donde se detallan las pruebas realizadas para verificar el correcto funcionamiento de la aplicación. Este apartado está dirigido principalmente a programadores que necesiten mantener, modificar o extender la funcionalidad de la aplicación.
+
+\section{Estructura de directorios}
+La organización de los distintos directorios está diseñada para presentar una separación clara entre el código fuente de las distintas funcionalidades, los recursos visuales como logotipos y los archivos de configuración de la aplicación.
+\newpage
+\begin{verbatim}
+.
+|-- .gitignore
+|-- README.md
+    `-- src/
+        |-- .streamlit/
+        |-- Dockerfile
+        |-- lanzar_app.bat
+        |-- main.py
+        |-- estilos.css
+        |-- requirements.txt
+        |-- bandas.xml
+        |-- funciones/
+        |   |-- __init__.py
+        |   |-- interfaz.py
+        |   |-- procesamiento.py
+        |   |-- alignment.py
+        |   |-- archivos.py
+        |   `-- csv.py
+        `-- recursos/
+            |-- Escudo_ubu.jpg
+            |-- gicap_logo.jpeg
+            `-- imagen_logo_UE.png
+    \end{verbatim}
+\begin{itemize}
+\item \textbf{src/}: Carpeta principal que contiene todo el código fuente, la configuración y los recursos de la aplicación.
+\item \textbf{main.py}: Punto de entrada de la aplicación. Se encarga de la configuración inicial de la página y de lanzar la interfaz.
+\item \textbf{Dockerfile}: Fichero de configuración para crear una imagen de Docker, permitiendo ejecutar la aplicación en un entorno dentro de un contenedor y reproducible.
+\item \textbf{lanzar\_app.bat}: \textit{Script} de Windows para ejecutar la aplicación de forma sencilla.
+\item \textbf{estilos.css}: Fichero CSS que define la apariencia visual de la aplicación.
+\item \textbf{requirements.txt}: Lista las dependencias de Python necesarias para ejecutar el proyecto.
+\item \textbf{funciones/}: Paquete de Python donde se encapsula toda la lógica de la aplicación (\textit{backend}).
+\item \textbf{recursos/}: Contiene los archivos de imagen, como los logotipos mostrados en el pie de página.
+\item \textbf{.gitignore}: Especifica los ficheros y directorios que el sistema de control de versiones Git debe ignorar.
+\end{itemize}
+
+\section{Manual del programador}
+Esta sección describe los módulos más importantes del sistema y sus responsabilidades.
+
+\subsection{Punto de Entrada (\texttt{main.py})}
+Se trata del script principal que se ejecuta con Streamlit. Sus tareas son:
+\begin{enumerate}
+ \item Configurar la página de la aplicación (\verb|st.set_page_config|), definiendo el título, el icono y el \textit{layout} de la página principal de la aplicación.
+\item Cargar y aplicar los estilos definidos en \texttt{estilos.css}.
+ \item Registrar la función de limpieza \verb|limpiar_carpeta| para que se ejecute automáticamente al cerrar la aplicación para limpiar el directorio de los archivos subido para el análisis evitando problemas de almacenamiento a la larga.
+\item Invocar a la función \verb|cargar_hyper_bin()| del módulo de interfaz, cuyo objetivo es renderizar todos los componentes de la UI.
+ \item Mostrar un pie de página con los logotipos de las entidades colaboradoras, cargados desde la carpeta \texttt{recursos/}.
+\end{enumerate}
+
+\subsection{Módulo de Interfaz (\texttt{interfaz.py})}
+Este módulo es responsable de toda la interfaz de usuario.
+\begin{itemize}
+ \item \textbf{\texttt{cargar\_hyper\_bin()}}: Se trata de la función principal que construye la UI. Para ello define los cargadores de archivos para las imágenes SIN y CON gotas, los botones de \textit{Procesar} y \textit{Ejecutar alineación}, y gestiona el estado de la sesión (\verb|st.session_state|) para mostrar los resultados de forma condicional. Actúa como el controlador principal que responde a las acciones del usuario y llama a las funciones del \textit{backend} para realizar las acciones correspondientes.
+\end{itemize}
+
+\subsection{Módulo de Procesamiento (\texttt{procesamiento.py})}
+Es el núcleo de la lógica de análisis de las imágenes.
+\begin{itemize}
+ \item \textbf{\texttt{aplicar\_procesamiento\_dual()}}: Actúa como una fachada (\textit{Facade Pattern}). Recibe los dos hipercubos (CON y SIN) y dirige todo el flujo de análisis: primero obtiene las máscaras iniciales, posteriormente invoca al módulo de alineamiento, deforma la imagen SIN para que coincida con la CON, y finalmente sustrae las detecciones para eliminar el ruido.
+\item \textbf{\texttt{\_obtener\_mascaras()}}: Su función es segmentar la imagen hiperespectral en hoja y posibles gotas basándose en umbrales de reflectancia predefinidos para bandas espectrales específicas. Realiza la denominada "trinarización" separando fondo de hoja y producto de hoja.
+\item \textbf{\texttt{trinarizar\_final()}}: Construye la imagen de resultado final una vez aplicados los algoritmos de superposición para reducir el ruido.
+\end{itemize}
+
+\subsection{Módulo de Alineamiento (\texttt{alignment.py})}
+Encapsula los algoritmos necesarios para la alineación automática.
+\begin{itemize}
+\item \textbf{\texttt{\_remove\_petiole()}}: Función de pre-procesado que utiliza operaciones morfológicas para eliminar el pecíolo de la máscara de la hoja (elemento de la hoja irrelevante para el análisis), permitiendo que el algoritmo se centre en el limbo.
+\item \textbf{\texttt{compute\_affine\_transform()}}: Calcula la matriz de transformación afín (serie de movimientos o transformaciones a realizar sobre una imagen para que coincidan y poder superponerlas) que alinea una imagen sobre la otra. Para ello utiliza el detector ORB sobre los bordes de las hojas y el algoritmo RANSAC para asegurar la robustez del modelo.
+\end{itemize}
+
+\section{Instalación de Herramientas Necesarias}
+Para poder ejecutar y desarrollar la aplicación, es necesario tener instaladas las siguientes herramientas en su sistema.
+
+\subsection{Python}
+\begin{enumerate}
+\item \textbf{Descarga}: Se recomienda utilizar Python 3.8 o superior. La versión probada y recomendada para este proyecto es Python 3.11. Se puede descargar el instalador desde la página oficial de Python: \url{https://www.python.org/downloads/}.
+\item \textbf{Instalación (Windows)}:
+\begin{itemize}
+\item Ejecutar el instalador descargado.
+\item \textbf{MUY IMPORTANTE}: Marcar la casilla  \textit{Add Python to PATH}  durante la instalación. Esto facilitará la ejecución de Python desde la línea de comandos.
+\item Seguir las instrucciones del instalador.
+\end{itemize}
+\item \textbf{Instalación (Linux/macOS)}:
+\begin{itemize}
+\item Python suele venir preinstalado. Para instalar versiones específicas, se recomienda usar gestores de paquetes como `apt` (Debian/Ubuntu), `brew` (macOS) o `pyenv` para gestionar múltiples versiones de Python.
+\item Ejemplo con `apt` (Ubuntu): \textit{sudo apt update \&\& sudo apt install python3.11 python3.11-venv}
+\end{itemize}
+\item \textbf{Verificación}: Abrir una terminal o línea de comandos y ejecutar: `\textit{python --version}` o `python3 --version`. Esto debería mostrar la versión de Python instalada.
+\end{enumerate}
+
+\subsection{Docker Desktop}
+Docker es una plataforma esencial para la reproducibilidad del entorno de la aplicación.
+\begin{enumerate}
+\item \textbf{Descarga}: Descargar Docker Desktop desde la página oficial: \url{https://www.docker.com/products/docker-desktop/}.
+\item \textbf{Instalación (Windows/macOS)}:
+\begin{itemize}
+\item Ejecutar el instalador y seguir las instrucciones. Requiere virtualización (Hyper-V en Windows o Virtualization.framework en macOS) que Docker Desktop suele configurar automáticamente.
+\item Asegurarse de que Docker Desktop esté en ejecución (el icono de Docker debería aparecer en la bandeja del sistema o barra de menú).
+\end{itemize}
+\item \textbf{Instalación (Linux)}:
+\begin{itemize}
+\item Seguir las instrucciones específicas para su distribución de Linux en la documentación oficial de Docker: \url{https://docs.docker.com/engine/install/}.
+\end{itemize}
+\item \textbf{Verificación}: Abrir una terminal y ejecutar: `docker --version`. Esto debería mostrar la versión de Docker instalada.
+\end{enumerate}
+
+\section{Compilación, instalación y ejecución del proyecto}
+El proyecto no requiere compilación. Los pasos para su instalación y ejecución son:
+
+\subsubsection{Método 1: Ejecución local con Python}
+\begin{enumerate}
+\item \textbf{Prerrequisitos}: Asegurarse de tener instalado Python 3.8 o superior (recomendado 3.11) y todas las herramientas mencionadas en la sección anterior.
+\item \textbf{Instalación de dependencias}: Navegar hasta la raíz del proyecto y ejecutar el siguiente comando para instalar las bibliotecas desde \texttt{src/requirements.txt}:
+\begin{verbatim}
+pip install -r src/requirements.txt
+\end{verbatim}
+\item \textbf{Ejecución}: Ejecutar la aplicación con uno de los siguientes métodos:
+\begin{itemize}
+\item Usando el script por lotes (solo en Windows):
+\begin{verbatim}
+cd src
+.\lanzar_app.bat
+\end{verbatim}
+\item Usando el comando de Streamlit directamente desde la raíz del proyecto:
+\begin{verbatim}
+streamlit run src/main.py
+ \end{verbatim}
+ \end{itemize}
+\end{enumerate}
+
+\subsubsection{Método 2: Ejecución con Docker (Recomendado para reproducibilidad)}
+\begin{enumerate}
+ \item \textbf{Prerrequisitos}: Tener Docker Desktop instalado y en ejecución.
+ \item \textbf{Construcción de la imagen}: Desde la raíz del proyecto, ejecutar:
+ \begin{verbatim}
+docker build -t dig4vitis-app src/
+\end{verbatim}
+ \item \textbf{Ejecución del contenedor}: Una vez construida la imagen, ejecutar:
+ \begin{verbatim}
+docker run -p 8501:8501 dig4vitis-app
+ \end{verbatim}
+ La aplicación estará disponible en el navegador en la dirección \url{http://localhost:8501}.
+\end{enumerate}
+
+\section{Pruebas del sistema}
+Debido a la naturaleza visual e interactiva del proyecto, las pruebas realizadas se centraron en validaciones independientes de las funciones tanto por parte del desarrollador como por parte de expertos versados en el tema para poder verificar que los resultados obtenidos son correctos o factibles. No se desarrolló una suite de pruebas unitarias automatizadas.
+
+El proceso de pruebas manuales consistió en:
+\begin{itemize}
+\item \textbf{Pruebas de Carga}: El primer aspecto a verificar es la correcta subida de los archivos (par de ficheros .bil y .bil.hdr). Además de comprobar la robustez del programa frente a archivos erróneos o corruptos verificando que se mostraban los mensajes de error pertinentes para avisar al usuario de posibles errores en la carga de dichos archivos.\imagen{carga_erronea1}{mensaje en caso de que ambas imágenes no sean de la misma hoja.}{1}
+\item \imagen{carga_erronea2}{mensaje en caso de que el formato de los archivos subidos no sean los adecuados.}{1}
+
+ \item \textbf{Pruebas de Procesamiento y Análisis}: Se utilizó un conjunto de imágenes de muestra para ejecutar el flujo completo. Se inspeccionaron visualmente los resultados en cada paso:
+\begin{itemize}
+ \item Correcta generación de las previsualizaciones RGB y trinarizadas base.
+ \item Calidad de la superposición de alineamiento para confirmar que el algoritmo ORB funcionaba correctamente.
+\item Coherencia del resultado final, verificando que el ruido era eliminado eficazmente en la imagen trinarizada automática.
+\end{itemize}
+Estas pruebas fueron supervisadas por expertos para poder verificar la coherencia y factibilidad de los resultados obtenidos.
+
+\item \textbf{Pruebas de funcionamiento de algoritmos:} para verificar el correcto funcionamiento del sistema de eliminación de  ruido por diferencia se realizó un análisis en el que se subieron dos imágenes iguales. Si el algoritmo funciona correctamente, el resultado del análisis debería ser de un porcentaje de recubrimiento de 0\%. Se verificó que el resultado era correcto verificando la hipótesis. 
+
+\item \textbf{Pruebas de Interfaz y Usabilidad}: Por último, se llevó a cabo una revisión de todos los componentes de la interfaz donde se verificó su correcto funcionamiento asegurando que estos se comportaban de la manera esperada, además de verificar que la navegación por la UI es intuitiva.
+
+\end{itemize}

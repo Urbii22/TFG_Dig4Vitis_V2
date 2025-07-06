@@ -1,0 +1,153 @@
+\apendice{Anexo: Documentación de Usuario}
+\label{apendice:usuario}
+
+\section{Introducción}
+En este apartado se detallarán y explicarán los requisitos necesarios para la ejecución de la aplicación así como los detalles de como instalar todas las herramientas necesarias y una guía que sirva como base para la utilización de la aplicación.
+
+\section{Requisitos de usuario}
+Los requisitos necesarios para poder ejecutar la aplicación son:
+
+\begin{itemize}
+\item \textbf{Equipo}: Un ordenador personal (Windows, macOS o Linux). Se recomienda un equipo moderno, ya que el procesamiento de imágenes hiperespectrales puede consumir una cantidad considerable de recursos como memoria RAM.
+\item \textbf{Software}: Un navegador web actualizado (como Google Chrome, Mozilla Firefox o Microsoft Edge). Para la instalación se necesitará software adicional (ver sección siguiente).<
+\item \textbf{Datos}: Debes tener preparadas las imágenes hiperespectrales que deseas analizar. Para elo se requiere, para cada muestra de hoja, dos pares de ficheros en formato ENVI:
+\begin{itemize}
+\item Un fichero de datos con extensión \texttt{.bil}.
+\item Un fichero de cabecera con extensión \texttt{.hdr}.
+\end{itemize}
+Necesitarás un par de estos ficheros para la imagen de la hoja \textbf{SIN tratamiento} y otro par para la hoja \textbf{CON tratamiento}.
+\end{itemize}
+
+\section{Instalación y Ejecución}
+Para poder ejecutar la aplicación, sigue estos pasos en orden.
+
+\subsection{Paso 1: Instalar el software previo (Git)}
+Antes de nada, es imprescindible tener instalado \textbf{Git}, una herramienta que nos permitirá descargar el código del proyecto.
+
+\begin{itemize}
+    \item \textbf{En Windows}:
+    \begin{enumerate}
+        \item Dirígete a la página oficial de Git: \url{https://git-scm.com/download/win}.
+        \item Descarga y ejecuta el instalador. Puedes aceptar las opciones por defecto durante la instalación.
+    \end{enumerate}
+    
+    \item \textbf{En macOS}:
+    \begin{enumerate}
+        \item Abre la aplicación "Terminal".
+        \item Escribe el comando \texttt{git --version} y pulsa Enter.
+        \item Si Git no está instalado, el sistema te ofrecerá automáticamente instalar las \textit{Command Line Developer Tools}. Acepta para completar la instalación.
+    \end{enumerate}
+    
+    \item \textbf{En Linux (Debian/Ubuntu)}:
+    \begin{enumerate}
+        \item Abre una terminal.
+        \item Ejecuta los siguientes comandos:
+        \begin{verbatim}
+sudo apt update
+sudo apt install git
+        \end{verbatim}
+    \end{enumerate}
+\end{itemize}
+
+\subsection{Paso 2: Descargar el código de la aplicación}
+Con Git ya instalado, puedes obtener el código fuente. Éste se encuentra en el repositorio: \url{https://github.com/Urbii22/TFG_Dig4Vitis_V2}.
+
+\paragraph{Opción A (Recomendada): Clonar con Git}
+\begin{enumerate}
+    \item Abre una terminal (Símbolo del sistema o PowerShell en Windows).
+    \item Navega con el comando \texttt{cd} hasta la carpeta donde quieras guardar el proyecto (ej. \texttt{cd Desktop}).
+    \item Ejecuta el siguiente comando:
+    \begin{verbatim}
+git clone https://github.com/Urbii22/TFG_Dig4Vitis_V2.git
+    \end{verbatim}
+    Esto creará una carpeta llamada \texttt{TFG\_Dig4Vitis\_V2} con todos los archivos.
+\end{enumerate}
+
+\paragraph{Opción B: Descargar como .ZIP}
+\begin{enumerate}
+    \item Desde la página web del repositorio, haz clic en el botón verde \textbf{<> Code} y selecciona \textbf{Download ZIP}.
+    \item Una vez descargado, \textbf{descomprime el archivo .zip} en la ubicación que prefieras.
+\end{enumerate}
+
+\subsection{Paso 3: Ejecutar la aplicación}
+Una vez tienes el código, elige uno de los dos métodos siguientes para lanzar la aplicación.
+
+\subsection{Método 1: Ejecución con Docker (Recomendado)}
+Este método funciona en cualquier sistema operativo (Windows, macOS, Linux).
+\begin{enumerate}
+\item \textbf{Instalar Docker}: Descarga e instala Docker Desktop desde su página web oficial: \url{https://www.docker.com/products/docker-desktop/}.
+\item \textbf{Abrir una terminal}: Abre una ventana de terminal (Símbolo del sistema o PowerShell en Windows, Terminal en macOS/Linux).
+\item \textbf{Navegar a la carpeta del proyecto}: Usa el comando \texttt{cd} para situarte en la carpeta donde has descomprimido el proyecto.
+\item \textbf{Construir la imagen de la aplicación}: Ejecuta el siguiente comando. Este proceso solo es necesario la primera vez y puede tardar varios minutos.
+\begin{verbatim}
+docker build -t ecovid-app src/
+\end{verbatim}
+\item \textbf{Ejecutar la aplicación}: Una vez construida la imagen, ejecuta este comando para iniciar la aplicación:
+\begin{verbatim}
+docker run -p 8502:8502 ecovid-app
+\end{verbatim}
+\item \textbf{Abrir la aplicación}: Abre tu navegador web y ve a la dirección \url{http://localhost:8502}.
+\end{enumerate}
+
+\subsection{Método 2: Ejecución local (Para usuarios de Windows)}
+Este método utiliza un script para facilitar el lanzamiento.
+\begin{enumerate}
+\item \textbf{Instalar Python}: Si no lo tienes, instala Python (versión 3.8 o superior, recomendada 3.11) desde \url{https://www.python.org/}. Asegúrate de marcar la casilla \textit{Add Python to PATH} durante la instalación.
+\item \textbf{Instalar dependencias}: Abre una terminal en la carpeta del proyecto (sitúate en la carpeta del proyecto en el explorador de archivos, click derecho con el ratón y seleccionar la opción \textit{abrir terminal aquí} o similar, o bien abre una terminal y navega hasta la ubicación del proyecto como se ha descrito con anterioridad) y ejecuta el siguiente comando para instalar las librerías necesarias:
+\begin{verbatim}
+pip install -r src/requirements.txt
+\end{verbatim}
+\item \textbf{Lanzar la aplicación}: Navega hasta la carpeta \texttt{src} y haz doble clic en el archivo \texttt{lanzar\_app.bat}, o bien navega con la terminal hasta la carpeta \texttt{src/} del proyecto y ejecuta el comando:
+\begin{verbatim}
+streamlit run main.py
+\end{verbatim}
+\item Se abrirá una ventana de terminal y, tras unos segundos, la aplicación aparecerá en tu navegador web.
+\end{enumerate}
+
+
+En el caso de que el sistema operativo no sea WINDOWS para lanzar la aplicación a través de la línea de comandos será necesario realizarlo mediante el comando 
+\begin{verbatim}
+streamlit run main.py
+\end{verbatim}
+dentro de la carpeta \texttt{src/} del proyecto.
+
+\section{Manual del usuario}
+La interfaz de la aplicación está diseñada para guiarte a través de un proceso de 4 pasos.
+
+Cuando ejecutes la aplicación verás una interfaz como la siguiente:
+\imagen{home1}{Interfaz principal de la aplicación una vez ejecutada}{1}
+
+En ella verás dos pestañas diferentes, la primera que es la que está por defecto la aplicación en si donde se puede realizar el análisis mientras que la segunda pestaña es un \textit{Acerca del TFG} donde se detallan todos los aspectos relevantes a la aplicación como cual es su objetivo y un breve resumen de su utilización
+
+\subsubsection{Paso 1: Carga de las imágenes}
+Al abrir la aplicación, verás la pantalla principal.
+\begin{itemize}
+\item En la sección \textit{1. Carga de imágenes hiperespectrales}, encontrarás dos recuadros de carga.
+\item En el recuadro de la izquierda, sube los dos ficheros (\texttt{.bil} y \texttt{.hdr}) de la hoja sin tratamiento. Para ello podrás tanto pulsar y seleccionarlos desde el explorador de archivos o arrastar dentro del recuadro si así lo deseas.
+\item En el recuadro de la derecha sube los dos ficheros de la hoja con tratamiento. Con el mismo procedimiento que para el caso anterior
+\item Si los ficheros se han cargado correctamente verás una imagen como la siguiente:
+\end{itemize}
+
+\imagen{cargaCorrecta}{imagen de la interfaz una vez los archivos se han subido correctamente}{1}
+\subsubsection{Paso 2: Procesamiento y previsualización}
+\begin{itemize}
+\item Una vez cargados los cuatro ficheros, haz clic en el botón naranja \textbf{Iniciar procesamiento}.
+\item La aplicación procesará los datos y, en la sección "2. Resultados del Análisis mostrará el resultado final en formato imagen de la detección del producto sobre la hoja e indicará el porcentaje de recubrimiento calculado.\imagen{resultado1}{Sección de resultados del análisis}{1} Se permitirá en caso de desearlo descargar la imagen trinarizada en formato PNG.
+
+\end{itemize}
+
+\subsubsection{Paso 3: visualización de pasos intermedios:}
+Una vez finalizado el análisis si el usuario lo requiere en la parte inferior, debajo de la imagen trinarizada, puede pulsar sobre el desplegable  \textit{Ver detalles y descargas adicionales}. En este desplegable podrá ver tanto la alineación automática realizada como las imágenes subidas en un primer momento (con y sin gotas) tanto en formato RGB como trinarizadas.
+\imagen{superposicion1}{Imagen donde se muestra el resultado de la superposición automática}{0.75}
+
+\imagen{comparargb1}{Comparación de ambas imágenes subidas inicialmente en formato RGB}{1}
+\imagen{comparatrin1}{Comparación de ambas imágenes subidas inicialmente trinarizadas}{1}
+
+
+\subsubsection{Paso 4:  Descargar los resultados}
+Una vez finalizado el análisis se pueden descargar las imágenes trinarizadas resultantes, tanto la de resultado final, mediante el botón debajo del porcentaje de recubrimiento calculado, así como las trinarizadas de los archivos subidos (con y sin gotas) mediante los botones en la parte inferior de la aplicación.
+\imagen{botonesdescarga1}{Botones para descargar las trinarizadas de los archivos subidos}{1}
+
+\subsubsection{Paso 5:  visitar la pestaña Acerca del TFG}
+Si así lo desea antes o después del análisis podrá pulsar en la pestaña de \textit{Acerca del TFG} en la parte superior de la aplicación para obtener algo mas de información sobre el trabajo y la aplicación.
+\imagen{acercaDe1}{Pestaña Acerca del TFG}{1}

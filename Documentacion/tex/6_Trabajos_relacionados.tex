@@ -1,0 +1,30 @@
+\capitulo{6}{Trabajos relacionados}
+
+A continuación se van a presentar otras tesis o trabajos que utilizan herramientas similares a las empleadas en el desarrollo de este proyecto así como algunos que comparten objetivos comunes o similares.
+
+\section{Hyperspectral images analysis}
+
+Este artículo describe \cite{romangonzalez:hal-00935014} de manera general que son las imágenes hiperespectrales, exponiendo conceptos teóricos como su definición o posibles aplicaciones además de tratar los diferentes métodos de obtención y procesamiento.
+
+Sirve como punto de partida de muchos de los temas descritos a lo largo de esta memoria como las diferentes definiciones de los componentes de una imagen hiperespectral. También realiza una gran descripción de los diferentes métodos que existen para la obtención de estas imágenes así como sus posibles aplicaciones.
+
+
+
+\section{UAV-Based Remote Sensing Technique to Detect Citrus Canker Disease Utilizing Hyperspectral Imaging and Machine Learning}
+
+En el trabajo de Abdulridha et al. \cite{rs11111373}, se desarrolló y evaluó una técnica de teledetección para la detección del chancro de los cítricos, una enfermedad causada por la bacteria \textit{Xanthomonas citri subsp. citri}. El objetivo principal fue detectar la enfermedad en hojas y frutos inmaduros de la variedad 'Sugar Belle' en diferentes estadios (asintomático, temprano y tardío), tanto en condiciones de laboratorio como en campo mediante un vehículo aéreo no tripulado (UAV). 
+
+Para ello, se utilizó un sistema de imagen hiperespectral en el rango de 400-1000 nm. Los datos espectrales se analizaron comparando dos métodos de clasificación de aprendizaje automático: la Red Neuronal de Función de Base Radial (RBF) y el K-Nearest Neighbor (KNN). Además, se evaluó la eficacia de 31 índices de vegetación para identificar la enfermedad.
+
+\imagen{deteccion_enferemdad}{Imagen que muestra y resalta la detección de la enfermedad (c) sobre las hojas }{1}
+
+ Los resultados demostraron una alta capacidad de detección en hojas. En laboratorio, se alcanzó una precisión de clasificación de hasta el 96\% con el método RBF y 94\% con KNN para diferenciar hojas sanas de hojas en estado asintomático. Sin embargo, la detección temprana en frutos inmaduros no resultó fiable, obteniendo una precisión baja (47\% con RBF) en la fase asintomática. A pesar de ello, la técnica sí logró identificar los frutos en la fase tardía de la enfermedad con un 92\% de precisión. 
+
+
+ 
+\section{Estudio Comparativo de Técnicas de Clasificación de Imágenes Hiperespectrales}
+Una de las áreas más exploradas en el tratamiento de imágenes hiperespectrales es la asignación a  cada pixel con una etiqueta correspondiente a una clase predefinida (por ejemplo, minerales, tipos de cultivo o zonas urbanas). A esto se le denomina clasificación supervisada.
+
+ En el \textit{Estudio Comparativo de Técnicas de Clasificación de Imágenes Hiperespectrales} de Paoletti et al. \cite{Paoletti_Haut_Plaza_Plaza_2019}, se realiza una revisión exhaustiva de los algoritmos más comunes para esta tarea. En el artículo se compara el rendimiento de distintos métodos como las máquinas de Vectores de Soporte (SVM), Random Forest (RF) y diversas arquitecturas de redes neuronales (MLP, CNN). Se destaca que, si bien todos los métodos expuestos son viables y muy potentes para la caracterización de materiales con firmas espectrales distintas su resultado depende en gran medida de los datos disponibles para su entrenamiento entre otros factores.
+\imagen{teledeteccion}{imagen donde se presenta distintos mapas de clasificación de una porción de terreno}{1}
+ Este enfoque si bien es fundamental en la teledetección propone una alternativa diferente a la aplicada en el desarrollo del presente proyecto. La clasificación Supervisada busca diferenciar entre clases heterogéneas (ej. soja vs. maíz) donde ambas clases son sustancialmente diferentes entre sí, nuestro proyecto se enfrenta a un reto de detección de cambios sutiles en vez de la identificación de clases planteadas en el artículo. Por este motivo se optó por una metodología diferencial y geométrica basada en la alineación de imágenes que no requiere entrenamiento previo en vez de un clasificador estadístico.

@@ -1,0 +1,115 @@
+\apendice{Anexo: Especificación de Diseño}
+\label{apendice:diseno}
+
+\section{Introducción}
+En este apartado se explicará el diseño de los datos y la arquitectura de la aplicación, detallando cómo se estructuran y comunican los diferentes componentes del software desarrollado para el proyecto.
+
+\section{Diseño de datos}
+En la aplicación no se han usado ninguna base de datos. La aplicación trabaja con imágenes hiperespectrales y los datos incluidos en ellas. El manejo de estos datos se realiza de manera temporal mediante los estados de sesión de Streamlit (\verb|st.session_state|) asociados a la sesión de usuario de tal manera que una vez finaliza la sesión y el usuario cierra la aplicación,  los datos empleados se eliminan. De esta manera se consigue una experiencia de usuario fluida con tiempos de carga intermedios (una vez subidas las imágenes por primer vez) reducidos y un uso fluido de la aplicación.
+
+Los estados de sesión clave que utiliza la aplicación son:
+\begin{itemize}
+    \item \textbf{processed}: Variable de tipo Booleano (verdadero o falso) que se activa ('True' o Verdadero) una vez que el usuario ha subido las imágenes y pulsa el botón para iniciar el procesado de las imágenes. De esta manera se controla las previsualizaciones, haciendo que los paso siguientes solo se muestren al usuario en el caso de que haya datos cargados.
+    \item \textbf{cube\_sin} y \textbf{cube\_con}: Su objetivo es almacenar los objetos de datos hiperespectrales, denominados hipercubos, obtenidos a partir de las imágenes en formato ENVI proporcionadas por el usuario para las muestras CON gotas y SIN gotas respectivamente. Estos datos son la base principal para todo el procesamiento posterior y detección del producto sobre las hojas.
+    \item \textbf{rgb\_sin} y \textbf{rgb\_con}: Se encargan de almacenar las imágenes en formato RGB obtenidas a partir de los hipercubos proporcionados por el usuario. Permitiendo la visualización de las mismas en la aplicación.
+    \item \textbf{trin\_sin} y \textbf{trin\_con}: Almacenan respectivamente los resultados de segmentación básica o la trinarización para ambas imágenes. Separando el fondo de la hoja y la hoja del producto anterior a la aplicación de reducción de ruido y alineamiento automático de ambas imágenes.
+\end{itemize}
+
+\section{Diseño arquitectónico}
+En cuanto a la estructura de la aplicación web se puede describir mediante un patrón \textbf{Frontend-Backend}. De esta manera quedan separadas claramente y diferenciadas la interfaz de usuario (\textbf{frontend}) de la lógica de procesamiento de los datos (\textbf{backend}). Si bien es cierto que este patrón comparte en gran medida características propias de un patrón \textbf{Modelo-Vista-Controlador}, la división en dos capas proporcionada por el modelo empleado es más directa en el caso de una aplicación web desarrollada mediante Streamlit.
+
+\subsection{Frontend (Capa de Presentación y Control)}
+La capa de interfaz de usuario ha sido construida al completo sobre la biblioteca Stremlit facilitando de esta manera su implementación y su integración en la aplicación web desarrollada. Se define en los ficheros \texttt{src/main.py} y \texttt{src/funciones/interfaz.py}. Las principales responsabilidades asociadas a esta capa son:
+\begin{itemize}
+    \item \textbf{Vista}: Encargada de la renderización de todos los componentes visuales de la aplicación como son los títulos, las distintas columnas, las imágenes y logotipos de la aplicación,  los cargadores de archivos (\verb|st.file_uploader|), los botones (\verb|st.button|) y las imágenes de resultados (\verb|st.image|).
+    \item \textbf{Controlador}: su objetivo es la gestión los eventos producidos por el usuario al interactuar con la aplicación. En cuanto a su lógica se basa en la captura de los eventos producidos al pulsar los botones (p. ej., \verb|if st.button(...):|). Dicha lógica es condicional y actúa como controlador capturando esos eventos, y llamando a las funciones correspondientes de la capa del Backend para realizar las acciones o análisis pertinentes. 
+
+\end{itemize}
+
+\subsection{Backend (Capa de Lógica y Datos)}
+Esta capa agrupa toda la funcionalidad de negocio y las acciones referentes al análisis y procesamiento de las imágenes. Dentro de esta capa cada una de las funcionalidades implementadas está en su módulo correspondiente facilitando la legibilidad del código así como la reutilización de dichos módulos de una manera más sencilla, haciendo además que las modificaciones a realizar sean más sencillas de implementar previniendo posibles errores o bugs o ayudando a su detección. Dichos módulos se encuentran dentro de la carpeta \texttt{src/funciones/} 
+
+\begin{itemize}
+    \item \textbf{Gestión de Archivos} (\texttt{archivos.py}): Este módulo contiene aquellas funciones referentes a la carga y almacenamiento temporal de los archivos subidos por el usuario. También se encarga de limpiar el disco una vez la sesión termina para evitar problemas con el almacenamiento debido al gran tamaño de las imágenes con las que se trabaja.
+    \item \textbf{Procesamiento de Imágenes} (\texttt{procesamiento.py}): Este módulo incluye todas las funciones e implementaciones referentes al análisis de las imágenes. Es el núcleo de la aplicación donde se agrupan la mayoría de las funciones más relevantes para el desarrollo del proyecto. Incluye funciones para:
+        \begin{itemize}
+            \item Obtener las máscaras de hoja y producto a partir de bandas espectrales específicas definidas en el código (\verb|_obtener_mascaras|).
+            \item Generar las imágenes trinarizadas separando fundo de la hoja y producto de la hoja  (\verb|_trinarizar|, \verb|trinarizar_final|).
+            \item Se encarga también de gestionar el flujo completo de análisis dual, que incluye el alineamiento y la sustracción de ruido (\verb|aplicar_procesamiento_dual|).
+        \end{itemize}
+    \item \textbf{Alineamiento de Imágenes} (\texttt{alignment.py}): Este módulo contiene todos los aspectos referentes a la lógica de implementación y aplicación del algoritmo ORB para alinear las dos imágenes (CON y SIN gotas). Dentro de sus funciones destacan principalmente la eliminación del peciolo (aspecto irrelevante de la hoja para el análisis que causaba problemas a la hora de aplicar la alineación y superposición) aislando el limbo de la hoja (\verb|_remove_petiole|). También contiene la lógica referente al cálculo de la matriz de transformación afín usando ORB y RANSAC para obtener una alineación y superposición automática precisa.
+
+\end{itemize}
+
+
+Esta separación clara facilita el mantenimiento, la reutilización del código y la posibilidad de cambiar el \textit{frontend} en el futuro sin alterar la lógica de procesamiento del \textit{backend}.
+
+\subsection{Patrones de Diseño y Principios Arquitectónicos}
+Además de la separación \textit{Frontend}-\textit{Backend}, la arquitectura del proyecto se beneficia de la aplicación de varios patrones y principios de diseño que mejoran su calidad, facilitando su mantenimiento, reutilización y futura escalabilidad de la aplicación.
+
+\subsubsection{Patrón Módulo (Module Pattern)}
+La clara organización del proyecto en módulos diferenciados donde cada fichero \texttt{.py} dentro de \texttt{src/funciones/} agrupa un conjunto de responsabilidades cohesivas.
+\begin{itemize}
+    \item \texttt{interfaz.py}: Define la interfaz de usuario.
+    \item \texttt{procesamiento.py}: Contiene la lógica principal del análisis hiperespectral.
+    \item \texttt{alignment.py}: Encapsula los algoritmos específicos para el alineamiento de imágenes.
+    \item \texttt{archivos.py}: Gestiona la lectura y escritura de ficheros.
+\end{itemize}
+Este patrón es fundamental para la separación de intereses (\textit{Separation of Concerns}). Facilitando también la legibilidad y comprensión del código de cara a futuras mejoras o modificaciones por parte de otros programadores.
+
+\begin{itemize}
+    \item \textbf{Impacto en el Mantenimiento}: Esta división en módulos tiene como consecuencia una fácil depuración del código en caso de errores o bugs. Por ejemplo en el caso de que la alineación de imágenes no funcione como se espera, el programador sabe que en una gran probabilidad el problema se encuentre en el módulo referente a la alineación \texttt{alignment.py}. Ahorrando de esta manera tiempo y esfuerzo al no tener que revisar el código completo para encontrar el problema, sobre todo en casos donde el programador no es el escritor original del código.
+
+    \item \textbf{Impacto en la Escalabilidad}: De igual manera este enfoque modular permite que a la hora de añadir nuevas funcionalidades estas se puedan desarrollar e implementar de manera aislada sin impactar o modificar código ya existente referente a otras funciones evitando crear conflictos indeseados. En el supuesto caso en el que en el futuro se quiera implementar una nueva funcionalidad, ésta se puede implementar de manera individual en un nuevo módulo sin modificar o afectar a las funcionalidades ya desarrolladas, solo habría modificar la llamada desde el controlador para que incluya a la nueva funcionalidad.
+\end{itemize}
+
+\subsubsection{Patrón Fachada (Facade Pattern)}
+Este patrón se puede observar en la función \verb|aplicar_procesamiento_dual()| dentro del módulo \texttt{procesamiento.py}. Esta función actúa como una fachada, es decir proporciona una interfaz simple sobre un sistema mucho más complejo. De esta manera el cliente ( en el caso actual sería el código del controlador en \texttt{interfaz.py}) solo necesita llamar a una única función (pasando las dos imágenes) y es esta función la que se encarga de distribuir las tareas a realizar entre el resto de tareas como por ejemplo obtener las máscaras, realizar los recortes, eliminar el peciolo, entre otras. Así se le proporciona al cliente una abstracción del sistema ocultando estos detalles concretos y simplificando aparentemente el proceso.
+
+\begin{itemize}
+    \item \textbf{Impacto en el Mantenimiento}: Este desacoplamiento entre el cliente (\textit{Frontend}) y el subsistema de procesamiento (\textit{Backend}) permite que se puedan realizar modificaciones a alguna de las funcionalidades como mejorar algoritmos o implementar nuevos sin tener un impacto sobre el aspecto visual de la interfaz de usuario, y viceversa. Facilitando las tareas de mantenimiento o simplificando la implementación de nuevas funcionalidades.
+
+    \item \textbf{Impacto en la Escalabilidad}: Del mismo modo en el caso de que se detectasen cuellos de botella en alguna de las funciones implementadas y se desease mejorarlas para hacerlas más eficientes se podría sustituir el subsistema de procesamiento detrás de la fachada por uno más eficiente o mejorado sin afectar al resto de la aplicación mejorando así la escalabilidad del proyecto.
+\end{itemize}
+
+\subsubsection{Gestión de Estado Centralizado (Centralized State Management)}
+Aunque no se trate de un patrón de diseño clásico de GoF, al usar \verb|st.session_state| en Streamlit, actúa como un patrón de \textit{Registro} o \textit{Singelton de Sesión} proporcionando un único lugar centralizado donde se almacena el estado compartido de la sesión.
+
+De esta manera en vez de tener que pasar los datos necesarios para al aplicación como los hipercubos o las imágenes procesadas mediante múltiples llamadas a las funciones de la interfaz, estos datos se guardan en \verb|st.session_state| y se recuperan cuando es necesario.
+
+\begin{itemize}
+    \item \textbf{Impacto en el Mantenimiento}: La aplicación de este patrón simplifica en gran medida el flujo de datos de la aplicación. Además, hace que el estado de la aplicación sea predecible y fácil de rastrear reduciendo así la complejidad de la aplicación y la probabilidad de errores debido a que no se tiene que pasar el estado explícitamente entre componentes.
+
+    \item \textbf{Impacto en la Escalabilidad}: También el hecho de tener un gestor de estado centralizado hace que si la aplicación crece añadiendo nuevos pasos o funcionalidades tiene como consecuencia que evita que la lógica de la aplicación no se vuelva inmanejable.
+\end{itemize}
+
+\section{Guía de estilo}
+Se ha definido la apariencia visual de la aplicación \textbf{EcoVid} para que la experiencia de usuario al usarla sea lo más coherente y profesional posible, manteniendo la consistencia de la gama de colores y formas durante todo el uso de la aplicación. La guía de estilo empleada está enfocada en un ambiente profesional de análisis de datos.
+
+
+\subsection{Colores y Tipografía}
+El estilo visual se ha definido en el fichero \texttt{src/estilos.css} mediante el lenguaje CSS para la definición de los aspectos visuales y de disposición de la aplicación web. El tema empleado en la aplicación ha sido un tema oscuro, ayudando de esta manera a reducir la fatiga visual durante largas sesiones o ambientes con poca luminosidad.
+
+\begin{itemize}
+    \item \textbf{Fondo}: Se usa un color gris muy oscuro (`\#161616`) para el fondo general de la aplicación. 
+    \imagen{negro}{imagen del color usado para el fondo así como sus valores RGB entre otros}{0.5}
+    \item \textbf{Color Primario}: Un naranja fuerte  (\#D9895B) se utiliza para los elementos destacados como títulos y el borde de la zona de carga de archivos. Los botones usan un gradiente de este mismo naranja. La selección de este color viene motivada por la representación del cobre que tiene un color similar haciendo que en todo momento esté presente este elemento fundamental dentro del trabajo. 
+\imagen{cobre1}{imagen del color primario usado para los elementos de la interfaz así como sus valores RGB entre otros}{0.5}
+\item \textbf{Color Secundario}: Un naranja suave (\#E0A17E) a modo de variación del color principal que mantiene el esquema de colores cobrizos de la aplicación, pero en un tono más difuminado usado como contraste para algunos de los detalles de la aplicación.\imagen{cobre2}{imagen del color secundario usado para los elementos de la interfaz así como sus valores RGB entre otros}{0.5}
+
+    \item \textbf{Texto}: El color del texto principal es un blanco (\#EAEAEA). De esta manera se asegura un contraste adecuado del texto sobre el fondo mejorando así su legibilidad y mejorando la experiencia de usuario.
+    \imagen{blanco}{imagen del color usado para el texto así como sus valores RGB entre otros}{0.5}
+    \item \textbf{Tipografía}: La fuente principal es 'Segoe UI', con alternativas estándar Sans Serif como Tahoma y Verdana. Estas fuentes han sido elegidas buscando una buena legibilidad de los carteles y datos dentro de la aplicación. [ejemplo tipografía]
+\end{itemize}
+
+\subsection{Nombre e Iconografía}
+\begin{itemize}
+    \item \textbf{Nombre}: El nombre de la aplicación es \textbf{EcoVid}. Este nombre refleja una solución que ayuda con la sostenibilidad de los cultivos de vid. 
+
+    \item \textbf{Iconografía}: Se ha diseñado un logotipo donde el elemento principal es un racimo de uvas, y a modo de detalle en las hojas de las mismas se han incluido tonos rojizos que hacen referencia al cobre, principal elemento a detectar con la aplicación. Este logotipo refleja el ámbito al que pertenece la aplicación.  En la interfaz se prioriza el uso de etiquetas de texto claras e iconos para describir las acciones, manteniendo un diseño limpio y funcional. \imagen{logotipo}{ Logotipo diseñado para la aplicación}{0.75}Además, se han incluido en los botones una serie de emoticonos los cuales ayudan con la identificación de la acción que realiza cada uno de ellos facilitando así su comprensión, además de mejorar la usabilidad general de la aplicación.\imagen{uso_emojis}{Ejemplo de utilización de los emoticonos en los botones}{1}
+
+    \item \textbf{Logotipos}: En el pie de página se muestran los logotipos de las entidades colaboradoras o financiadoras del proyecto, como la Unión Europea, la Universidad de Burgos (UBU) y el grupo de investigación GICAP. 
+\end{itemize}
+
+
+

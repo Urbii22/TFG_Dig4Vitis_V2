@@ -1,0 +1,38 @@
+\capitulo{7}{Conclusiones y Líneas de trabajo futuras}
+
+Una vez finalizado el desarrollo del proyecto, se puede afirmar  a modo de conclusión que se han cumplido todos los objetivos impuesto tanto al inicio del mismo como durante las diferentes fases del desarrollo. Este capítulo presenta una síntesis de los logros alcanzados así como las contribuciones técnicas más significativas y una reflexión sobre los desafíos superados. A modo de conclusión se proponen las líneas de trabajo futuras que se abren a partir de los resultados obtenidos. 
+
+\section{Conclusiones:}
+A lo largo del desarrollo del proyecto se han ido cumpliendo con éxito los objetivos planteados, culminando en el desarrollo de una solución de software funcional, robusta y válida, a modo de aplicación web interactiva para el análisis de la eficiencia de tratamientos fitosanitarios en viñedos. Dicha aplicación posee la capacidad de cuantificar de manera precisa y repetible el porcentaje de recubrimiento de productos con base de cobre sobre hojas de vid, abordando un problema relevante en el campo de la agricultura de precisión.
+
+Como principal contribución del proyecto destaca la validación de una metodología completa desde la obtención y gestión de datos hiperespectrales hasta la reducción de ruido mediante un enfoque de visión por computador. Se ha demostrado que la estrategia de emplear una imagen de control para obtener las variaciones de reflectancia inherentes a la hoja  implementada para la reducción de falsos positivos es un método eficaz que mejora de manera considerable los resultados obtenidos.
+
+La aplicación desarrollada no solo proporciona como resultado un valor numérico sino que ofrece una interfaz intuitiva y la posibilidad de visualizar de manera clara los resultados a modo de imagen trinarizada, consolidándose de esta manera como una base sólida con aplicabilidad en entornos de  investigación y con un claro potencial de evolución hacia soluciones de campo.
+
+El desarrollo de la aplicación ha implicado la superación de desafíos técnicos significativos cuyas soluciones constituyen el núcleo de la ingeniería de este proyecto:
+
+\begin{enumerate}
+
+\item El principal obstáculo fue la alta variabilidad espectral de la superficie de la hoja. Generando un número considerable de falsos positivos, confundiendo el producto aplicado con la textura natural de la hoja. Para solventarlo  se decidió implementar un enfoque diferencial, utilizando para ello una hoja sin tratamiento como imagen de control sobre la que identificar los patrones y las formaciones de la hoja que creaban los falsos positivos. Este enfoque permite medir y sustraer el ruido específico de cada muestra ofreciendo una precisión difícilmente alcanzable con filtros genéricos.
+
+\item Si bien el enfoque de la estrategia diferencial es acertado, solo es viable en el caso de que la superposición de la imagen de control y la imagen con tratamiento es perfecta. Para superar este obstáculo fue diseñado un pipeline de alineación totalmente automático empleando la detección de bordes mediante el algoritmo Canny, el emparejamiento de características con ORB y la estimación de la matriz de transformación afín mediante RANSAC. Esta implementación demostró ser clave para garantizar una alineación a nivel sub-pixel, precisa y repetible, convirtiendo de esta manera un  proceso manual inviable en una operación automática, fiable y repetible.
+\end{enumerate}
+
+
+En términos personales gracias al desarrollo de este proyecto he adquirido conocimientos sobre los procesos y las técnicas para desarrollar una solución de ingeniería a un problema real, desde la identificación del problema, hasta la construcción de un producto que cumpla los requisitos necesarios para ser aplicado en el mundo real. Durante este proceso no solo he evolucionado como desarrollador sino que me ha aportado una visión cítrica del trabajo a realizar siendo capaz de identificar posibles problemas antes de que lleguen a ocurrir convirtiéndome en un desarrollador más completo y crítico. 
+Otro aspecto esencial adquirido durante el proyecto ha sido la comunicación precisa y correcta de las dificultades encontradas durante el transcurso del proyecto con los tutores, dando indicaciones concretas y fundamentadas de los problemas originados durante el proyecto, facilitando así su posterior subsanación.
+
+
+
+\section{Líneas de trabajo futuras:}
+
+El sistema desarrollado si bien es una solución completa para el problema planteado, establece las bases para futuras investigaciones y mejoras que podrían resultar en una amplificación significativa del impacto y alcance de la aplicación.
+
+Actualmente la aplicación esta optimizada para compuestos con base de cobre. Una evolución natural del proyecto seria extender esta funcionalidad a la detección de más compuestos convirtiendo así el sistema en una plataforma más flexible. Esto implicaría el desarrollo de una interfaz de usuario avanzada que permita modificar al usuario parámetros clave del análisis como la banda espectral sobre la que realizar el análisis o modificar los umbrales permitiendo una mayor adaptabilidad a las necesidades de detección y análisis de otro tipos de tratamientos, cultivos o condiciones de captura, llegando a poder detectar múltiples compuestos de manera simultánea y pudiendo analizar la totalidad química de un tratamiento sin necesidad de centrarse en un compuesto en específico.
+
+El objetivo final de un proyecto de estas características  es la implementación de de la tecnología desarrollada en la maquinaria de cultivo. Por ello es esencial que el análisis se pueda realizar en tiempo real, en vez de sobre imágenes estáticas de laboratorio. Para ello sería necesario una serie de optimizaciones y mejoras sobre los algoritmos implementados con el objetivo de permitir el análisis sobre secuencias de video. Como consecuencia indirecta se obtendría un mayor alcance de la aplicación abriendo la puerta a su integración en sistemas montados en vehículos agrícolas o drones, obteniendo un mayor alcance del proyecto.
+
+La aproximación implementada para la detección de ruido es efectiva y replicable, sin embargo, posee el inconveniente de que es necesario para ello una imagen de control. Esta imagen no es viable o no se puede obtener como en los casos de detección en tiempo real. Por ello la implementación de modelos de Aprendizaje Profundo que ayuden  identificar o detectar la morfología de la superficie correspondiente al producto sería una solución robusta y viable, que subsanaría el problema de la ausencia de una imagen de control. Para ello se debería crear y etiquetar un \textit{dataset} con un gran número de muestras representativas para la implementación y entrenamiento de un modelo que ayude a descartar el ruido y falsos positivos creados por las variaciones de reflectancia intrínsecas de la superficie de la hoja además de mejorar la aplicabilidad del sistema a distintas condiciones más adversas o variables.
+
+
+

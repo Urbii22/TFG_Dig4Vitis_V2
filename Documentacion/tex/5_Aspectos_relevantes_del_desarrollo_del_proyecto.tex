@@ -1,0 +1,104 @@
+\capitulo{5}{Aspectos relevantes del desarrollo del proyecto}
+
+La aplicación ha sido desarrollada con el objetivo de crear un sistema de análisis de imágenes hiperespectrales que no solo sea funcional, sino también robusto, preciso y científicamente fundado. El proyecto va más allá de una simple implementación convirtiéndose en una solución de ingeniería que aborda problemas complejos relacionados con la visión por ordenador en el ámbito de la agricultura de precisión.
+
+El sistema se ha implementado como una aplicación web interactiva, con una arquitectura modular estructurada en un flujo de trabajo lógico. Este flujo lo conforman tres fases técnicas fundamentales detalladas a continuación: la adquisición y gestión de los datos hiperespectrales; el procesamiento y segmentación para la extracción de características; y el elemento más innovador del proyecto, un sistema avanzado de reducción de ruido y falsos positivos basado en la alineación y superposición automática de imágenes.
+
+
+\section{Carga y Gestión de Datos Hiperespectrales: La Base del Análisis}
+
+La base de la aplicación sobre la que se fundamenta el análisis es la correcta obtención y estructuración de los datos. La fiabilidad de los resultados del análisis depende en su totalidad de esta fase inicial. El sistema está diseñado para procesar imágenes en formato ENVI, un estándar en el campo de la teledetección, que encapsula la riqueza de la información hiperespectral en dos ficheros:
+
+\begin{itemize}
+    \item Fichero de datos (\verb|.bil|): Un archivo binario que contiene la matriz de valores de reflectancia. Dada la alta resolución espacial y espectral de las imágenes manejadas (con dimensiones del orden de 1358×900×300 píxeles), estos ficheros son de gran tamaño (aproximadamente 0,7 GB), almacenando más de 360 millones de puntos de datos individuales.  Se trata del hipercubo de datos.
+
+    \item Fichero de cabecera (\verb|.hdr|): Un archivo de texto que describe los metadatos de la imagen, como las dimensiones, el número de bandas (300 en este caso), las longitudes de onda asociadas a cada una y el formato de los datos, así como datos de la cámara con la que se ha realizado la captura entre otros metadatos útiles para identificar la imagen y sus características. Es esencial para la correcta interpretación del hipercubo de datos.
+
+\end{itemize}
+
+Para gestionar estos ficheros se han empleado una selección cuidadosa de bibliotecas del ecosistema científico de Python con el objetivo garantizando eficiencia y precisión:
+
+\begin{enumerate}
+    \item \textbf{Interfaz de Usuario con Streamlit}: Para la construcción de la interfaz gráfica se eligió el framework Streamlit. Gracias a esta decisión estratégica el ciclo de desarrollo fue rápido y eficiente. En lugar de invertir un tiempo considerable en el desarrollo web tradicional (HTML, CSS, JavaScript y un backend como Flask o Django), Streamlit permite crear aplicaciones interactivas y centradas en los datos con código Python. Esto liberó recursos para centrarse en el núcleo del problema: los algoritmos de procesamiento de imágenes.
+
+    \item \textbf{Lectura de Datos con Spectral (SPy)}: Para la interpretación de los datos hiperespectrales se seleccionó la biblioteca \verb|Spectral|, el estándar de facto en el ámbito académico para esta tarea. Su elección se justifica por su capacidad única para parsear correctamente los metadatos de los ficheros \verb|.hdr| y mapear los complejos datos binarios del fichero \verb|.bil| en una estructura coherente y accesible. Sin esta biblioteca, sería necesario implementar un lector de bajo nivel, una tarea compleja y propensa a errores.
+
+    \item \textbf{Representación Numérica con Numpy}: El uso de NumPy es crucial permitiendo realizar una representación de los datos. Una vez leídos los datos, se materializan como un array tridimensional de NumPy. La elección de esta biblioteca se debe a su altísimo rendimiento en operaciones vectorizadas, crucial para manipular los más de 300 millones de puntos de datos de cada hipercubo de forma eficiente y mantener así la interactividad de la aplicación. Esta representación posibilita  la posterior realización operaciones directamente con los datos espectrales obtenidos.
+
+\end{enumerate}
+
+Además, el módulo \verb|src/funciones/archivos.py| implementa un sistema de guardado que asigna un identificador único (UUID) a cada fichero subido, evitando colisiones de nombres y gestionando de forma segura los archivos temporales en el servidor.
+
+
+
+\section{Procesamiento y Generación de Máscaras de Segmentación (Trinarización)}
+
+Una vez el  hipercubo de datos está cargado en memoria, la siguiente fase consiste en la segmentación de la imagen. El objetivo es traducir la información espectral obtenida en información semántica, asignando cada píxel a una de las tres categorías: fondo, superficie foliar (hoja) o producto de cobre. Este proceso, el cual se ha denominado \textit{trinarización}, se fundamenta en un método de segmentación por umbral  por bandas espectrales, cuyos parámetros fueron definidos empíricamente a partir del análisis de las firmas espectrales del material \cite{SANCHEZ2025101049}.
+
+El flujo de segmentación, detallado en \verb|src/funciones/procesamiento.py|, es el siguiente:
+
+\begin{enumerate}
+    \item \textbf{Segmentación Primaria (Hoja vs. Fondo)}: El primer paso a realizar es aislar la hoja del fondo. Se identificó que la \textbf{banda 10} del espectro ofrecía un contraste sólido para esta tarea. Después de descartar varias configuraciones,  se optó por aplicar un umbral  en el que se identifican como hoja todos aquellos píxeles cuyo valor de reflectancia espectral para esa banda es menor de 2000 (\verb|b10 < 2000|), generando una máscara binaria inicial que representa la silueta de la hoja.
+\imagen{histograma_10}{El gráfico representa el histograma obtenido en la banda 10 y la imagen la máscara de la hoja obtenida de la segmentación }{1}
+
+    \item \textbf{Refinamiento Morfológico de la Máscara Foliar}: Este método de segmentación por umbral simple a menudo genera máscaras que no son exactas y contienen ruido. Con el objetivo de reducir esta característica no deseada se optó por utilizar operaciones de morfología matemática de la biblioteca Scikit-image (\textit{remove\_small\_holes}) en lugar de filtros de suavizado convencionales (como un filtro Gaussiano). Esta elección se fundamenta en que los filtros de suavizado, si bien reducen el ruido, difuminan los bordes de la imagen. Este factor hace que no sean adecuados debido a que para el posterior proceso de alineación, es fundamental preservar la nitidez de los contornos de la hoja. Por otro lado las operaciones morfológicas, permiten eliminar el ruido (como agujeros o pequeños objetos aislados) respetando la integridad de los bordes de las formas principales.
+
+    \item \textbf{Segmentación Secundaria (Producto vs. Hoja)}: Una vez aislada la región de la hoja (máscara \textit{hoja}), se procede a detectar el producto de cobre. Se identificó que la \textbf{banda 164 (728,24 nm)} como la más sensible a la reflectancia de los productos con base de cobre\cite{SANCHEZ2025101049}. Sobre esta banda, se aplica un segundo conjunto de umbrales para identificar los píxeles correspondientes a las deposiciones del producto dentro del área foliar. Para asegurar una correcta identificación del producto sobre la hoja esta segunda segmentación solo se realiza sobre aquellos píxeles que conforman la máscara de la hoja. Estos umbrales empleados para la detección del producto son umbrales compuestos permitiendo así una mayor precisión en la detección eliminando parte del ruido generado. Obteniendo de esta manera la máscara \textit{producto}.\imagen{umbrales}{extracto del código donde se muestran los umbrales empleados para detectar cada uno de los productos}{1}Para cada uno de los dos productos se identificaron distintos rangos de lectura, dentro de los parámetros estadísticos determinados experimentalmente para cada uno de ellos\cite{SANCHEZ2025101049}.
+Para la determinación de Cuprocol se empleó la combinación de rangos: 3900 nm – 4100 nm y 4900 nm – 5200 nm. Para la determinación del compuesto Cuprantol Duo la combinación de rangos usada fue: 3900 nm – 4300 nm y 4900 nm – 5200 nm.
+
+
+    \item \textbf{Generación de la Imagen Trinarizada}: Finalmente, las máscaras de \textit{hoja} y \textit{producto} se combinan para crear una única imagen de visualización. En esta imagen, a cada clase se le asigna un color distintivo para facilitar la inspección visual: el fondo se representa en negro, la hoja en verde y el producto detectado en rojo.
+\end{enumerate}
+Este método de segmentación por umbrales, ha demostrado ser altamente efectivo y eficiente en términos de computación cuando las bandas y los umbrales se han calibrado correctamente, como es el caso de este proyecto.\imagen{trin_con}{Imagen resultado de la  trinarización, separando fondo (negro) de hoja (verde) de producto (rojo)}{0.75}
+
+\section{Reducción de Ruido mediante Alineación Automática por ORB}
+
+El reto más complejo del presente trabajo no ha sido la detección del producto en sí, sino la eliminación de falsos positivos. Al realizar la trinarización, la \textit{imagen resultado} obtenida presenta detecciones erróneas a las cuales se ha referido como ruido. El motivo de la aparición del ruido en la detección del producto se debe a que los valores espectrales de los píxeles que conforman la superficie de una hoja no son uniformes, sino que  presentan variaciones naturales de reflectancia debidas a su estructura (nervios, micro-vellosidades, brillos especulares, zonas sombreadas, etc) que pueden ser erróneamente clasificadas como producto por el algoritmo ya que dichos valores podrían estar dentro de los umbrales de detección de producto.
+
+La solución implementada para solucionar la interferencia de ruido espectral es la contribución técnica más significativa de este trabajo: un sistema de sustracción de ruido que utiliza una imagen de control (sin tratamiento) para identificar y eliminar estas variaciones espectrales naturales de la imagen tratada. Para que esta sustracción sea válida, las dos imágenes deben estar perfectamente alineadas a nivel sub-píxel, una tarea no trivial dado que es imposible volver a colocar la hoja exactamente en la misma posición y orientación. El correcto funcionamiento de este sistema de reducción de ruido se fundamenta en el hecho de que las variaciones en la superficie de la hoja que fomentan la aparición de los falsos positivos en la detección son coincidentes en ambas imágenes de la misma hoja antes y después de aplicar el producto permitiendo de esta manera una identificación clara y precisa de aquellos píxeles que conforman las anomalías.
+\imagen{con_sin}{imagen resultado de la trinarización de la imagen de control (Izquierda) y la imagen con tratamiento (Derecha)}{1}
+
+\subsubsection{\textbf{El Proceso de Alineación Automática: de ORB a RANSAC}}
+
+Se diseñó e implementó un pipeline de alineación automática utilizando la biblioteca OpenCV, como se detalla en \verb|src/funciones/alignment.py|. La elección de cada componente de este pipeline fue una decisión de ingeniería deliberada.
+
+\begin{enumerate}
+    \item \textbf{Extracción del Limbo Foliar}: Se aísla la parte más estable de la hoja, el limbo, eliminando el pecíolo (\verb|_remove_petiole|) mediante operaciones morfológicas (identifiación de objetos similares al peciolo, una estructura delgada y de longitud considerable) ya que es irrelevante para el análisis y dificultaba la superposición de las imágenes.
+
+    \item \textbf{Detección de Bordes con Canny}: Se aplica el detector de bordes de Canny\cite{OpenCV2025Canny} a ambas máscaras del limbo. Se eligió Canny por ser un algoritmo multi-etapa (suavizado, cálculo de gradiente, supresión de no máximos y umbralización por histéresis) que produce contornos de un solo píxel de grosor, limpios y bien definidos. Estas características hacen que el resultado de aplicar el algoritmo sea ideal para poder aplicar el detector de características ORB. Ya que dicho detector opera de manera más eficaz y precisa sobre regiones de alto contraste bien localizadas.
+
+    \item \textbf{Detección, Descripción y Emparejamiento de Puntos Clave con ORB}: El algoritmo ORB analiza los bordes y extrae cientos de puntos de interés (\textit{keypoints}). Para cada punto, genera un descriptor binario que captura la textura local identificando así las características únicas de ese punto creando de esta manera un identificador único para cada uno de los puntos extraídos. A continuación, un \verb|BFMatcher| (\textit{Brute-Force Matcher}) compara estos descriptores para encontrar correspondencias entre las dos imágenes. Si bien la implementación de un método de fuerza bruta puede parecer  prohibitivo en términos computacionales es extremadamente eficiente para los descriptores binarios de ORB \cite{rs14184465}. Por lo tanto el BFMatcher garantiza encontrar la correspondencia óptima, debido a que es exhaustivo (compara todos los puntos extraídos  de la imagen base con todos los puntos extraídos de la imagen con producto).
+
+    \item \textbf{Estimación Robusta de la Transformación con RANSAC}: El emparejamiento por fuerza bruta puede producir errores (\textit{outliers}). La inclusión de RANSAC\cite{VINAYA2015174} es indispensable para la robustez del sistema. Este método estadístico iterativo aísla el conjunto de correspondencias que son geométricamente consistentes (\textit{inliers}) y calcula la matriz de transformación afín (serie de transformaciones a realizar sobre la imagen de control para obtener la coincidencia de ambas imágenes) basándose únicamente en ellas descartando los posibles errores. Sin RANSAC, unos pocos emparejamientos erróneos podrían desviar por completo la transformación, invalidando la alineación.
+
+    \item \textbf{Aplicación de la Transformación}: Finalmente, la matriz de transformación calculada se aplica a la imagen de control y su máscara de ruido, alineándola con precisión sobre la imagen tratada, lista para la fase de sustracción.\imagen{superposicion_exacta}{imagen que muestra el resultado de la aplicación del algoritmo ORB y RANSAC par ala alineación y superposición de imágenes}{0.7}
+
+    \item \textbf{Sustracción del ruido}: Una vez ambas máscaras han sido alineadas geométricamente se procede a la fase final de sustracción con el objetivo de aislar las detecciones válidas de producto. Para ello se realizan una serie de operaciones lógicas a nivel de píxel:
+
+\begin{enumerate}
+    \item Definición del área común de análisis: se calcula una nueva máscara \textit{hoja\_común} como el resultado de la intersección lógica de las máscaras de la imagen de control y la imagen con producto una vez alineadas. Esta nueva máscara representa exactamente el área de la hoja visible y válida entre ambas imágenes. De esta manera se asegura que la comparación solo se realice sobre la región de interés compartida.
+
+    \item Sustracción de ruido: posteriormente se comparan las detecciones de ambas máscaras alineadas (imagen de control e imagen con producto). Se analizan los píxeles que conforman la región del área común uno a uno. Se considerarán como producto final, si, y solo si, cumplen dos condiciones: deben de ser identificados como producto en la imagen con gotas (producto) y NO fue detectado como tal en la imagen sin gotas (imagen de control) eliminando así todas aquellas detecciones coincidentes en ambas imágenes. Debido a que el ruido es común en ambas imágenes.
+
+    \item Post-procesado: finalmente, se calcula el porcentaje de recubrimiento dividiendo el número de píxeles de producto final entre el número total de píxeles que conforman la máscara de la hoja inicial (\textit{hoja\_común}). 
+
+\end{enumerate}
+
+
+\end{enumerate}
+\imagen{porcentaje_2}{imagen donde se aprecia el resultado final sin ruido así como el porcentaje de recubrimiento calculado}{1}
+\imagen{comparacion_2}{imagen donde se muestra el resultado una vez aplicada la reducción de ruido }{1}
+
+\subparagraph{\textbf{Justificación Técnica de la Elección de ORB}}
+
+La elección de ORB frente a otros algoritmos de detección de características bien conocidos como SIFT, SURF o AKAZE no fue casual, sino una decisión de ingeniería basada en un análisis de coste-beneficio adaptado a los requisitos del proyecto:
+
+\begin{itemize}
+    \item \textbf{Eficiencia Computacional:} Este es el aspecto central que fundamenta su selección frente a las alternativas. ORB es órdenes de magnitud más rápido que SIFT y SURF. Mientras que SIFT/SURF requieren complejas operaciones en coma flotante, ORB se basa en descriptores binarios cuya comparación mediante distancias de Hamming es extremadamente eficiente. Para una aplicación interactiva que maneja imágenes de gran tamaño (más de un millón de píxeles), esta velocidad es crucial para garantizar tiempos de respuesta aceptables para el usuario sin necesidad de hardware especializado (GPU).
+    \item \textbf{Licencia y Disponibilidad:} Históricamente, SIFT y SURF estaban sujetos a patentes que limitaban su uso en muchos entornos. ORB, en cambio, fue diseñado desde su origen como una alternativa libre y de código abierto. Su integración nativa en el módulo principal de OpenCV facilita enormemente su implementación, evitando las complicaciones de compilación o licenciamiento que otros algoritmos presentaban.
+    \item \textbf{Robustez Adecuada para el Problema:} Si bien SIFT es a menudo considerado el estándar de facto en precisión bajo condiciones extremas, para este caso de uso específico (alinear dos imágenes casi idénticas de la misma hoja tomadas con mínimos cambios de perspectiva, iluminación o posición) la robustez de ORB es más que suficiente. ORB es explícitamente invariante a la rotación y tolera bien cambios moderados de escala y brillo. En este escenario, la ganancia marginal de precisión que podría ofrecer un algoritmo más pesado no compensa la drástica pérdida de rendimiento. ORB ofrece el equilibrio óptimo entre robustez y velocidad.
+    \item \textbf{Idoneidad para Flujos Automatizados:} ORB es fácil de parametrizar y funciona de manera estable en una amplia variedad de imágenes sin necesidad de ajustes finos, lo que lo hace ideal para el pipeline totalmente automático que se pretendía construir.
+\end{itemize}
+En definitiva, la sustracción de ruido mediante la alineación automática con ORB y RANSAC no solo resuelve el principal desafío técnico del proyecto, sino que lo hace de una manera elegante, robusta y científicamente rigurosa, cumpliendo con éxito los objetivos más exigentes del proyecto.
+
+ 

@@ -1,0 +1,152 @@
+\capitulo{3}{Conceptos teóricos}
+
+La principal característica implementada durante este proyecto ha sido el cálculo del recubrimiento de una hoja rociada con producto antifúngico. Para ello se han empleado imágenes hiperespectrales sobre las cuales se han llevado a cabo una serie de análisis. Este proyecto se encuadra en una rama de la agricultura denominada agricultura de precisión. Por ello, para mejorar la comprensión general del proyecto es necesario tener conocimiento de los siguientes conceptos.
+
+\section{Imágenes hiperespectrales}
+
+\subsection{\textbf{Definición}}
+
+Una imagen hiperespectral~\cite{sanchez2016procesado}  es una imagen que en vez de tener un único valor de intensidad para cada pixel de la imagen tendrá tantos como bandas tenga la imagen .  Se puede entender este tipo de imágenes como una matriz de 3 dimensiones o un cubo donde para cada pixel existen tantos valores de reflectancia, absorción o fluorescencia como bandas han sido recogidas en la imagen hiperespectral\cite{Vranic2024IdentificacinDB}.
+
+\imagen{espectro_visible}{Representación del espectro visible por el ojo humano en comparación con el total de espectros existentes\cite{romangonzalez:hal-00935014}}{1}
+
+Es importante comprender sobre qué imagen estamos realizando el análisis. Esta podría ser  monocroma, en escala de grises, sin en vez de un único color tenemos 3 colores estaríamos ante una imagen RGB. Si además tenemos diferentes longitudes de onda para cada pixel de nuestra imagen (entre 2 y 10) estaríamos ante una imagen multiespectral. Pero si los pixeles de nuestra imagen contienen datos de todo el espectro electromagnético ordenado en bandas estaríamos ante una imagen hiperespectral.
+
+\imagen{comparacion_tipos_hiperespectrales}{Representación visual de la información que contiene cada pixel de cada tipo de imagen.}{1}
+
+        
+
+\textbf{\subsection{Adquisición de imágenes hiperespectrales}}
+
+Para obtener imágenes hiperespectrales se necesita un sensor especializado capaz de captar todo el espectro de emisión del objeto o área a fotografiar. 
+
+Para ello existen diversos métodos para transportar el sensor\cite{Prez2018ComputacinDA} , puede ser o bien aéreo, mediante aviones o drones; o bien terrestre montando el sensor en vehículos o dispositivos terrestres.
+
+A la hora de realizar la captura de la imagen existen diversas técnicas que se pueden aplicar:
+
+\begin{itemize}
+\item \textbf{Barrido instantáneo} (\textit{Snapshot})
+
+Captura toda la información espectral y espacial en un único instante, sin necesidad de movimiento relativo entre el sensor y el objeto. Ideal para aplicaciones dinámicas (ej. monitoreo en tiempo real de procesos industriales o inspección de alimentos en cintas transportadoras).
+
+\item \textbf{Barrido por empuje} (\textit{Pushbroom})
+
+Captura una línea espacial completa en cada instante, avanzando progresivamente sobre la escena. Es el método más usado en drones y satélites para agricultura de precisión.
+
+\item \textbf{Barrido por barrido mecánico} (\textit{Whiskbroom})
+
+El sensor captura un único punto por vez, barriendo mecánicamente la escena en dos dimensiones. Menos común debido a su lentitud, pero útil en microscopía hiperespectral.
+ 
+\end{itemize}
+
+\subsection{Detalles de una imagen hiperespectral}
+Las imágenes con las que se trabajó durante el proyecto son imágenes hiperespectrales en formato ENVI de 300 bandas. Estas imágenes constan de 2 archivos diferentes pero complementarios. 
+
+El primero de extensión .bil (Band Interleaved by Line) se trata de un fichero binario que contiene los valores de reflectancia de cada pixel para cada una de las bandas. Como su nombre indica cada pixel corresponde con una línea del archivo donde se encuentran todos los diferentes valores de reflectancia en función de la banda.
+
+Por otro lado el fichero con extensión .bil.hdr hace referencia a la cabecera (o header) que describe las características de la imagen y como deben interpretarse los datos binarios contenidos en el otro archivo. En este encontramos características fundamentales como la numeración de bandas, los valores de éstas,  tamaño de los píxeles, además de incluir campos referentes a los tipos de datos de cada valor de reflectancia del pixel entre otros.
+
+Cabe destacar el gran tamaño de los ficheros con extensión .bil. Esto se debe a que al contener los datos de los valores de las 300 bandas la cantidad de datos que almacenan es muy grande. Las imágenes empleadas para el proyecto tienen unas dimensiones de 1358 x 900 x 300. En otras palabras los datos almacenados en el fichero .bil es del orden de mas de 360 millones de datos organizados en una matriz de 3 dimensiones de 1358 unidades de alto, 900 de ancho y 300 de profundidad a modo de hipercubo.
+Por este motivo estos ficheros pueden llegar a pesar del orden de 0,7 GB  mientras que los ficheros de cabecera (.bil.hdr) tienen un tamaño mucho menor  (unos 3Kb). 
+
+\imagen{hipercubo}{representación de una imagen hiperespectral en formato hipercubo \cite{camacho2020aproximacion}}{0.5}
+
+Precisamente por esta riqueza de información, las imágenes hiperespectrales fueron seleccionadas para este proyecto, ya que permiten identificar la firma espectral única del cobre, diferenciándola de la reflectancia de la hoja. La gestión de estos ficheros de gran volumen y su representación como hipercubos mediante \verb|Numpy| ha sido uno de los primeros desafíos técnicos abordados, siendo la base para todo el procesamiento posterior. 
+
+\subsection{Aplicaciones de las imágenes hiperespectrales:}
+
+Las imágenes hiperespectrales tienen aplicaciones muy diversas y de gran impacto en distintos campos, gracias a su capacidad para capturar información detallada tanto espacial como espectral de los objetos y materiales. Algunas de las aplicaciones más relevantes son:
+
+\subsection{Aplicaciones principales de las imágenes hiperespectrales}
+
+\begin{itemize}
+    \item \textbf{Industria alimentaria y control de calidad}:
+Se utilizan para la determinación de la inocuidad y de la calidad de productos alimentarios, permitiendo detectar contaminantes, adulteraciones o defectos y para evaluar la frescura de productos hidrobiológicos como pescados, camarón y tilapia.
+
+    \item \textbf{Medicina y aplicaciones biomédicas}:
+Permiten el análisis no invasivo de tejidos y órganos, facilitando la detección temprana de enfermedades, el estudio de la composición de tejidos y el cálculo de abundancias de diferentes componentes biológicos en imágenes médicas
+
+    \item \textbf{Conservación y estudio del patrimonio cultural}:
+Las imágenes hiperespectrales se emplean en la caracterización espectroscópica de obras de arte y objetos históricos, permitiendo estudiar materiales, pigmentos, restauraciones previas y estados de conservación sin dañar las piezas. 
+
+    \item \textbf{Geología y prospección minera}:
+Se aplican en la prospección de minerales y recursos naturales, como la búsqueda de níquel, mediante el análisis de la composición superficial del terreno y la identificación de minerales específicos a partir de sus firmas espectrales.
+
+    \item \textbf{Agricultura de precisión}:
+Facilitan el monitoreo de cultivos, la  detección de estrés hídrico, de enfermedades, deficiencias nutricionales y la estimación de rendimientos, optimizando el uso de recursos,  mejorando la productividad agrícola.
+
+    \item \textbf{Monitoreo ambiental}:
+Se utilizan para la detección de contaminantes, el seguimiento de la calidad del agua y del aire, y la evaluación de cambios en los ecosistemas.
+\end{itemize}
+
+\subsection{Ventajas clave}
+
+\begin{itemize}
+    \item Técnicas no invasivas y no destructivas.
+    \item Alta resolución espectral y espacial.
+    \item Capacidad de análisis en tiempo real y sobre grandes áreas o pequeños objetos.
+\end{itemize}
+
+ 
+
+\section{Visión por ordenador}
+
+
+La visión por ordenador \cite{Andrade2014PropuestaDU}es una disciplina de la informática centrada en el desarrollo de métodos y sistemas para la interpretación y análisis de imágenes de manera automática, con el objetivo de obtener información relevante del entorno y tomar las decisiones pertinentes en base a la información recabada. Es común el uso de técnicas de procesamiento de imágenes, inteligencia artificial, aprendizaje automático entre otros para que sean capaces de comprender el contenido visual de manera similar a lo que haría el ojo humano.
+Algunos ejemplos de sus aplicaciones más comunes:
+
+\begin{itemize}
+    \item Reconocimiento de objetos y patrones.
+    \item Detección y seguimiento de movimientos.
+    \item Diagnóstico médico asistido por imágenes (por ejemplo, detección de caries o apoyo en endoscopias)
+    \item Inspección de calidad en procesos industriales.
+    \item Análisis de escenas en tiempo real para vehículos autónomos.
+\end{itemize}
+
+
+\section{\textbf{ }ORB(Oriented fast and Rotated BRIEF)}
+Se trata de un algoritmo utilizado en la visión por ordenador para la detección y descripción de puntos clave en imágenes\cite{Luo_2019} empleado para la alineación automática de las imágenes permitiendo una superposición exacta de dos imágenes de la misma hoja. Obteniendo así un método automático de eliminación de ruido.
+\subsection{Características principales:}
+
+\begin{itemize}
+    \item \textbf{Detección de puntos clave}: ORB utiliza el detector FAST para localizar puntos de interés en la imagen, que suelen ser esquinas o regiones con alto contraste.
+    \item \textbf{Descripción de los puntos}: Para describir los puntos detectados, ORB emplea un descriptor basado en BRIEF, que es rápido y eficiente, pero lo mejora haciéndolo invariante a la rotación.
+    \item \textbf{Invarianza}: ORB es invariante a rotaciones y parcialmente invariante a cambios de escala, lo que significa que puede reconocer objetos aunque estén girados o ligeramente escalados.
+
+    \item \textbf{Eficiencia computacional:} El requisito fundamental para el desarrollo de una aplicación web interactiva es la velocidad de respuesta. Debido al significativamente superior rendimiento computacional, se seleccionó el algoritmo ORB frente a alternativas clásicas como SIFT o SURF. Esto permite realizar la alineación de imágenes en un tiempo aceptable para el usuario sin sacrificar la precisión necesaria.
+
+    \item \textbf{Viabilidad de implementación:} A diferencia de SIFT, ORB no está sujeto a patentes, lo que garantiza que la solución desarrollada es de uso libre y puede ser fácilmente integrada, modificada o extendida en futuros trabajos académicos o comerciales sin restricciones de licencia. 
+\end{itemize}
+
+\imagen{ORB}{flujo de trabajo para obtener puntos claves de imágenes mediante el algoritmo ORB }{1}
+
+\subsection{Aplicaciones habituales:}
+
+\begin{itemize}
+    \item Reconocimiento y emparejamiento de objetos.
+    \item Seguimiento visual en robótica y realidad aumentada.
+    \item Reconstrucción 3D y mosaico de imágenes.
+    \item Detección de movimiento y análisis de escenas.
+\end{itemize}
+
+
+\section{Binarización}
+ 
+ La binarización \cite{SAUVOLA2000225} consiste en convertir una imagen que se encuentra en escala de grises o a color en solo 2 colores de tal manera que los pixeles de dicha imagen solo pueden tener 2 valores, 0 o 1 (blanco o negro). Se realiza definiendo un umbral de tal manera que todo aquello que se encuentra por debajo del umbral pertenece a uno de los dos grupos y todo lo que se encuentra por encima al otro grupo.
+ 
+   \imagen{binarizacion}{ejemplo de binarización de una manzana}{1}
+
+ En el caso específico de este proyecto la binarización ha sido empleada para realizar la discriminación entre fondo y hoja, y posteriormente se ha realizado una segunda binarización para diferenciar el producto de la hoja. A esta doble binarización se le ha decidido llamar \textit{trinarización} ya que en esencia se están diferenciando 3 grupos (fondo, hoja y producto)
+
+ 
+\section{Segmentación por Trinarización}
+
+El problema de la identificación del producto requiere la segmentación en tres clases (fondo, hoja y producto) una binarización simple no resulta suficiente. Por ello se ha diseñado e implementado un proceso de segmentación secuencial denominado trinarización. Este método consiste en dos binarizaciones consecutivas de la siguiente forma:
+\begin{itemize}
+
+\item Una primera binarización con el objetivo de aislar la región de interés (la hoja) del fondo de la imagen, utilizando un umbral sobre la banda espectral 10 (406.68 nm).
+\item Una segunda binarización únicamente sobre la ROI (Región de interés) para poder discriminar los píxeles correspondientes a producto de cobre basándose en su alta reflectancia en la banda 164 (728,24 nm)\cite{SANCHEZ2025101049}.
+\end{itemize}
+Este enfoque permite una segmentación precisa y eficiente adaptada a las características específicas de la distribución de las imágenes.
+
+

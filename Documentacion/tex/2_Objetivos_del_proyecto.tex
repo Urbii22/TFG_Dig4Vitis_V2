@@ -1,0 +1,34 @@
+\capitulo{2}{Objetivos del proyecto}
+
+En este apartado se detallan los objetivos que se persiguen con la realización del proyecto. Se puede distinguir entre los objetivos marcados para los requisitos del software a construir y los objetivos de carácter técnico que se plantean a la hora de llevar a la práctica el proyecto.
+
+\section {Objetivos Generales}
+\begin{enumerate}
+
+\item Desarrollar una aplicación, con una interfaz intuitiva, en la que el usuario pueda interactuar de forma sencilla y obtener un resultado visual y de forma inmediata de la eficacia de la aplicación de productos fungicidas, con base de cobre. La aplicación estará basada en el análisis de imágenes hiperespectrales de hojas de vid   
+
+\item Validar una metodología de análisis de imagen hiperespectral que garantice la obtención de resultados coherentes, fiables y repetibles. El fin último es que la cuantificación del recubrimiento sea aplicable en entornos de investigación y con potencial para su uso en aplicaciones reales de agricultura de precisión. 
+
+\end{enumerate}
+
+\section {Objetivos Técnicos} 
+Para alcanzar los objetivos generales, se establecieron las siguientes metas técnicas específicas, centradas en el diseño y la implementación de la herramienta:
+
+\begin{enumerate}
+    \item La construcción de una aplicación web interactiva en Python, utilizando la biblioteca Streamlit, que integre todo el flujo de trabajo: desde la carga de datos hiperespectrales hasta el procesamiento y la visualización final de los resultados.
+    \item El diseño e implementación de un pipeline de visión por computador para el procesamiento de imágenes hiperespectrales. Este pipeline debe incluir módulos para la segmentación de la imagen (separación de fondo, hoja y producto) y para la gestión eficiente de los datos del hipercubo.
+    \item La implementación de un sistema robusto para la eliminación de falsos positivos basado en la sustracción de ruido. Este objetivo es el núcleo técnico del proyecto e implica la alineación geométrica precisa de la imagen tratada con una imagen de control mediante el uso de los algoritmos ORB y RANSAC.
+    \item La habilitación de funcionalidades para la exportación de los resultados, permitiendo al usuario descargar tanto las imágenes del análisis (las máscaras de segmentación y la imagen final con la reducción de ruido) como los datos cuantitativos del porcentaje de recubrimiento.
+    \item El desarrollo de la solución siguiendo principios de ingeniería del software que aseguren una estructura de código clara, modular y documentada, facilitando así el mantenimiento, la reusabilidad de los componentes y la futura escalabilidad del proyecto.
+    \item La creación de una interfaz de usuario (UI) y una experiencia de usuario (UX) que cumplan con criterios de usabilidad, haciendo que el manejo de una herramienta técnicamente compleja sea sencillo e intuitivo. 
+
+\end{enumerate}
+
+\section {Objetivos Personales} 
+\begin{enumerate}
+\item Aprender el ciclo de vida completo del desarrollo de una aplicación funcional, desde el concepto hasta el despliegue, utilizando el framework \verb|Streamlit|. 
+\item  Mejorar en la comprensión del flujo de trabajo  e implementar buenas prácticas a la hora de realizar un desarrollo de un producto informático. Así como  mis habilidades de inclusión e implementación de patrones de diseño en el desarrollo de la aplicación, así como su impacto en el rendimiento y otros aspectos.
+\item Aumentar y fortalecer mi comprensión, nivel de programación y comprensión del lenguaje Python así como adquirir experiencia práctica con las bibliotecas especializadas en visión por computador, además de la investigación y descubrimiento de nuevas librerías y algoritmos útiles para el desarrollo de la aplicación.
+\item Mejorar a nivel personal en un entorno profesional con sus fechas límites, requisitos a cumplimentar, trabajo científico y buenas prácticas a la hora de desarrollar un producto.
+
+\end{enumerate}

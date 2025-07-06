@@ -1,0 +1,320 @@
+\apendice{Anexo: Especificación de Requisitos}
+\label{apendice:requisitos}
+
+\section{Introducción}
+
+En este apartado se detallan los requisitos funcionales y no funcionales de la aplicación de software \textbf{EcoVid}. El objetivo es proporcionar una descripción clara y sin ambigüedades de las funcionalidades del sistema en su versión final. Este documento sirve como base para el desarrollo, las pruebas y la validación de la aplicación.
+
+Se ha dividido en tres partes principales:
+\begin{itemize}
+    \item \textbf{Objetivos generales}: Descripción de las metas del proyecto.
+    \item \textbf{Catálogo de requisitos}: Listado detallado de los requisitos funcionales (RF) y no funcionales (RNF) que definen el comportamiento y las características del sistema.
+    \item \textbf{Especificación de Casos de Uso}: Descripción detallada de las interacciones clave del usuario con la aplicación para cumplir los requisitos funcionales.
+\end{itemize}
+
+\section{Objetivos generales}
+
+Los objetivos principales de la aplicación desarrollada son los siguientes:
+\begin{itemize}
+    \item \textbf{Automatizar el análisis comparativo}: Proporcionar una herramienta que automatice el proceso de detección de producto fungicida sobre hojas de vid, utilizando un enfoque diferencial que compara una muestra tratada con una muestra de control.
+    \item \textbf{Mejorar la precisión mediante sustracción de ruido}: Implementar un algoritmo robusto para la eliminación de falsos positivos. Este sistema se basa en la alineación geométrica precisa de la imagen tratada con su control para sustraer las variaciones de reflectancia naturales de la propia hoja (nervios, brillos), aislando únicamente el producto real.
+    \item \textbf{Facilitar la usabilidad}: Ofrecer una interfaz de usuario web, intuitiva y sencilla, que guíe al usuario a través del proceso de carga y análisis dual sin requerir conocimientos técnicos avanzados en visión por computador.
+    \item \textbf{Visualizar y exportar resultados para validación}: Ofrecer una visualización clara del resultado final (porcentaje y mapa de recubrimiento), junto con vistas intermedias que permitan al investigador validar la calidad del proceso (ej. la precisión del alineamiento), y permitir la descarga de dichas imágenes.
+\end{itemize}
+
+\section{Catálogo de requisitos}
+
+\subsection{Requisitos Funcionales (RF)}
+\begin{itemize}
+    \item[\textbf{RF-01}:] El sistema debe permitir al usuario cargar dos pares de imágenes hiperespectrales en formato ENVI (.bil + .hdr): uno para la imagen de referencia \textbf{SIN tratamiento} y otro para la imagen \textbf{CON tratamiento}.
+    \item[\textbf{RF-02}:] El sistema debe validar que para cada muestra (SIN y CON) se hayan subido ambos ficheros (.bil y .hdr) antes de poder iniciar el procesamiento.
+    \item[\textbf{RF-03}:] Al pulsar el botón "Iniciar Procesamiento", el sistema debe ejecutar de forma automática un pipeline de análisis dual completo.
+    \item[\textbf{RF-04}:] El sistema debe generar una imagen de resultado final que visualice la hoja (área común) y las detecciones de producto ya depuradas (sin ruido).
+    \item[\textbf{RF-05}:] El sistema debe calcular y mostrar de forma prominente el \textbf{porcentaje de recubrimiento} final, definido como el área de producto real detectado respecto al área total de la hoja común.
+    \item[\textbf{RF-06}:] El sistema debe alinear geométricamente la imagen SIN tratamiento con la imagen CON tratamiento para corregir desplazamientos, rotaciones y ligeros cambios de escala.
+    \item[\textbf{RF-07}:] El proceso de alineación debe basarse en la detección de los contornos del \textbf{limbo} foliar (previa eliminación morfológica del pecíolo), el emparejamiento de puntos característicos mediante el algoritmo \textbf{ORB}, y una estimación robusta de la transformación afín con \textbf{RANSAC}.
+    \item[\textbf{RF-08}:] El sistema debe ser capaz de identificar el \textbf{área de la hoja común} (la intersección de ambas máscaras de hoja una vez alineadas) para asegurar que el análisis comparativo se realiza sobre una región de interés idéntica.
+    \item[\textbf{RF-09}:] El sistema debe implementar una lógica de \textbf{sustracción de ruido}: un píxel se considerará "producto final" si, y solo si, es detectado como producto en la imagen CON y NO es detectado como tal en la imagen SIN alineada.
+    \item[\textbf{RF-10}:] El sistema debe ofrecer una opción principal para descargar la imagen del \textbf{resultado final} en formato PNG.
+    \item[\textbf{RF-11}:] El sistema debe disponer de una sección expandible ("Ver detalles y descargas adicionales") para mostrar visualizaciones de diagnóstico y validación.
+    \item[\textbf{RF-12}:] Dentro de la sección de detalles, el sistema debe mostrar una imagen de \textbf{superposición de alineamiento} (p.ej., máscara CON en verde y SIN alineada en rojo) para permitir al usuario inspeccionar visualmente la calidad de la alineación.
+    \item[\textbf{RF-13}:] Dentro de la sección de detalles, el sistema debe mostrar las imágenes de \textbf{segmentación base} (trinarizadas SIN y CON, antes del alineamiento y sustracción) y sus correspondientes vistas RGB.
+    \item[\textbf{RF-14}:] El sistema debe permitir la descarga individual de las \textbf{imágenes trinarizadas base} (CON y SIN) en formato PNG desde la sección de detalles.
+    \item[\textbf{RF-15}:] El sistema debe incluir una pestaña informativa (Acerca del TFG) que describa el contexto, los objetivos y la metodología del proyecto, proporcionando transparencia sobre su funcionamiento.
+    \item[\textbf{RF-16}:] El pipeline de procesamiento debe ser capaz de manejar imágenes de entrada con ligeras diferencias de dimensiones, creando un lienzo común para evitar recortes antes del alineamiento.
+    \item[\textbf{RF-17}:] El sistema debe aplicar un filtro de post-procesado sobre la máscara de producto final para eliminar artefactos o detecciones de tamaño insignificante (inferior a un umbral de píxeles predefinido).
+\end{itemize}
+
+\subsection{Requisitos No Funcionales (RNF)}
+\begin{itemize}
+    \item[\textbf{RNF-01}:] La aplicación debe ser accesible a través de un navegador web estándar (Chrome, Firefox, Edge).
+    \item[\textbf{RNF-02}:] La interfaz de usuario debe ser intuitiva, con un flujo de trabajo claro y guiado (Carga -> Proceso -> Resultados).
+    \item[\textbf{RNF-03}:] La aplicación debe presentar un diseño visual coherente y profesional, definido en un fichero CSS externo, utilizando una paleta de colores oscura para mejorar la legibilidad y reducir la fatiga visual.
+    \item[\textbf{RNF-04}:] El sistema debe proporcionar retroalimentación visual al usuario (spinner de \textit{Analizando imágenes...}) durante las operaciones que consuman un tiempo considerable.
+    \item[\textbf{RNF-05}:] El sistema debe gestionar los ficheros subidos en una carpeta temporal (`archivos\_subidos`) y garantizar su eliminación automática al finalizar la sesión de la aplicación para no consumir espacio en disco de forma innecesaria.
+    \item[\textbf{RNF-06}:] La aplicación debe estar desarrollada íntegramente en lenguaje Python, utilizando bibliotecas de código abierto como Streamlit, OpenCV, Spectral, NumPy y Scikit-image.
+    \item[\textbf{RNF-07}:] La estructura del código del proyecto debe ser modular, separando la lógica de la interfaz (`interfaz.py`), el procesamiento (`procesamiento.py`), el alineamiento (`alignment.py`) y la gestión de archivos (`archivos.py`).
+    \item[\textbf{RNF-08}:] El sistema debe ser robusto frente a errores de carga de ficheros, mostrando mensajes de error claros al usuario si no se proporcionan los pares de ficheros (.bil y .hdr) requeridos.
+    \item[\textbf{RNF-09}:] El estado de la aplicación debe ser gestionado de forma centralizada a través del mecanismo de estado de sesión (`st.session\_state`) de Streamlit, para preservar los datos procesados entre interacciones del usuario y evitar recálculos innecesarios.
+    \item[\textbf{RNF-10}:] La aplicación debe ser distribuible como una imagen de Docker, garantizando la reproducibilidad del entorno de ejecución y la encapsulación de todas las dependencias.
+    \item[\textbf{RNF-11}:] El código fuente del proyecto debe estar gestionado bajo un sistema de control de versiones (Git) y disponible en un repositorio público para fomentar la transparencia y la colaboración.
+    \item[\textbf{RNF-12}:] La tipografía principal de la aplicación será 'Segoe UI' o una fuente sans-serif estándar para garantizar la legibilidad, tal y como se define en la hoja de estilos.
+\end{itemize}
+
+\section{Especificación de Casos de Uso}
+A continuación se detallan los casos de uso que describen la funcionalidad de la aplicación EcoVid.
+
+\begin{figure}[H]
+\begin{longtable}{p{0.25\linewidth} p{0.65\linewidth}}
+    
+    \toprule
+    \textbf{ID del Caso de Uso} & CU-1 \\
+    \midrule
+    \endfirsthead
+
+    
+
+    \bottomrule
+    \multicolumn{2}{r}{{\small\textit{Continúa en la siguiente página...}}} \\
+    \endfoot
+
+    \endlastfoot
+
+    \textbf{Nombre} & Realizar análisis dual de imágenes hiperespectrales con sustracción de ruido \\
+    \midrule
+    \textbf{Actor Principal} & Usuario (Investigador/Técnico) \\
+    \midrule
+    \textbf{Requisitos Asociados} & RF: 01-09, 16, 17 \newline RNF: 01, 02, 04, 08, 09 \\
+    \midrule
+    \textbf{Descripción} & El usuario carga los pares de imágenes de una hoja SIN y CON tratamiento. Al pulsar un botón, el sistema ejecuta un proceso automático que alinea ambas imágenes, sustrae el ruido, calcula el porcentaje de recubrimiento real del producto y muestra los resultados. \\
+    \midrule
+    \textbf{Precondición} & El usuario ha accedido a la aplicación y tiene en su equipo local los cuatro ficheros hiperespectrales necesarios (par .bil y .bil.hdr para la muestra SIN y par .bil y .bil.hdr para la CON). \\
+    \midrule
+    \textbf{Flujo Principal} & 
+        1. El usuario accede a la pestaña   \textit{Cargar y Procesar Imágenes}. \newline
+        2. Carga los ficheros (.bil y .hdr) de la hoja SIN tratamiento. \newline
+        3. Carga los ficheros (.bil y .hdr) de la hoja CON tratamiento. \newline
+        4. Pulsa el botón \textit{Iniciar Procesamiento}. \newline
+        5. El sistema valida los archivos y muestra un indicador de progreso (cubre RF-02, RNF-04). \newline
+        6. Se ejecuta el pipeline de análisis completo, que incluye el alineamiento con ORB/RANSAC, la identificación del área común y la sustracción del ruido (cubre RF-03, RF-06, RF-07, RF-08, RF-09). \newline
+        7. Se calculan y muestran los resultados finales: imagen y porcentaje de recubrimiento (cubre RF-04, RF-05). \\
+    \midrule
+    \textbf{Postcondición} & Los resultados del análisis son visibles en la interfaz, con los datos almacenados en la sesión para su posterior inspección y descarga. \\
+    \midrule
+    \textbf{Excepciones} & \textbf{E-1:} Si faltan archivos, el sistema muestra un error y detiene el proceso (cubre RNF-08). \\
+    \midrule
+    \textbf{Importancia} & Muy Alta \\
+    \caption{CU-1 - Realizar análisis dual con sustracción de ruido} \label{tab:cu1} \\
+\end{longtable}
+\end{figure}
+
+
+% --- Diagrama de Actividad para el Caso de Uso 1 (CU-1) ---
+\begin{figure}[H]
+    \centering
+    \begin{tikzpicture}[
+        node distance=1.3cm and 1.5cm,
+        % Estilo para los nodos de acción del usuario/sistema
+        activity/.style={
+            rectangle, 
+            draw, 
+            thick, 
+            fill=blue!10, 
+            minimum width=4.5cm, 
+            minimum height=1.2cm, % Aumentado para mejor ajuste
+            text centered,
+            text width=4.3cm 
+        },
+        % Estilo para los nodos de inicio y fin
+        startstop/.style={
+            circle, 
+            draw, 
+            thick, 
+            fill=black, 
+            inner sep=0pt, 
+            minimum size=7mm
+        },
+        % Estilo para el nodo de decisión
+        decision/.style={
+            diamond, 
+            draw, 
+            thick, 
+            fill=orange!20, 
+            aspect=1.5, 
+            minimum size=1cm,
+            text centered,
+            text width=2.5cm % Ajustado para el texto del diamante
+        },
+        % Estilo para las flechas
+        arrow/.style={-Stealth, thick}
+    ]
+
+    % --- Definición de los Nodos del Diagrama ---
+    
+    % Nodos de la columna principal (flujo exitoso)
+    \node (start) [startstop] {};
+    \node (acc_interfaz) [activity, below=of start] {Usuario accede a la interfaz};
+    \node (carga_ficheros) [activity, below=of acc_interfaz] {Usuario carga ficheros SIN y CON tratamiento};
+    \node (pulsa_procesar) [activity, below=of carga_ficheros] {Usuario pulsa Iniciar Procesamiento};
+    \node (valida) [decision, below=of pulsa_procesar, yshift=-0.7cm] {¿Ficheros correctos?};
+    \node (ejecuta_proc) [activity, below=of valida, yshift=-0.7cm] {Sistema ejecuta el pipeline de análisis completo};
+    \node (muestra_res) [activity, below=of ejecuta_proc] {Sistema muestra los resultados en la interfaz};
+    \node (fin_ok) [startstop, below=of muestra_res, label=right:Fin] {};
+
+    % Nodos de la rama de excepción (error)
+    \node (error) [activity, right=of valida, xshift=3cm, fill=red!20] {Sistema muestra un mensaje de error claro};
+    \node (fin_error) [startstop, below=of error, label=right:Fin] {};
+
+    % --- Conexión de los Nodos con Flechas ---
+    
+    % Flujo principal
+    \draw [arrow] (start) -- (acc_interfaz);
+    \draw [arrow] (acc_interfaz) -- (carga_ficheros);
+    \draw [arrow] (carga_ficheros) -- (pulsa_procesar);
+    \draw [arrow] (pulsa_procesar) -- (valida);
+    \draw [arrow] (valida) -- node[anchor=east, pos=0.5] {Sí} (ejecuta_proc);
+    \draw [arrow] (ejecuta_proc) -- (muestra_res);
+    \draw [arrow] (muestra_res) -- (fin_ok);
+
+    % Flujo de excepción
+    \draw [arrow] (valida) -- node[anchor=south, pos=0.4] {No} (error);
+    \draw [arrow] (error) -- (fin_error);
+
+    \end{tikzpicture}
+    \caption{Diagrama de Actividad para el Caso de Uso 1 (CU-1).}
+    \label{fig:diag_act_cu1}
+\end{figure}
+
+\newpage
+
+\begin{longtable}{p{0.25\linewidth} p{0.65\linewidth}}
+    
+    \toprule
+    \textbf{ID del Caso de Uso} & CU-2 \\
+    \midrule
+    \endfirsthead
+    
+    \multicolumn{2}{c}%
+    {{\bfseries \tablename\ \thetable{} -- continuación de la página anterior}} \\
+    \toprule
+    \textbf{ID del Caso de Uso} & CU-2 \\
+    \midrule
+    \endhead
+
+    \bottomrule
+    \endfoot
+
+    \endlastfoot
+
+    \textbf{Nombre} & Inspeccionar y descargar resultados del análisis \\
+    \midrule
+    \textbf{Actor Principal} & Usuario (Investigador/Técnico) \\
+    \midrule
+    \textbf{Requisitos Asociados} & RF: 10, 11, 12, 13, 14 \\
+    \midrule
+    \textbf{Descripción} & Una vez completado el análisis, el usuario puede descargar el resultado principal. Además, puede acceder a una sección de detalles para validar la calidad del proceso y descargar imágenes intermedias. \\
+    \midrule
+    \textbf{Precondición} & El Caso de Uso 1 (CU-1) se ha completado con éxito. \\
+    \midrule
+    \textbf{Flujo Principal} & 
+        1. El usuario observa el resultado principal (imagen y porcentaje). \newline
+        2. Pulsa "Descargar Imagen de Resultado" para guardar la imagen final (cubre RF-10). \newline
+        3. (Opcional) Expande la sección "Ver detalles y descargas adicionales" (cubre RF-11). \newline
+        4. Dentro de la sección, puede inspeccionar la superposición del alineamiento (cubre RF-12) y visualizar/descargar las imágenes RGB y trinarizadas base (cubre RF-13, RF-14). \\
+    \midrule
+    \textbf{Postcondición} & El usuario ha guardado en su equipo local las imágenes que necesita para su informe o análisis posterior. \\
+    \midrule
+    \textbf{Excepciones} & Ninguna. \\
+    \midrule
+    \textbf{Importancia} & Alta \\
+    \caption{CU-2 - Inspeccionar y descargar resultados} \label{tab:cu2} \\
+\end{longtable}
+
+% --- Diagrama de Actividad para el Caso de Uso 2 (CU-2) ---
+\begin{figure}[H]
+    \centering
+    % Ajustamos el ancho máximo al de la caja de texto; si el diagrama
+    % ya cupiese no se escala, y si es más ancho se reduce
+    \begin{adjustbox}{max width=\textwidth,center}
+        \begin{tikzpicture}[
+            node distance=1.3cm and 1.5cm,
+            % Estilo para los nodos de acción del usuario/sistema
+            activity/.style={
+                rectangle,
+                draw,
+                thick,
+                fill=blue!10,
+                minimum width=4.5cm,
+                minimum height=1.2cm,
+                text centered,
+                text width=4.3cm
+            },
+            % Estilo para los nodos de inicio y fin
+            startstop/.style={
+                circle,
+                draw,
+                thick,
+                fill=black,
+                inner sep=0pt,
+                minimum size=7mm
+            },
+            % Estilo para el nodo de decisión
+            decision/.style={
+                diamond,
+                draw,
+                thick,
+                fill=orange!20,
+                aspect=1.5,
+                minimum size=1cm,
+                text centered,
+                text width=3cm
+            },
+            % Estilo para las flechas
+            arrow/.style={-Stealth, thick}
+        ]
+
+        % --- Definición de los Nodos del Diagrama ---
+
+        \node (start) [startstop] {};
+        \node (observa) [activity, below=of start] {Usuario observa los resultados del análisis};
+        
+        % Punto de bifurcación invisible para organizar el flujo
+        \coordinate (fork_point) at ($(observa.south) + (0,-1.3cm)$);
+
+        % Rama 1: Descarga directa del resultado final
+        \node (descarga_final) [activity, left=of fork_point, xshift=-2cm] {Pulsar Descargar Imagen de Resultado};
+        \node (sistema_da_final) [activity, below=of descarga_final] {Sistema proporciona el fichero PNG final};
+        \node (fin_directo) [startstop, below=of sistema_da_final, label=right:Fin] {};
+
+        % Rama 2: Inspección y descarga de detalles
+        \node (expande_detalles) [activity, right=of fork_point, xshift=2cm] {Pulsar para expandir Ver detalles};
+        \node (inspecciona) [activity, below=of expande_detalles] {Usuario inspecciona las visualizaciones de detalle};
+        \node (decision_descarga) [decision, below=of inspecciona, yshift=-0.7cm] {¿Desea descargar imágenes base?};
+        \node (descarga_base) [activity, below=of decision_descarga, yshift=-0.7cm] {Pulsar botón de descarga de imagen base};
+        \node (fin_detalles_descarga) [startstop, below=of descarga_base, label=right:Fin] {};
+        \node (fin_detalles_sin_descarga) [startstop, right=of decision_descarga, xshift=3.5cm, label=right:Fin] {};
+        
+        % --- Conexión de los Nodos con Flechas ---
+        
+        \draw [arrow] (start) -- (observa);
+        
+        % Conexiones de las ramas (usando fork_point)
+        \draw [arrow] (observa.south) |- (descarga_final);
+        \draw [arrow] (observa.south) |- (expande_detalles);
+        
+        % Flujo de la rama 1
+        \draw [arrow] (descarga_final) -- (sistema_da_final);
+        \draw [arrow] (sistema_da_final) -- (fin_directo);
+
+        % Flujo de la rama 2
+        \draw [arrow] (expande_detalles) -- (inspecciona);
+        \draw [arrow] (inspecciona) -- (decision_descarga);
+        \draw [arrow] (decision_descarga) -- node[anchor=east,  pos=0.5] {Sí} (descarga_base);
+        \draw [arrow] (descarga_base) -- (fin_detalles_descarga);
+        \draw [arrow] (decision_descarga) -- node[anchor=south, pos=0.4] {No} (fin_detalles_sin_descarga);
+        
+        \end{tikzpicture}
+    \end{adjustbox}
+    \caption{Diagrama de Actividad para el Caso de Uso 2 (CU-2).}
+    \label{fig:diag_act_cu2}
+\end{figure}

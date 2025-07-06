@@ -1,0 +1,312 @@
+\apendice{Plan de Proyecto Software}
+
+\section{Introducción}
+En este apéndice de la memoria se va a estudiar y discutir la viabilidad del proyecto, tanto en términos económicos como legales así como de la planificación temporal seguida durante el desarrollo del mismo.
+
+\section{Planificación temporal}
+
+Para la gestión del proyecto se adoptó una metodología de desarrollo ágil, estructurada en \textbf{\textit{sprints}}. Este enfoque moderno y flexible permitió un progreso iterativo y transparente, con objetivos claros definidos para cada semana y un seguimiento riguroso del trabajo a través de los \textit{commits} registrados en el repositorio de GitHub del proyecto.
+
+La elección de esta metodología, en lugar de un modelo tradicional en cascada, ha sido estratégica para poder adaptarse con agilidad a los desafíos técnicos y refinar los requisitos de forma continua. Esta flexibilidad resultó crucial para cumplir con el hito principal del proyecto: la entrega de un Producto Mínimo Viable (MVP) robusto y funcional a principios de mayo, que sirviera como base para las fases de validación y refinamiento posteriores.
+
+\subsection{\textbf{Fase de Desarrollo General y MVP (Sprints 1-8)}}
+
+
+\subsubsection{Sprint 1: Kick-off y estructura del proyecto (7 – 13 de marzo)}
+
+
+El proyecto se inauguró con el \textit{kick-off} técnico. El objetivo fundamental fue establecer una arquitectura de software sólida y escalable. Se crearon los directorios clave (\verb|src|, \verb|recursos|, \verb|src/funciones|) y los ficheros iniciales (\verb|main.py|, \verb|requirements.txt|, \verb|.gitignore|) partiendo del proyecto ya existente como base. Durante este \textit{sprint} se definió un esqueleto de aplicación sobre el que construir las futuras funcionalidades, asegurando desde el principio un entorno de trabajo limpio y organizado.
+
+
+\subsubsection{Sprint 2: Refactorización de la arquitectura (14 – 20 de marzo)}
+
+Tras una revisión inicial, se detectó que la lógica de la aplicación tendía a concentrarse en un único fichero. En este sprint se realizó a una refactorización profunda para aplicar el principio de Separación de Intereses (\textit{Separation of Concerns}). Se crearon módulos específicos para la interfaz de usuario (\verb|interfaz.py|), el procesamiento de imágenes (\verb|procesamiento.py|) y la gestión de archivos (\verb|archivos.py|). Esta reorganización, fue un paso crítico para garantizar la mantenibilidad y escalabilidad del código a largo plazo.
+
+
+\subsubsection{Sprint 3: Consolidación de funcionalidades y primer prototipo (21 – 27 de marzo)}
+
+El objetivo fue implementar el flujo de datos de extremo a extremo y obtener el primer prototipo funcional. Se desarrolló la lógica para la carga de ficheros hiperespectrales (\verb|.bil| y \verb|.hdr|), su interpretación mediante la biblioteca \textit{Spectral} y su conversión a un hipercubo de \textit{NumPy}. 
+
+\subsubsection{Sprint 4: Nuevo método de detección (28 de marzo – 3 de abril)}
+
+El algoritmo de umbral inicial demostró ser insuficiente para la detección precisa del cobre. Este sprint se enfocó en la investigación de las firmas espectrales del compuesto. Se analizaron los histogramas de reflectancia de múltiples bandas. Se implementó un nuevo método de detección basado en umbrales compuestos sobre la banda 164 (728.24 nm), lo que permitió discriminar con mayor fiabilidad los píxeles con tratamiento de los que no lo tenían.
+
+
+\subsubsection{Sprint 5: Mejora de fidelidad y simplificación de la interfaz (4 – 10 de abril)}
+
+
+Se observó que los filtros de suavizado genéricos, aunque reducían el ruido, también eliminaban detalles finos de las gotas. Se tomó la decisión técnica de eliminar toda supresión de ruido previa para trabajar con los datos en crudo. En paralelo, se simplificó la interfaz de usuario, eliminando controles superfluos y centrando el flujo de trabajo en la secuencia Cargar -> Procesar -> Analizar.
+
+\subsubsection{Sprint 6: Mejoras visuales y Prototipo en vídeo (11 – 17 de abril)}
+
+Este sprint se dividió en dos objetivos: mejorar la experiencia de usuario (UX) y explorar el análisis en tiempo real. Se implementó una hoja de estilos (CSS) para dotar a la aplicación de una estética profesional y una paleta de colores corporativa. El mayor desafío técnico fue la creación de la rama \textit{video}, donde se adaptó el pipeline de procesamiento para que pudiera ejecutarse sobre fotogramas de un \textit{stream} de vídeo, optimizando el rendimiento para lograr una salida estable y demostrando la viabilidad de la tecnología para aplicaciones de campo.
+
+\subsubsection{Sprint 7: \textit{Branding} y \textit{DevOps} (18 – 24 de abril)}
+
+Con el prototipo madurando, el enfoque se desplazó hacia las buenas prácticas de \textit{DevOps} y la profesionalización del producto. Se configuró un \verb|Dockerfile| detallado para crear un entorno de ejecución contenido, aislado y 100\% reproducible, eliminando problemas de dependencias. Se añadieron los logos de las entidades colaboradoras y se pulieron elementos de la interfaz, asegurando una presentación coherente y profesional.
+
+\subsubsection{Sprint 8: Preparación para versión demostrable (MVP) (25 de abril – 1 de mayo)}
+
+El objetivo de este sprint fue empaquetar una versión estable y fácilmente ejecutable del software, constituyendo el Producto Mínimo Viable (MVP). Se creó el \textit{script} \verb|lanzar_app.bat| para simplificar la ejecución en Windows. Se crearon las ramas \verb|demo| y \verb|video| como instantáneas congeladas y estables del código, obteniendo así versiones fiables listas para demostración.
+
+\subsection{\textbf{Implmentación de Sustracción de Ruido (Sprints 9-12)}}
+
+\subsubsection{Sprint 9: Ajustes Post-MVP e inicio de funcionalidades avanzadas (2 – 8 de mayo)}
+
+Tras validar el MVP, se inició una nueva fase de desarrollo enfocada en el núcleo innovador del proyecto: la eliminación de ruido por sustracción. Esto marcó un cambio de paradigma: en lugar de filtrar el ruido, el nuevo enfoque consistiría en detectar todos los posibles artefactos en una hoja de control para luego sustraerlos de la hoja tratada. Implementando así un método diferencial mucho más robusto y científicamente riguroso.
+
+\subsubsection{Sprint 10: Mejora del Ajuste Automático (9 – 15 de mayo)}
+
+Después de realizar una investigación sobre posibles métodos para aplicar el algoritmo de sustracción de ruido, se implementó el pipeline completo de alineación automática de imágenes: detección de bordes con Canny, extracción de puntos clave con ORB, emparejamiento por fuerza bruta (\textit{BFMatcher}) y estimación robusta de la transformación afín con RANSAC para descartar correspondencias erróneas. 
+
+\subsubsection{Sprint 11: Sprint de estabilización (16 – 22 de mayo)}
+
+Tras la implementación de una funcionalidad tan compleja como la alineación automática, este \textit{sprint} se dedicó por completo a la estabilización. No se añadieron nuevas características; en su lugar, se realizaron pruebas exhaustivas, se corrigieron errores (\textit{bugs}) y se optimizó el rendimiento del nuevo algoritmo para asegurar su robustez y precisión en diferentes escenarios.
+
+\subsubsection{Sprint 12:  Pruebas y validación (23 de mayo – 29 de mayo)}
+
+Durante este \textit{sprint} se realizaron diversas pruebas y validaciones para verificar el correcto desempeño de la aplicación así como la validación de todas las funcionalidades. Asegurando así un correcto desempeño por parte de todos los componentes que conforman la aplicación.  Una vez superadas estas pruebas se dió por finalizado el desarrollo de las funcionalidades de la aplicación, Dando comienzo así a la fase de documentación.
+
+\subsection{\textbf{Refinamiento y Documentación final (Sprints 13+)}}
+
+\subsubsection{Sprints 13, 14 y 15: Inicio de documentación (30 de mayo – 19 de junio)}
+
+Durante estos \textit{sprints} se realizaron los primeros borradores de la documentación así como su revisión por parte de los tutores. Durante este periodo de tiempo no se realizó ninguna modificación al código de la aplicación.
+
+\subsubsection{Sprint 16 : Modificación de la interfaz y diseño del logotipo ( 20 de junio - 26 de junio)}
+
+Durante este \textit{sprint} se implementó una interfaz de usuario (UI) totalmente nueva dando así un nuevo \textit{look and feel} a la aplicación, modificando esquema de colores y disposición de los elementos de la interfaz. Además se diseñó un logotipo para la aplicación con el objetivo de darle un aspecto más profesional y terminada a la aplicación.
+
+% --- INICIO DEL CÓDIGO DEL DIAGRAMA DE FASES ---
+
+% Definimos los colores para las fases para poder cambiarlos fácilmente
+\definecolor{colorFaseI}{HTML}{2563EB}  % Azul
+\definecolor{colorFaseII}{HTML}{16A34A} % Verde
+\definecolor{colorFaseIII}{HTML}{7E22CE} % Púrpura
+\definecolor{colorTexto}{HTML}{374151} % Gris oscuro para el texto
+\definecolor{colorBorde}{HTML}{E5E7EB} % Gris claro para el borde
+
+\begin{figure}[H]
+    \centering
+    \resizebox{\textwidth}{!}{% Redimensiona el diagrama para que ocupe todo el ancho de la página
+    \begin{tikzpicture}[
+        % Estilo para las cajas de cada fase
+        phase/.style={
+            draw=colorBorde,
+            thick,
+            fill=white,
+            rounded corners=5pt,
+            text width=4.5cm, % Ancho del texto dentro de la caja
+            minimum height=8cm,
+            drop shadow={
+                opacity=0.2,
+                shadow xshift=2pt,
+                shadow yshift=-2pt
+            },
+            text=colorTexto,
+            align=left % Alinea el texto a la izquierda por defecto
+        },
+        % Estilo para las flechas que conectan las fases
+        arrow/.style={
+            ->, % <-- CORRECCIÓN: Se usa una punta de flecha universal y compatible
+            thick,
+            line width=1.2pt,
+            color=gray!60
+        }
+    ]
+
+    % --- NODO FASE I ---
+    \node[phase] (fase1) {
+        {\centering \color{colorFaseI} \Large\bfseries Fase I \par}
+        {\centering \small\bfseries Desarrollo General y MVP \\ (Sprints 1-8) \par}
+        \vspace{1.5em} % Espacio vertical
+
+        {\small\bfseries Objetivo Principal:}
+        \begin{itemize}[leftmargin=*, topsep=2pt, itemsep=0pt, parsep=2pt]
+            \item[] \footnotesize Establecer la arquitectura, implementar funcionalidades básicas y consolidar un prototipo funcional (MVP) para validación.
+        \end{itemize}
+        \vspace{1em}
+        
+        {\small\bfseries Hitos Técnicos Clave:}
+        \begin{itemize}[leftmargin=*, label=\textbullet, topsep=2pt, itemsep=0pt, parsep=2pt]
+            \item \footnotesize Configuración de la Arquitectura
+            \item \footnotesize Detección por Firmas Espectrales
+            \item \footnotesize Entorno reproducible con Docker
+            \item \footnotesize \textbf{Entrega del MVP}
+        \end{itemize}
+    };
+
+    % --- NODO FASE II ---
+    \node[phase, right=1.5cm of fase1] (fase2) {
+        {\centering \color{colorFaseII} \Large\bfseries Fase II \par}
+        {\centering \small\bfseries Implementación de Sustracción de Ruido \\ (Sprints 9-12) \par}
+        \vspace{1.5em}
+
+        {\small\bfseries Objetivo Principal:}
+        \begin{itemize}[leftmargin=*, topsep=2pt, itemsep=0pt, parsep=2pt]
+            \item[] \footnotesize Desarrollar, integrar y validar el algoritmo de eliminación de ruido mediante sustracción diferencial.
+        \end{itemize}
+        \vspace{1em}
+
+        {\small\bfseries Hitos Técnicos Clave:}
+        \begin{itemize}[leftmargin=*, label=\textbullet, topsep=2pt, itemsep=0pt, parsep=2pt]
+            \item \footnotesize Diseño de Arquitectura Diferencial
+            \item \footnotesize Alineación Automática (ORB+RANSAC)
+            \item \footnotesize Estabilización de funcionalidades
+            \item \footnotesize \textbf{Validación de Campo}
+        \end{itemize}
+    };
+
+    % --- NODO FASE III ---
+    \node[phase, right=1.5cm of fase2] (fase3) {
+        {\centering \color{colorFaseIII} \Large\bfseries Fase III \par}
+        {\centering \small\bfseries Refinamiento y Documentación \\ (Sprints 13+) \par}
+        \vspace{1.5em}
+        
+        {\small\bfseries Objetivo Principal:}
+        \begin{itemize}[leftmargin=*, topsep=2pt, itemsep=0pt, parsep=2pt]
+            \item[] \footnotesize Realizar la calibración final, entregar la versión definitiva del software y redactar la memoria técnica del proyecto.
+        \end{itemize}
+        \vspace{1em}
+        
+        {\small\bfseries Hitos Técnicos Clave:}
+        \begin{itemize}[leftmargin=*, label=\textbullet, topsep=2pt, itemsep=0pt, parsep=2pt]
+            \item \footnotesize Ajuste Fino (*Tuning*) de Parámetros
+            \item \footnotesize Entrega de la Versión Final
+            \item \footnotesize Redacción de la Memoria Técnica
+            \item \footnotesize \textbf{Cierre del Proyecto}
+        \end{itemize}
+    };
+    
+    % --- FLECHAS CONECTORAS ---
+    \draw [arrow] (fase1.east) -- (fase2.west);
+    \draw [arrow] (fase2.east) -- (fase3.west);
+
+    \end{tikzpicture}
+    } % Fin del resizebox
+    \caption{Diagrama de Evolución del Proyecto por Fases.}
+    \label{fig:diagrama_fases_tikz}
+\end{figure}
+
+% --- FIN DEL CÓDIGO DEL DIAGRAMA ---
+
+
+ 
+
+
+
+\section{Estudio de viabilidad}
+En este apartado se va a realizar un análisis de la viabilidad del proyecto.  Tanto  desde la perspectiva económica como  desde la legal para determinar la factibilidad y sostenibilidad del mismo .
+
+\subsection{Viabilidad económica}
+Para determinar la viabilidad económica del proyecto, se ha de realizar una estimación de los costes asociados a su desarrollo. Es importante remarcar el hecho de que este estudio de viabilidad es una simulación de un entorno profesional donde es necesario reconocer y cuantificar los costes asociados proyecto para poder estudiar la viabilidad del desarrollo del mismo.
+Al tratarse de un Trabajo de Fin de Grado no se persigue ningún beneficio económico directo. Sin embargo uno de sus objetivos es la adquisición de conocimiento y la implementación de una herramienta funcional.
+
+\subsubsection{Coste de Hardware}
+A continuación, se detalla el equipamiento y se calcula su coste anual mediante una amortización estándar de 5 años.
+
+\begin{itemize}
+    \item \textbf{Ordenador portátil (LG Gram):} 1.300 €
+    \item \textbf{PC de sobremesa (Torre, 2 monitores y periféricos):} 1.700 €
+\end{itemize}
+
+El coste total del hardware asciende a 3.000 €. Aplicando una amortización a 5 años, el coste anual del hardware para el proyecto sería de:
+$$ \frac{3.000\text{ €}}{5\text{ años}} = 600\text{ €/año} $$
+
+\subsubsection{Coste de Software}
+El software utilizado en el proyecto ha sido, en su mayoría, de código abierto o con licencias gratuitas para uso académico y personal.
+
+\begin{itemize}
+    \item \textbf{Sistemas Operativos:} Windows 10 (portátil) y Windows 11 (PC), preinstalados en los equipos (licencia OEM), por lo que su coste es marginal para el proyecto teniendo un impacto de 0 €.
+    \item \textbf{Entorno de Desarrollo (IDE):} Para la realización del proyecto se empleó Visual Studio Code (en su versión \textit{Insiders}), de uso gratuito.
+    \item \textbf{Editor de documentación:} Para la redacción de la documentación se utilizó Overleaf, utilizando su plan gratuito.
+    \item \textbf{Bibliotecas de Python:} Todas las bibliotecas empleadas (Numpy, OpenCV, Streamlit, etc.) son de código abierto y gratuitas.
+\end{itemize}
+
+Teniendo esto en cuenta se puede estimar que dado que no se ha requerido la adquisición de licencias de software de pago, el coste total en este apartado es de \textbf{0 €}.
+
+\subsubsection{Coste de Personal}
+Para este cálculo, se simula la contratación de un programador con perfil \textit{Junior} a jornada parcial (50\% del tiempo) en una empresa para el desarrollo del proyecto.
+
+\begin{itemize}
+    \item \textbf{Salario mensual (bruto):} 1.800 € (12 pagas)
+    \item \textbf{Dedicación al proyecto:} 50 \% (media jornada)
+\end{itemize}
+
+El coste mensual del personal dedicado al proyecto a media jornada sería:
+$$ 1.800\text{ €/mes} \times 0.50 = 900\text{ €/mes} $$
+
+El coste anual del sueldo del programador contratado sería de:
+$$ 900\text{ €/mes} \times 12\text{ meses} = 10.800\text{ €/año} $$
+
+\subsubsection{Otros Costes}
+No se han identificado otros costes relevantes para el desarrollo del proyecto. Los gastos ocasionados por la electricidad o la conexión a internet necesarios para llevar a cabo el proyecto se considera que no tienen un impacto directo del proyecto por estar asociados al entorno de trabajo.
+
+\subsubsection{Coste Total y Conclusión}
+Sumando todos los costes anuales del proyecto, obtenemos el coste total teórico del proyecto en un año.
+
+\begin{table}[h!]
+\centering
+\begin{tabular}{|l|r|}
+\hline
+\textbf{Recurso} & \textbf{Coste Anual} \\
+\hline
+Coste de Hardware & 600,00 € \\
+Coste de Software & 0,00 € \\
+Coste de Personal & 10.800,00 € \\
+Otros Costes & 0,00 € \\
+\hline
+\textbf{Total} & \textbf{11.400,00 €} \\
+\hline
+\end{tabular}
+\caption{Coste anual estimado del proyecto.}
+\end{table}
+
+Observando este coste desde una perspectiva meramente académica este coste de desarrollo del proyecto es demasiado elevado si lo que se busca es la rentabilidad ya que estos costes no se recuperarían en ningún momento. Esto debido a que no se generan ingresos directos por la realización del proyecto. Desde un punto de vista empresarial, solo sería viable el proyecto en el caso de que el producto desarrollado sea lo suficientemente completo como para generar interés por parte de potenciales clientes que quisieran adquirir el producto bien como producto consumible final o como patente para aplicar en sus propios proyectos.
+
+Sin embargo la viabilidad del proyecto no radica únicamente en los posibles beneficios económicos asociados al mismo. También hay que considerar los intangibles que produce el desarrollo de un producto de estas características. Se trata de la adquisición de competencias técnicas y personales, la creación de una herramienta funcional para el proyecto Dig4Vitis y la contribución a la investigación en agricultura de precisión.
+
+\subsection{Viabilidad legal}
+En este apartado se van a analizar las licencias de las herramientas y bibliotecas de software utilizadas para asegurar la conformidad legal del proyecto. Además, se propondrá una licencia para el código fuente generado.
+
+\subsubsection{Licencias del Software y Bibliotecas Utilizadas}
+El proyecto se fundamenta en el uso de Python y un conjunto de bibliotecas de código abierto. A continuación, se describen las licencias más relevantes empleadas:
+
+\begin{itemize}
+    \item \textbf{Licencia MIT:} Es una de las licencias de software libre más permisivas. Permite la reutilización, modificación y distribución del software para cualquier fin (incluso comercial), exigiendo únicamente que se mantenga el aviso de derechos de autor y la licencia original en las copias del software.
+    \item \textbf{Apache License 2.0:} Es otra licencia permisiva que permite el uso, modificación y distribución libremente. Requiere que se conserven los avisos de derechos de autor y patentes. Una característica importante es que otorga una licencia de patente explícita de los contribuidores a los usuarios.
+    \item \textbf{BSD 3-Clause License:} Similar a la licencia MIT, es muy permisiva pero incluye una cláusula que prohíbe el uso del nombre de los autores o contribuidores para promocionar productos derivados sin permiso explícito.
+\end{itemize}
+
+La siguiente tabla resume las principales bibliotecas utilizadas y sus respectivas licencias.
+
+\begin{table}[ht!]
+\centering
+\begin{tabular}{|l|l|}
+\hline
+\textbf{Biblioteca/Herramienta} & \textbf{Licencia} \\
+\hline
+Python & Python Software Foundation License (Compatible con GPL) \\
+Numpy & BSD 3-Clause License \\
+OpenCV-Python & Apache License 2.0 \\
+Pandas & BSD 3-Clause License \\
+Streamlit & Apache License 2.0 \\
+Spectral Python (Spy) & Licencia MIT \\
+Scikit-Image (skimage) & BSD 3-Clause License \\
+Pillow & Historical Permission Notice and Disclaimer (HPND) \\
+\hline
+\end{tabular}
+\caption{Bibliotecas utilizadas en el proyecto y sus licencias.}
+\end{table}
+
+El uso de estas bibliotecas es totalmente compatible con el desarrollo de un proyecto académico y no impone restricciones que limiten su uso o distribución.
+
+\subsubsection{Licencia del Proyecto}
+Dada la naturaleza académica del proyecto así como el análisis de las distintas licencias y restricciones de las bibliotecas utilizadas durante el desarrollo del mismo, se ha llegado a la conclusión de que la licencia que más se adecúa al entorno de desarrollo y condiciones presentadas para este proyecto es la \textbf{Licencia MIT}.
+
+La decisión de esta licencia sobre las demás se fundamenta en su simplicidad y en su carácter permisivo, que facilita la colaboración, la reutilización del código en futuras investigaciones y la posible integración con otros proyectos sin imponer complejas restricciones legales.
+
+La adopción de esta licencia MIT permite que cualquier persona pueda realizar cualquier modificación o mejora sobre el proyecto ya desarrollado. Teniendo en cuenta que el requisito impuesto por esta licencia es dar crédito al autor original del proyecto. De esta manera se consigue fomentar el espíritu de colaboración de la comunidad de software de código abierto.
+
+
+

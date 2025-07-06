@@ -1,0 +1,86 @@
+\capitulo{4}{Técnicas y herramientas}
+
+La consecución de los objetivos de este proyecto ha requerido la selección y articulación de un conjunto de tecnologías específicas. La elección de cada herramienta no ha sido arbitraria, sino que responde a la necesidad de construir una solución robusta, eficiente y de fácil mantenimiento. En este capítulo se detalla el ecosistema tecnológico empleado, justificando el rol de cada componente dentro de la arquitectura del proyecto. 
+
+\section{Lenguaje de Programación y Entrono de Desarrollo}
+
+\subsection{Python }
+Lenguaje de programación ampliamente utilizado, denominado de alto nivel. Destaca sobre todo  por su simplicidad y versatilidad\cite{PythonDocs311}. El motivo de su elección es debido a su amplia gama de bibliotecas que facilitan mucho el trabajo y la implementación de funcionalidades de manera sencilla y directa. En este caso en concreto la gran cantidad de bibliotecas ampliamente reconocidas para el análisis de imágenes y el trabajo sobre ellas mediante visión por computadora. La disponibilidad de herramientas especializadas como NumPy, OpenCV o Spectral fue un factor decisivo, ya que permitieron acelerar el desarrollo y basar la solución en tecnologías estándar de la industria y la investigación. 
+
+\subsection{Batchfile:}
+No es un lenguaje en sí, sino un archivo que al ejecutarse escribe en consola una serie de comandos. El uso en el proyecto se ciñe a agrupar los comandos a ejecutar para poder abrir la aplicación web del proyecto. Este tipo de archivos puede ser peligroso si no se conoce exactamente lo que hacen ya que podrían ser una fuente de posibles ciberataques.
+
+\subsection{VsCodeInsiders}
+IDE (Entorno de Desarrollo Integrado) de programación propiedad de Microsoft elegido por delante de otras alternativas como Pycharm. Se trata de una versión de VsCode\cite{VSCode2025} que posee las últimas funcionalidades en estado de beta, de manera que permite el acceso a estas antes de que salgan para el público general.  Se ha elegido en vez de otros entornos más específicos de Python como puede ser Pycharm, propiedad de JetBrains, debido a que este IDE es más eficiente y supone una menor carga para el dispositivo, sacrificando alguna funcionalidad irrelevante para el desarrollo del proyecto. Se trata de una herramienta gratuita que además incluye herramientas de control de versiones como Git. Esto facilitó un flujo de trabajo ágil y ordenado.
+
+
+
+\section{Ecosistema de Bibliotecas para el procesamiento de imágenes}
+
+    \subsection{Numpy}
+Biblioteca ampliamente utilizada sobre todo en el ecosistema científico en Python, para facilitar los cálculos numéricos eficientes empleando para ello arrays  multidimensionales. En este caso en concreto su principal uso ha sido para poder trabajar de manera eficiente con los datos (hipercubo) de las imágenes pudiendo extraer los valores de reflectancia de los píxeles y trabajar con ellos de una manera más eficiente\cite{Harris2020NumPy}.
+
+
+\subsection{OpenCV}
+Biblioteca para la visión por ordenador y tratamiento de imágenes. En el caso de este trabajo se ha usado para la detección de bordes de las hojas así como el algoritmo ORB que realiza la alineación de las 2 imágenes para la eliminación del ruido\cite{Bradski2000OpenCV}.
+
+\subsection{Pandas}
+Se trata de una de las biblioteca más importantes en el ecosistema de Python. Su principal uso en este proyecto es para la estructuración de los datos obtenidos de las imágenes hiperespectrales para su procesamiento y su exportación\cite{McKinney2010Pandas}.
+
+\subsection{Pillow} 
+Esta biblioteca se basa en la manipulación y procesamiento de imágenes en Python. Se trata de la evolución de un proyecto anterior PIL y se ha convertido en un estándar de facto para el análisis de imágenes en Python. En el caso de este proyecto, se ha usado para cargar las diferentes imágenes de la interfaz gráfica\cite{Pillow}. 
+
+\subsection{SkImage}
+Otra biblioteca para el procesamiento de imágenes en Python. En este proyecto se ha usado para facilitar el flujo de trabajo desde la imagen hiperespectral hasta las imágenes normales .png resultado del análisis.
+Además esta biblioteca posee una gran variedad de algoritmos entre los que se encuentra el algoritmo ORB empleado para alinear las imágenes para la supresión del ruido en el análisis\cite{vanderWalt2014ScikitImage}.
+
+\subsection{Spectral}
+Biblioteca centrada específicamente en el análisis de imágenes hiperespectrales y multiespectrales. Permitiendo la visualización, manipulación y procesamiento de datos espectrales. En el caso concreto de este trabajo se ha usado para la carga y gestión de los hipercubos (imágenes .bil) en formato ENVI, permitiendo el acceso a otras bibliotecas como numpy a las diferentes bandas del hipercubo\cite{SpectralPython}.
+
+\section{Framework de la Aplicación Web y Diseño}
+
+ \subsection{Streamlit}
+Esta biblioteca permite la creación de páginas web interactivas de manera sencilla y rápida. Es una gran herramienta ya que permite crear las páginas web sin conocimientos avanzados de programación web (HTML, JavaScript o CSS). Es el motor principal de la aplicación web de este proyecto sobre la que se ha implementado todo el funcionamiento y visualización de los datos\cite{Streamlit}.
+
+
+ \subsection{Css (Cascade Style Sheets):} 
+Lenguaje de programación utilizado principalmente para la representación visual de los elementos en una página web\cite{alvarez2017manual}. En este caso la aplicación implementada es una aplicación web basada en los recursos de la librería Streamlit, pero que para todo el aspecto visual, colores, títulos, organización de los contenidos en la página ,etc, ha sido realizado en CSS.
+
+
+\section{Herramientas de Gestión y Apoyo al desarrollo}
+
+\subsection{Github}
+Se trata de una herramienta que permite la gestión de proyectos de código principalmente, basada en el control de versiones Git\cite{GitHub2025}. La gestión a través de esta aplicación permite un modo más visual e interactivo que puede ser atractiva para usuarios que no tengan un gran dominio de Git y la linea de comandos ya que permite  la gestión a través de su interfaz gráfica. Cabe destacar su gran integración con la mayoría de IDEs más conocidos y utilizados facilitando de esta manera la gestión y control de las versiones del proyecto.
+En este proyecto en concreto se ha empleado un único repositorio donde se aloja todo el código referente a la aplicación desarrollada.  Sin embargo para al implementación de nuevas funcionalidades o pruebas alternativas se han usado distintas ramas para facilitar volver a un estado previo del proyecto si algo falla.
+
+
+\subsection{Overleaf}
+Entorno web empleado para la realización de la documentación\cite{Overleaf2025}. Permite la edición de archivos en formato LaTex. Ampliamente utilizado por personal de ámbito científico y técnico para la redacción y edición de papers y artículos científicos. Aunque dispone de una versión de pago que permite funcionalidades más avanzadas como sincronización con GitHub, mayor velocidad de compilación de los archivos, prioridad en alta demanda de servidores o herramientas de IA, para la realización de la memoria del proyecto estas funcionalidades son irrelevantes por lo que se ha usado únicamente la versión gratuita.
+
+\subsection{Spectronon}
+
+Se trata de una aplicación desarrollada por el fabricante de la cámara hiperespectral empleada en la toma de imágenes (Resonon Inc.)  que permite visualizar y trabajar con las diferentes bandas contenidas en el hipercubo que se sube a la aplicación, así como poder ver los diferentes valores de reflectancia de cada pixel, o las gráficas de representación los distintos valores para las distintas bandas contenidas en el cubo. Sirve como herramienta de apoyo para poder seleccionar la banda correcta para el análisis así como los umbrales para la detección del compuesto\cite{Resonon2025}.
+
+\subsection{Docker}
+Se trata de una aplicación que permite crear, ejecutar y gestionar aplicaciones dentro de contenedores\cite{DockerDocs2025}. Estos contenedores son unidades ligeras y portátiles que contienen todo lo necesario para la ejecución de la aplicación. Su utilidad reside en la posibilidad de que una vez terminada la implementación completa de la aplicación, ésta se puede compartir y ejecutar de una manera sencilla en cualquier dispositivo que disponga de Docker instalado, sin necesidad de instalar bibliotecas o aplicaciones adicionales para ello.
+
+
+\section{Herramientas de IA y ayuda}
+
+\subsection{ChatGPT} 
+Ampliamente conocida, esta plataforma de la empresa OpenAI permite el acceso a sus modelos para poder uso de ellos, a través de la aplicación de escritorio o de la versión web. Esta herramienta permite resolver dudas técnicas, investigar conceptos, aportar ideas de resolución de problemas de manera sencilla y rápida. Permite al usuario economizar esfuerzos y optimizar flujos de trabajo para mejorar la eficiencia y calidad del producto final obtenido\cite{ChatGPT2025}. Su principal uso en este proyecto ha sido como apoyo y ayuda a la explicación de diversos conceptos tanto teóricos como de programación así como la propuesta de posibles soluciones a los problemas encontrados durante la realización del proyecto.
+
+\subsection{Gemini}
+Se trata de otra herramienta de IA. En este caos propiedad de google, con utilidades y casos de uso similares  los de ChatGPT. Destaca por su gran ventana de contexto (1 millón de tokens) permitiendo así poder analizar documentos de mayor tamaño (aproximadamente 1500 páginas) de manera precisa y con todos los detalles\cite{Gemini2025}. Durante el transcurso del trabajo se ha utilizado como alternativa a ChatGPT en casos donde esa ventana de contexto es relevante como la explicación o resumen de documentos de gran extensión.
+
+\subsection{Perpelxity}
+Se trata de un buscador que integra herramientas de inteligencia artificial para mejorar los resultados de las búsquedas\cite{PerplexityAI2025}. La principal ventaja sobre otros buscadores o herramientas de IA y por la que he decidido usar esta herramienta, es que permite al usuario elegir si la búsqueda se realiza de fuentes generales (internet, wikipedia ...) o si así se desea permite que la búsqueda solo se haga a partir de fuentes meramente académicas como papers científicos o proyectos reglados incluidos en plataformas reconocidas como por ejemplo \textit{Semantic Scholar}\cite{SemanticScholar} o \textit{Arxiv}\cite{arXiv}. Esta herramienta facilita mucho el trabajo de investigación de conceptos teóricos, sabiendo que la información proporcionada está contrastada y es veraz.
+
+
+
+
+
+
+
+
+
