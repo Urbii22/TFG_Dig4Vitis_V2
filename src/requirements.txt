@@ -1,7 +1,7 @@
 numpy==2.2.5
 opencv_python_headless==4.10.0.84
 pandas==2.2.3
-Pillow==11.2.1
-skimage==0.0
+Pillow<11
+scikit-image
 spectral==0.23.1
 streamlit==1.36.0
