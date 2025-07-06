@@ -87,7 +87,7 @@ Para ejecutar EcoVid en tu máquina local, sigue estos pasos. El método recomen
 
 4.  **Ejecuta el contenedor**:
     ```bash
-    docker run -p 8501:8501 ecovid-app
+    docker run -p 8502:8502 ecovid-app
     ```
 
 5.  **Abre la aplicación**:
