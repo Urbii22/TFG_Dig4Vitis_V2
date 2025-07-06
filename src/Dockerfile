@@ -17,4 +17,4 @@ COPY . .
 EXPOSE 8502
 
 # Comando para ejecutar la aplicación
-CMD ["streamlit", "run", "main.py"]
+CMD ["streamlit", "run", "main.py","--server.maxUploadSize=2000"]
