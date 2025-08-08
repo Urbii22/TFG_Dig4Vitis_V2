@@ -25,5 +25,3 @@ repos:
       - id: mypy
         additional_dependencies: ["types-Pillow"]
         files: ^src/ecovid/|^tests/
-
-

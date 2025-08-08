@@ -15,7 +15,5 @@ Descripción de la solución.
 ## Alternativas consideradas
 
 ## Criterios de aceptación
-- [ ] 
-- [ ] 
-
-
+- [ ]
+- [ ]

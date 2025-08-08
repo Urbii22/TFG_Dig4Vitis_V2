@@ -13,7 +13,14 @@ Requires-Dist: pandas>=2.0
 Requires-Dist: Pillow<11
 Requires-Dist: scikit-image>=0.22
 Requires-Dist: spectral==0.23.1
-Requires-Dist: typer[all]>=0.12.0
+Requires-Dist: typer>=0.12.0
+Provides-Extra: dev
+Requires-Dist: pytest>=8.0; extra == "dev"
+Requires-Dist: pytest-cov>=5.0; extra == "dev"
+Requires-Dist: pre-commit>=3.6; extra == "dev"
+Requires-Dist: ruff>=0.5; extra == "dev"
+Requires-Dist: black>=24.4; extra == "dev"
+Requires-Dist: mypy>=1.10; extra == "dev"
 Dynamic: license-file
 
 <div align="center">
@@ -105,7 +112,7 @@ Para ejecutar EcoVid en tu máquina local, sigue estos pasos. El método recomen
 
 4.  **Ejecuta el contenedor**:
     ```bash
-    docker run -p 8502:8502 ecovid-app
+    docker run -p 8501:8501 ecovid-app
     ```
 
 5.  **Abre la aplicación**:
@@ -136,7 +143,7 @@ Para ejecutar EcoVid en tu máquina local, sigue estos pasos. El método recomen
 
 4.  **Ejecuta la aplicación**:
     ```bash
-    streamlit run src/main.py
+    streamlit run src/main.py --server.port=8501
     ```
 
 ---

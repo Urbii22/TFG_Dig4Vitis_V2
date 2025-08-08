@@ -80,7 +80,7 @@ Se diseñó e implementó un pipeline de alineación automática utilizando la b
 
     \item Sustracción de ruido: posteriormente se comparan las detecciones de ambas máscaras alineadas (imagen de control e imagen con producto). Se analizan los píxeles que conforman la región del área común uno a uno. Se considerarán como producto final, si, y solo si, cumplen dos condiciones: deben de ser identificados como producto en la imagen con gotas (producto) y NO fue detectado como tal en la imagen sin gotas (imagen de control) eliminando así todas aquellas detecciones coincidentes en ambas imágenes. Debido a que el ruido es común en ambas imágenes.
 
-    \item Post-procesado: finalmente, se calcula el porcentaje de recubrimiento dividiendo el número de píxeles de producto final entre el número total de píxeles que conforman la máscara de la hoja inicial (\textit{hoja\_común}). 
+    \item Post-procesado: finalmente, se calcula el porcentaje de recubrimiento dividiendo el número de píxeles de producto final entre el número total de píxeles que conforman la máscara de la hoja inicial (\textit{hoja\_común}).
 
 \end{enumerate}
 
@@ -100,5 +100,3 @@ La elección de ORB frente a otros algoritmos de detección de características 
     \item \textbf{Idoneidad para Flujos Automatizados:} ORB es fácil de parametrizar y funciona de manera estable en una amplia variedad de imágenes sin necesidad de ajustes finos, lo que lo hace ideal para el pipeline totalmente automático que se pretendía construir.
 \end{itemize}
 En definitiva, la sustracción de ruido mediante la alineación automática con ORB y RANSAC no solo resuelve el principal desafío técnico del proyecto, sino que lo hace de una manera elegante, robusta y científicamente rigurosa, cumpliendo con éxito los objetivos más exigentes del proyecto.
-
- 

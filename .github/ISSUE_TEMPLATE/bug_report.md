@@ -10,9 +10,9 @@ assignees: ''
 Qué pasó y qué esperabas que pasara.
 
 ## Pasos para reproducir
-1. 
-2. 
-3. 
+1.
+2.
+3.
 
 ## Evidencia
 Capturas/logs relevantes.
@@ -21,5 +21,3 @@ Capturas/logs relevantes.
 - SO:
 - Versión de Python:
 - Versión de la app/imagen Docker:
-
-

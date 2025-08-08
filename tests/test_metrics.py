@@ -17,5 +17,3 @@ def test_compute_coverage_empty_leaf():
     leaf = np.zeros((5, 5), dtype=bool)
     drops = np.ones((5, 5), dtype=bool)
     assert compute_coverage_percentage(leaf, drops) == 0.0
-
-

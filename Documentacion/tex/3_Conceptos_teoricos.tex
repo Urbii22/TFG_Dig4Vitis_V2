@@ -14,11 +14,11 @@ Es importante comprender sobre qué imagen estamos realizando el análisis. Esta
 
 \imagen{comparacion_tipos_hiperespectrales}{Representación visual de la información que contiene cada pixel de cada tipo de imagen.}{1}
 
-        
+
 
 \textbf{\subsection{Adquisición de imágenes hiperespectrales}}
 
-Para obtener imágenes hiperespectrales se necesita un sensor especializado capaz de captar todo el espectro de emisión del objeto o área a fotografiar. 
+Para obtener imágenes hiperespectrales se necesita un sensor especializado capaz de captar todo el espectro de emisión del objeto o área a fotografiar.
 
 Para ello existen diversos métodos para transportar el sensor\cite{Prez2018ComputacinDA} , puede ser o bien aéreo, mediante aviones o drones; o bien terrestre montando el sensor en vehículos o dispositivos terrestres.
 
@@ -36,22 +36,22 @@ Captura una línea espacial completa en cada instante, avanzando progresivamente
 \item \textbf{Barrido por barrido mecánico} (\textit{Whiskbroom})
 
 El sensor captura un único punto por vez, barriendo mecánicamente la escena en dos dimensiones. Menos común debido a su lentitud, pero útil en microscopía hiperespectral.
- 
+
 \end{itemize}
 
 \subsection{Detalles de una imagen hiperespectral}
-Las imágenes con las que se trabajó durante el proyecto son imágenes hiperespectrales en formato ENVI de 300 bandas. Estas imágenes constan de 2 archivos diferentes pero complementarios. 
+Las imágenes con las que se trabajó durante el proyecto son imágenes hiperespectrales en formato ENVI de 300 bandas. Estas imágenes constan de 2 archivos diferentes pero complementarios.
 
 El primero de extensión .bil (Band Interleaved by Line) se trata de un fichero binario que contiene los valores de reflectancia de cada pixel para cada una de las bandas. Como su nombre indica cada pixel corresponde con una línea del archivo donde se encuentran todos los diferentes valores de reflectancia en función de la banda.
 
 Por otro lado el fichero con extensión .bil.hdr hace referencia a la cabecera (o header) que describe las características de la imagen y como deben interpretarse los datos binarios contenidos en el otro archivo. En este encontramos características fundamentales como la numeración de bandas, los valores de éstas,  tamaño de los píxeles, además de incluir campos referentes a los tipos de datos de cada valor de reflectancia del pixel entre otros.
 
 Cabe destacar el gran tamaño de los ficheros con extensión .bil. Esto se debe a que al contener los datos de los valores de las 300 bandas la cantidad de datos que almacenan es muy grande. Las imágenes empleadas para el proyecto tienen unas dimensiones de 1358 x 900 x 300. En otras palabras los datos almacenados en el fichero .bil es del orden de mas de 360 millones de datos organizados en una matriz de 3 dimensiones de 1358 unidades de alto, 900 de ancho y 300 de profundidad a modo de hipercubo.
-Por este motivo estos ficheros pueden llegar a pesar del orden de 0,7 GB  mientras que los ficheros de cabecera (.bil.hdr) tienen un tamaño mucho menor  (unos 3Kb). 
+Por este motivo estos ficheros pueden llegar a pesar del orden de 0,7 GB  mientras que los ficheros de cabecera (.bil.hdr) tienen un tamaño mucho menor  (unos 3Kb).
 
 \imagen{hipercubo}{representación de una imagen hiperespectral en formato hipercubo \cite{camacho2020aproximacion}}{0.5}
 
-Precisamente por esta riqueza de información, las imágenes hiperespectrales fueron seleccionadas para este proyecto, ya que permiten identificar la firma espectral única del cobre, diferenciándola de la reflectancia de la hoja. La gestión de estos ficheros de gran volumen y su representación como hipercubos mediante \verb|Numpy| ha sido uno de los primeros desafíos técnicos abordados, siendo la base para todo el procesamiento posterior. 
+Precisamente por esta riqueza de información, las imágenes hiperespectrales fueron seleccionadas para este proyecto, ya que permiten identificar la firma espectral única del cobre, diferenciándola de la reflectancia de la hoja. La gestión de estos ficheros de gran volumen y su representación como hipercubos mediante \verb|Numpy| ha sido uno de los primeros desafíos técnicos abordados, siendo la base para todo el procesamiento posterior.
 
 \subsection{Aplicaciones de las imágenes hiperespectrales:}
 
@@ -67,7 +67,7 @@ Se utilizan para la determinación de la inocuidad y de la calidad de productos 
 Permiten el análisis no invasivo de tejidos y órganos, facilitando la detección temprana de enfermedades, el estudio de la composición de tejidos y el cálculo de abundancias de diferentes componentes biológicos en imágenes médicas
 
     \item \textbf{Conservación y estudio del patrimonio cultural}:
-Las imágenes hiperespectrales se emplean en la caracterización espectroscópica de obras de arte y objetos históricos, permitiendo estudiar materiales, pigmentos, restauraciones previas y estados de conservación sin dañar las piezas. 
+Las imágenes hiperespectrales se emplean en la caracterización espectroscópica de obras de arte y objetos históricos, permitiendo estudiar materiales, pigmentos, restauraciones previas y estados de conservación sin dañar las piezas.
 
     \item \textbf{Geología y prospección minera}:
 Se aplican en la prospección de minerales y recursos naturales, como la búsqueda de níquel, mediante el análisis de la composición superficial del terreno y la identificación de minerales específicos a partir de sus firmas espectrales.
@@ -87,7 +87,7 @@ Se utilizan para la detección de contaminantes, el seguimiento de la calidad de
     \item Capacidad de análisis en tiempo real y sobre grandes áreas o pequeños objetos.
 \end{itemize}
 
- 
+
 
 \section{Visión por ordenador}
 
@@ -115,7 +115,7 @@ Se trata de un algoritmo utilizado en la visión por ordenador para la detecció
 
     \item \textbf{Eficiencia computacional:} El requisito fundamental para el desarrollo de una aplicación web interactiva es la velocidad de respuesta. Debido al significativamente superior rendimiento computacional, se seleccionó el algoritmo ORB frente a alternativas clásicas como SIFT o SURF. Esto permite realizar la alineación de imágenes en un tiempo aceptable para el usuario sin sacrificar la precisión necesaria.
 
-    \item \textbf{Viabilidad de implementación:} A diferencia de SIFT, ORB no está sujeto a patentes, lo que garantiza que la solución desarrollada es de uso libre y puede ser fácilmente integrada, modificada o extendida en futuros trabajos académicos o comerciales sin restricciones de licencia. 
+    \item \textbf{Viabilidad de implementación:} A diferencia de SIFT, ORB no está sujeto a patentes, lo que garantiza que la solución desarrollada es de uso libre y puede ser fácilmente integrada, modificada o extendida en futuros trabajos académicos o comerciales sin restricciones de licencia.
 \end{itemize}
 
 \imagen{ORB}{flujo de trabajo para obtener puntos claves de imágenes mediante el algoritmo ORB }{1}
@@ -131,14 +131,14 @@ Se trata de un algoritmo utilizado en la visión por ordenador para la detecció
 
 
 \section{Binarización}
- 
+
  La binarización \cite{SAUVOLA2000225} consiste en convertir una imagen que se encuentra en escala de grises o a color en solo 2 colores de tal manera que los pixeles de dicha imagen solo pueden tener 2 valores, 0 o 1 (blanco o negro). Se realiza definiendo un umbral de tal manera que todo aquello que se encuentra por debajo del umbral pertenece a uno de los dos grupos y todo lo que se encuentra por encima al otro grupo.
- 
+
    \imagen{binarizacion}{ejemplo de binarización de una manzana}{1}
 
  En el caso específico de este proyecto la binarización ha sido empleada para realizar la discriminación entre fondo y hoja, y posteriormente se ha realizado una segunda binarización para diferenciar el producto de la hoja. A esta doble binarización se le ha decidido llamar \textit{trinarización} ya que en esencia se están diferenciando 3 grupos (fondo, hoja y producto)
 
- 
+
 \section{Segmentación por Trinarización}
 
 El problema de la identificación del producto requiere la segmentación en tres clases (fondo, hoja y producto) una binarización simple no resulta suficiente. Por ello se ha diseñado e implementado un proceso de segmentación secuencial denominado trinarización. Este método consiste en dos binarizaciones consecutivas de la siguiente forma:
@@ -148,5 +148,3 @@ El problema de la identificación del producto requiere la segmentación en tres
 \item Una segunda binarización únicamente sobre la ROI (Región de interés) para poder discriminar los píxeles correspondientes a producto de cobre basándose en su alta reflectancia en la banda 164 (728,24 nm)\cite{SANCHEZ2025101049}.
 \end{itemize}
 Este enfoque permite una segmentación precisa y eficiente adaptada a las características específicas de la distribución de las imágenes.
-
-

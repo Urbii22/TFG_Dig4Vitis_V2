@@ -6,5 +6,3 @@ __version__ = "0.1.0"
 # Los módulos pueden importarse explícitamente, por ejemplo:
 # from ecovid.pipeline import process_pair
 # from ecovid.metrics import compute_coverage_percentage
-
-

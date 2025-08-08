@@ -4,4 +4,12 @@ pandas>=2.0
 Pillow<11
 scikit-image>=0.22
 spectral==0.23.1
-typer[all]>=0.12.0
+typer>=0.12.0
+
+[dev]
+pytest>=8.0
+pytest-cov>=5.0
+pre-commit>=3.6
+ruff>=0.5
+black>=24.4
+mypy>=1.10

@@ -22,12 +22,12 @@ En cuanto a la estructura de la aplicación web se puede describir mediante un p
 La capa de interfaz de usuario ha sido construida al completo sobre la biblioteca Stremlit facilitando de esta manera su implementación y su integración en la aplicación web desarrollada. Se define en los ficheros \texttt{src/main.py} y \texttt{src/funciones/interfaz.py}. Las principales responsabilidades asociadas a esta capa son:
 \begin{itemize}
     \item \textbf{Vista}: Encargada de la renderización de todos los componentes visuales de la aplicación como son los títulos, las distintas columnas, las imágenes y logotipos de la aplicación,  los cargadores de archivos (\verb|st.file_uploader|), los botones (\verb|st.button|) y las imágenes de resultados (\verb|st.image|).
-    \item \textbf{Controlador}: su objetivo es la gestión los eventos producidos por el usuario al interactuar con la aplicación. En cuanto a su lógica se basa en la captura de los eventos producidos al pulsar los botones (p. ej., \verb|if st.button(...):|). Dicha lógica es condicional y actúa como controlador capturando esos eventos, y llamando a las funciones correspondientes de la capa del Backend para realizar las acciones o análisis pertinentes. 
+    \item \textbf{Controlador}: su objetivo es la gestión los eventos producidos por el usuario al interactuar con la aplicación. En cuanto a su lógica se basa en la captura de los eventos producidos al pulsar los botones (p. ej., \verb|if st.button(...):|). Dicha lógica es condicional y actúa como controlador capturando esos eventos, y llamando a las funciones correspondientes de la capa del Backend para realizar las acciones o análisis pertinentes.
 
 \end{itemize}
 
 \subsection{Backend (Capa de Lógica y Datos)}
-Esta capa agrupa toda la funcionalidad de negocio y las acciones referentes al análisis y procesamiento de las imágenes. Dentro de esta capa cada una de las funcionalidades implementadas está en su módulo correspondiente facilitando la legibilidad del código así como la reutilización de dichos módulos de una manera más sencilla, haciendo además que las modificaciones a realizar sean más sencillas de implementar previniendo posibles errores o bugs o ayudando a su detección. Dichos módulos se encuentran dentro de la carpeta \texttt{src/funciones/} 
+Esta capa agrupa toda la funcionalidad de negocio y las acciones referentes al análisis y procesamiento de las imágenes. Dentro de esta capa cada una de las funcionalidades implementadas está en su módulo correspondiente facilitando la legibilidad del código así como la reutilización de dichos módulos de una manera más sencilla, haciendo además que las modificaciones a realizar sean más sencillas de implementar previniendo posibles errores o bugs o ayudando a su detección. Dichos módulos se encuentran dentro de la carpeta \texttt{src/funciones/}
 
 \begin{itemize}
     \item \textbf{Gestión de Archivos} (\texttt{archivos.py}): Este módulo contiene aquellas funciones referentes a la carga y almacenamiento temporal de los archivos subidos por el usuario. También se encarga de limpiar el disco una vez la sesión termina para evitar problemas con el almacenamiento debido al gran tamaño de las imágenes con las que se trabaja.
@@ -91,9 +91,9 @@ Se ha definido la apariencia visual de la aplicación \textbf{EcoVid} para que l
 El estilo visual se ha definido en el fichero \texttt{src/estilos.css} mediante el lenguaje CSS para la definición de los aspectos visuales y de disposición de la aplicación web. El tema empleado en la aplicación ha sido un tema oscuro, ayudando de esta manera a reducir la fatiga visual durante largas sesiones o ambientes con poca luminosidad.
 
 \begin{itemize}
-    \item \textbf{Fondo}: Se usa un color gris muy oscuro (`\#161616`) para el fondo general de la aplicación. 
+    \item \textbf{Fondo}: Se usa un color gris muy oscuro (`\#161616`) para el fondo general de la aplicación.
     \imagen{negro}{imagen del color usado para el fondo así como sus valores RGB entre otros}{0.5}
-    \item \textbf{Color Primario}: Un naranja fuerte  (\#D9895B) se utiliza para los elementos destacados como títulos y el borde de la zona de carga de archivos. Los botones usan un gradiente de este mismo naranja. La selección de este color viene motivada por la representación del cobre que tiene un color similar haciendo que en todo momento esté presente este elemento fundamental dentro del trabajo. 
+    \item \textbf{Color Primario}: Un naranja fuerte  (\#D9895B) se utiliza para los elementos destacados como títulos y el borde de la zona de carga de archivos. Los botones usan un gradiente de este mismo naranja. La selección de este color viene motivada por la representación del cobre que tiene un color similar haciendo que en todo momento esté presente este elemento fundamental dentro del trabajo.
 \imagen{cobre1}{imagen del color primario usado para los elementos de la interfaz así como sus valores RGB entre otros}{0.5}
 \item \textbf{Color Secundario}: Un naranja suave (\#E0A17E) a modo de variación del color principal que mantiene el esquema de colores cobrizos de la aplicación, pero en un tono más difuminado usado como contraste para algunos de los detalles de la aplicación.\imagen{cobre2}{imagen del color secundario usado para los elementos de la interfaz así como sus valores RGB entre otros}{0.5}
 
@@ -104,12 +104,9 @@ El estilo visual se ha definido en el fichero \texttt{src/estilos.css} mediante 
 
 \subsection{Nombre e Iconografía}
 \begin{itemize}
-    \item \textbf{Nombre}: El nombre de la aplicación es \textbf{EcoVid}. Este nombre refleja una solución que ayuda con la sostenibilidad de los cultivos de vid. 
+    \item \textbf{Nombre}: El nombre de la aplicación es \textbf{EcoVid}. Este nombre refleja una solución que ayuda con la sostenibilidad de los cultivos de vid.
 
     \item \textbf{Iconografía}: Se ha diseñado un logotipo donde el elemento principal es un racimo de uvas, y a modo de detalle en las hojas de las mismas se han incluido tonos rojizos que hacen referencia al cobre, principal elemento a detectar con la aplicación. Este logotipo refleja el ámbito al que pertenece la aplicación.  En la interfaz se prioriza el uso de etiquetas de texto claras e iconos para describir las acciones, manteniendo un diseño limpio y funcional. \imagen{logotipo}{ Logotipo diseñado para la aplicación}{0.75}Además, se han incluido en los botones una serie de emoticonos los cuales ayudan con la identificación de la acción que realiza cada uno de ellos facilitando así su comprensión, además de mejorar la usabilidad general de la aplicación.\imagen{uso_emojis}{Ejemplo de utilización de los emoticonos en los botones}{1}
 
-    \item \textbf{Logotipos}: En el pie de página se muestran los logotipos de las entidades colaboradoras o financiadoras del proyecto, como la Unión Europea, la Universidad de Burgos (UBU) y el grupo de investigación GICAP. 
+    \item \textbf{Logotipos}: En el pie de página se muestran los logotipos de las entidades colaboradoras o financiadoras del proyecto, como la Unión Europea, la Universidad de Burgos (UBU) y el grupo de investigación GICAP.
 \end{itemize}
-
-
-

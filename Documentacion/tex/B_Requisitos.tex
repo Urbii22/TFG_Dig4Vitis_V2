@@ -66,13 +66,13 @@ A continuación se detallan los casos de uso que describen la funcionalidad de l
 
 \begin{figure}[H]
 \begin{longtable}{p{0.25\linewidth} p{0.65\linewidth}}
-    
+
     \toprule
     \textbf{ID del Caso de Uso} & CU-1 \\
     \midrule
     \endfirsthead
 
-    
+
 
     \bottomrule
     \multicolumn{2}{r}{{\small\textit{Continúa en la siguiente página...}}} \\
@@ -90,7 +90,7 @@ A continuación se detallan los casos de uso que describen la funcionalidad de l
     \midrule
     \textbf{Precondición} & El usuario ha accedido a la aplicación y tiene en su equipo local los cuatro ficheros hiperespectrales necesarios (par .bil y .bil.hdr para la muestra SIN y par .bil y .bil.hdr para la CON). \\
     \midrule
-    \textbf{Flujo Principal} & 
+    \textbf{Flujo Principal} &
         1. El usuario accede a la pestaña   \textit{Cargar y Procesar Imágenes}. \newline
         2. Carga los ficheros (.bil y .hdr) de la hoja SIN tratamiento. \newline
         3. Carga los ficheros (.bil y .hdr) de la hoja CON tratamiento. \newline
@@ -116,31 +116,31 @@ A continuación se detallan los casos de uso que describen la funcionalidad de l
         node distance=1.3cm and 1.5cm,
         % Estilo para los nodos de acción del usuario/sistema
         activity/.style={
-            rectangle, 
-            draw, 
-            thick, 
-            fill=blue!10, 
-            minimum width=4.5cm, 
+            rectangle,
+            draw,
+            thick,
+            fill=blue!10,
+            minimum width=4.5cm,
             minimum height=1.2cm, % Aumentado para mejor ajuste
             text centered,
-            text width=4.3cm 
+            text width=4.3cm
         },
         % Estilo para los nodos de inicio y fin
         startstop/.style={
-            circle, 
-            draw, 
-            thick, 
-            fill=black, 
-            inner sep=0pt, 
+            circle,
+            draw,
+            thick,
+            fill=black,
+            inner sep=0pt,
             minimum size=7mm
         },
         % Estilo para el nodo de decisión
         decision/.style={
-            diamond, 
-            draw, 
-            thick, 
-            fill=orange!20, 
-            aspect=1.5, 
+            diamond,
+            draw,
+            thick,
+            fill=orange!20,
+            aspect=1.5,
             minimum size=1cm,
             text centered,
             text width=2.5cm % Ajustado para el texto del diamante
@@ -150,7 +150,7 @@ A continuación se detallan los casos de uso que describen la funcionalidad de l
     ]
 
     % --- Definición de los Nodos del Diagrama ---
-    
+
     % Nodos de la columna principal (flujo exitoso)
     \node (start) [startstop] {};
     \node (acc_interfaz) [activity, below=of start] {Usuario accede a la interfaz};
@@ -166,7 +166,7 @@ A continuación se detallan los casos de uso que describen la funcionalidad de l
     \node (fin_error) [startstop, below=of error, label=right:Fin] {};
 
     % --- Conexión de los Nodos con Flechas ---
-    
+
     % Flujo principal
     \draw [arrow] (start) -- (acc_interfaz);
     \draw [arrow] (acc_interfaz) -- (carga_ficheros);
@@ -188,12 +188,12 @@ A continuación se detallan los casos de uso que describen la funcionalidad de l
 \newpage
 
 \begin{longtable}{p{0.25\linewidth} p{0.65\linewidth}}
-    
+
     \toprule
     \textbf{ID del Caso de Uso} & CU-2 \\
     \midrule
     \endfirsthead
-    
+
     \multicolumn{2}{c}%
     {{\bfseries \tablename\ \thetable{} -- continuación de la página anterior}} \\
     \toprule
@@ -216,7 +216,7 @@ A continuación se detallan los casos de uso que describen la funcionalidad de l
     \midrule
     \textbf{Precondición} & El Caso de Uso 1 (CU-1) se ha completado con éxito. \\
     \midrule
-    \textbf{Flujo Principal} & 
+    \textbf{Flujo Principal} &
         1. El usuario observa el resultado principal (imagen y porcentaje). \newline
         2. Pulsa "Descargar Imagen de Resultado" para guardar la imagen final (cubre RF-10). \newline
         3. (Opcional) Expande la sección "Ver detalles y descargas adicionales" (cubre RF-11). \newline
@@ -277,7 +277,7 @@ A continuación se detallan los casos de uso que describen la funcionalidad de l
 
         \node (start) [startstop] {};
         \node (observa) [activity, below=of start] {Usuario observa los resultados del análisis};
-        
+
         % Punto de bifurcación invisible para organizar el flujo
         \coordinate (fork_point) at ($(observa.south) + (0,-1.3cm)$);
 
@@ -293,15 +293,15 @@ A continuación se detallan los casos de uso que describen la funcionalidad de l
         \node (descarga_base) [activity, below=of decision_descarga, yshift=-0.7cm] {Pulsar botón de descarga de imagen base};
         \node (fin_detalles_descarga) [startstop, below=of descarga_base, label=right:Fin] {};
         \node (fin_detalles_sin_descarga) [startstop, right=of decision_descarga, xshift=3.5cm, label=right:Fin] {};
-        
+
         % --- Conexión de los Nodos con Flechas ---
-        
+
         \draw [arrow] (start) -- (observa);
-        
+
         % Conexiones de las ramas (usando fork_point)
         \draw [arrow] (observa.south) |- (descarga_final);
         \draw [arrow] (observa.south) |- (expande_detalles);
-        
+
         % Flujo de la rama 1
         \draw [arrow] (descarga_final) -- (sistema_da_final);
         \draw [arrow] (sistema_da_final) -- (fin_directo);
@@ -312,7 +312,7 @@ A continuación se detallan los casos de uso que describen la funcionalidad de l
         \draw [arrow] (decision_descarga) -- node[anchor=east,  pos=0.5] {Sí} (descarga_base);
         \draw [arrow] (descarga_base) -- (fin_detalles_descarga);
         \draw [arrow] (decision_descarga) -- node[anchor=south, pos=0.4] {No} (fin_detalles_sin_descarga);
-        
+
         \end{tikzpicture}
     \end{adjustbox}
     \caption{Diagrama de Actividad para el Caso de Uso 2 (CU-2).}

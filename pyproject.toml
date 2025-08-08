@@ -70,5 +70,3 @@ module = [
   "funciones.*",
 ]
 ignore_errors = true
-
-

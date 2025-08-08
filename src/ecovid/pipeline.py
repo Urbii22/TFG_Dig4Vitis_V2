@@ -2,13 +2,13 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Tuple
 
 import cv2
 import numpy as np
 from spectral.io import envi
 
-from funciones.procesamiento import aplicar_procesamiento_dual  # type: ignore
+from funciones.procesamiento import aplicar_procesamiento_dual
+
 from .metrics import compute_coverage_percentage
 
 
@@ -55,7 +55,9 @@ def _ensure_dir(path: str | Path) -> Path:
     return p
 
 
-def export_outputs(res: ProcessResult, output_dir: str | Path, stem: str = "resultado") -> Tuple[Path, Path, Path]:
+def export_outputs(
+    res: ProcessResult, output_dir: str | Path, stem: str = "resultado"
+) -> tuple[Path, Path, Path]:
     """Exporta PNG anotado, máscara binaria y CSV de cobertura.
 
     Devuelve las rutas (png_anotado, mascara_png, csv).
@@ -69,14 +71,12 @@ def export_outputs(res: ProcessResult, output_dir: str | Path, stem: str = "resu
 
     # Máscara binaria de gotas
     mask_path = out_dir / f"{stem}_mask_gotas.png"
-    mask_u8 = (res.final_drops_mask.astype(np.uint8) * 255)
+    mask_u8 = res.final_drops_mask.astype(np.uint8) * 255
     cv2.imwrite(str(mask_path), mask_u8)
 
     # CSV de cobertura
     csv_path = out_dir / f"{stem}_cobertura.csv"
-    csv_content = "metrica,valor\nporcentaje_cobertura,{:.4f}\n".format(res.coverage_percent)
+    csv_content = f"metrica,valor\nporcentaje_cobertura,{res.coverage_percent:.4f}\n"
     csv_path.write_text(csv_content, encoding="utf-8")
 
     return png_path, mask_path, csv_path
-
-

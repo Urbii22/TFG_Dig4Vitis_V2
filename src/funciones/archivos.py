@@ -1,12 +1,13 @@
 import os
 import re
 import uuid
-import streamlit as st
 
+import streamlit as st
 
 # ------------------------------------------------------------------
 # Utilidad interna
 # ------------------------------------------------------------------
+
 
 def _limpiar_base(nombre: str) -> str:
     """
@@ -16,7 +17,7 @@ def _limpiar_base(nombre: str) -> str:
     """
     # Intenta encontrar el patrón "Letras y números (número)" al inicio.
     # Ej: "EM 2 (2)"
-    match = re.match(r'^[A-Za-z\s]+\d+\s\(\d+\)', nombre)
+    match = re.match(r"^[A-Za-z\s]+\d+\s\(\d+\)", nombre)
     if match:
         return match.group(0).strip()
 
@@ -26,7 +27,7 @@ def _limpiar_base(nombre: str) -> str:
     # Elimina sufijos comunes para no confundirlos con el identificador
     for sufijo in ["_sin", "_con", "-sin", "-con"]:
         if nombre_sin_ext.endswith(sufijo):
-            nombre_sin_ext = nombre_sin_ext[:-len(sufijo)]
+            nombre_sin_ext = nombre_sin_ext[: -len(sufijo)]
 
     # Devuelve la parte inicial como identificador
     return nombre_sin_ext.strip()
@@ -35,6 +36,7 @@ def _limpiar_base(nombre: str) -> str:
 # ------------------------------------------------------------------
 # API pública
 # ------------------------------------------------------------------
+
 
 def limpiar_carpeta(carpeta: str) -> None:
     """Borra todos los ficheros de la carpeta temporal al cerrar la app."""
@@ -73,10 +75,10 @@ def guardar_archivos_subidos(archivos_subidos, prefijo: str = ""):
             base = _limpiar_base(archivo.name)
             # Generar nombre único
             lower = archivo.name.lower()
-            if lower.endswith('.bil.hdr'):
-                ext = '.bil.hdr'
-            elif lower.endswith('.bil'):
-                ext = '.bil'
+            if lower.endswith(".bil.hdr"):
+                ext = ".bil.hdr"
+            elif lower.endswith(".bil"):
+                ext = ".bil"
             else:
                 ext = os.path.splitext(archivo.name)[1]
 
@@ -89,9 +91,9 @@ def guardar_archivos_subidos(archivos_subidos, prefijo: str = ""):
                 f.write(archivo.read())
 
             # Identificar rutas
-            if ext == '.bil.hdr':
+            if ext == ".bil.hdr":
                 hdr_file = ruta
-            elif ext == '.bil':
+            elif ext == ".bil":
                 bil_file = ruta
                 nombre_base = base  # para mostrar al usuario
                 st.markdown(
@@ -106,6 +108,5 @@ def guardar_archivos_subidos(archivos_subidos, prefijo: str = ""):
                 )
 
     return hdr_file, bil_file, nombre_base
-                
 
     return hdr_file, bil_file, nombre_base

@@ -25,7 +25,7 @@ Tras una revisión inicial, se detectó que la lógica de la aplicación tendía
 
 \subsubsection{Sprint 3: Consolidación de funcionalidades y primer prototipo (21 – 27 de marzo)}
 
-El objetivo fue implementar el flujo de datos de extremo a extremo y obtener el primer prototipo funcional. Se desarrolló la lógica para la carga de ficheros hiperespectrales (\verb|.bil| y \verb|.hdr|), su interpretación mediante la biblioteca \textit{Spectral} y su conversión a un hipercubo de \textit{NumPy}. 
+El objetivo fue implementar el flujo de datos de extremo a extremo y obtener el primer prototipo funcional. Se desarrolló la lógica para la carga de ficheros hiperespectrales (\verb|.bil| y \verb|.hdr|), su interpretación mediante la biblioteca \textit{Spectral} y su conversión a un hipercubo de \textit{NumPy}.
 
 \subsubsection{Sprint 4: Nuevo método de detección (28 de marzo – 3 de abril)}
 
@@ -57,7 +57,7 @@ Tras validar el MVP, se inició una nueva fase de desarrollo enfocada en el núc
 
 \subsubsection{Sprint 10: Mejora del Ajuste Automático (9 – 15 de mayo)}
 
-Después de realizar una investigación sobre posibles métodos para aplicar el algoritmo de sustracción de ruido, se implementó el pipeline completo de alineación automática de imágenes: detección de bordes con Canny, extracción de puntos clave con ORB, emparejamiento por fuerza bruta (\textit{BFMatcher}) y estimación robusta de la transformación afín con RANSAC para descartar correspondencias erróneas. 
+Después de realizar una investigación sobre posibles métodos para aplicar el algoritmo de sustracción de ruido, se implementó el pipeline completo de alineación automática de imágenes: detección de bordes con Canny, extracción de puntos clave con ORB, emparejamiento por fuerza bruta (\textit{BFMatcher}) y estimación robusta de la transformación afín con RANSAC para descartar correspondencias erróneas.
 
 \subsubsection{Sprint 11: Sprint de estabilización (16 – 22 de mayo)}
 
@@ -126,7 +126,7 @@ Durante este \textit{sprint} se implementó una interfaz de usuario (UI) totalme
             \item[] \footnotesize Establecer la arquitectura, implementar funcionalidades básicas y consolidar un prototipo funcional (MVP) para validación.
         \end{itemize}
         \vspace{1em}
-        
+
         {\small\bfseries Hitos Técnicos Clave:}
         \begin{itemize}[leftmargin=*, label=\textbullet, topsep=2pt, itemsep=0pt, parsep=2pt]
             \item \footnotesize Configuración de la Arquitectura
@@ -162,13 +162,13 @@ Durante este \textit{sprint} se implementó una interfaz de usuario (UI) totalme
         {\centering \color{colorFaseIII} \Large\bfseries Fase III \par}
         {\centering \small\bfseries Refinamiento y Documentación \\ (Sprints 13+) \par}
         \vspace{1.5em}
-        
+
         {\small\bfseries Objetivo Principal:}
         \begin{itemize}[leftmargin=*, topsep=2pt, itemsep=0pt, parsep=2pt]
             \item[] \footnotesize Realizar la calibración final, entregar la versión definitiva del software y redactar la memoria técnica del proyecto.
         \end{itemize}
         \vspace{1em}
-        
+
         {\small\bfseries Hitos Técnicos Clave:}
         \begin{itemize}[leftmargin=*, label=\textbullet, topsep=2pt, itemsep=0pt, parsep=2pt]
             \item \footnotesize Ajuste Fino (*Tuning*) de Parámetros
@@ -177,7 +177,7 @@ Durante este \textit{sprint} se implementó una interfaz de usuario (UI) totalme
             \item \footnotesize \textbf{Cierre del Proyecto}
         \end{itemize}
     };
-    
+
     % --- FLECHAS CONECTORAS ---
     \draw [arrow] (fase1.east) -- (fase2.west);
     \draw [arrow] (fase2.east) -- (fase3.west);
@@ -191,7 +191,7 @@ Durante este \textit{sprint} se implementó una interfaz de usuario (UI) totalme
 % --- FIN DEL CÓDIGO DEL DIAGRAMA ---
 
 
- 
+
 
 
 
@@ -307,6 +307,3 @@ Dada la naturaleza académica del proyecto así como el análisis de las distint
 La decisión de esta licencia sobre las demás se fundamenta en su simplicidad y en su carácter permisivo, que facilita la colaboración, la reutilización del código en futuras investigaciones y la posible integración con otros proyectos sin imponer complejas restricciones legales.
 
 La adopción de esta licencia MIT permite que cualquier persona pueda realizar cualquier modificación o mejora sobre el proyecto ya desarrollado. Teniendo en cuenta que el requisito impuesto por esta licencia es dar crédito al autor original del proyecto. De esta manera se consigue fomentar el espíritu de colaboración de la comunidad de software de código abierto.
-
-
-

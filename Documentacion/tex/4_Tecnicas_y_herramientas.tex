@@ -1,11 +1,11 @@
 \capitulo{4}{Técnicas y herramientas}
 
-La consecución de los objetivos de este proyecto ha requerido la selección y articulación de un conjunto de tecnologías específicas. La elección de cada herramienta no ha sido arbitraria, sino que responde a la necesidad de construir una solución robusta, eficiente y de fácil mantenimiento. En este capítulo se detalla el ecosistema tecnológico empleado, justificando el rol de cada componente dentro de la arquitectura del proyecto. 
+La consecución de los objetivos de este proyecto ha requerido la selección y articulación de un conjunto de tecnologías específicas. La elección de cada herramienta no ha sido arbitraria, sino que responde a la necesidad de construir una solución robusta, eficiente y de fácil mantenimiento. En este capítulo se detalla el ecosistema tecnológico empleado, justificando el rol de cada componente dentro de la arquitectura del proyecto.
 
 \section{Lenguaje de Programación y Entrono de Desarrollo}
 
 \subsection{Python }
-Lenguaje de programación ampliamente utilizado, denominado de alto nivel. Destaca sobre todo  por su simplicidad y versatilidad\cite{PythonDocs311}. El motivo de su elección es debido a su amplia gama de bibliotecas que facilitan mucho el trabajo y la implementación de funcionalidades de manera sencilla y directa. En este caso en concreto la gran cantidad de bibliotecas ampliamente reconocidas para el análisis de imágenes y el trabajo sobre ellas mediante visión por computadora. La disponibilidad de herramientas especializadas como NumPy, OpenCV o Spectral fue un factor decisivo, ya que permitieron acelerar el desarrollo y basar la solución en tecnologías estándar de la industria y la investigación. 
+Lenguaje de programación ampliamente utilizado, denominado de alto nivel. Destaca sobre todo  por su simplicidad y versatilidad\cite{PythonDocs311}. El motivo de su elección es debido a su amplia gama de bibliotecas que facilitan mucho el trabajo y la implementación de funcionalidades de manera sencilla y directa. En este caso en concreto la gran cantidad de bibliotecas ampliamente reconocidas para el análisis de imágenes y el trabajo sobre ellas mediante visión por computadora. La disponibilidad de herramientas especializadas como NumPy, OpenCV o Spectral fue un factor decisivo, ya que permitieron acelerar el desarrollo y basar la solución en tecnologías estándar de la industria y la investigación.
 
 \subsection{Batchfile:}
 No es un lenguaje en sí, sino un archivo que al ejecutarse escribe en consola una serie de comandos. El uso en el proyecto se ciñe a agrupar los comandos a ejecutar para poder abrir la aplicación web del proyecto. Este tipo de archivos puede ser peligroso si no se conoce exactamente lo que hacen ya que podrían ser una fuente de posibles ciberataques.
@@ -27,8 +27,8 @@ Biblioteca para la visión por ordenador y tratamiento de imágenes. En el caso 
 \subsection{Pandas}
 Se trata de una de las biblioteca más importantes en el ecosistema de Python. Su principal uso en este proyecto es para la estructuración de los datos obtenidos de las imágenes hiperespectrales para su procesamiento y su exportación\cite{McKinney2010Pandas}.
 
-\subsection{Pillow} 
-Esta biblioteca se basa en la manipulación y procesamiento de imágenes en Python. Se trata de la evolución de un proyecto anterior PIL y se ha convertido en un estándar de facto para el análisis de imágenes en Python. En el caso de este proyecto, se ha usado para cargar las diferentes imágenes de la interfaz gráfica\cite{Pillow}. 
+\subsection{Pillow}
+Esta biblioteca se basa en la manipulación y procesamiento de imágenes en Python. Se trata de la evolución de un proyecto anterior PIL y se ha convertido en un estándar de facto para el análisis de imágenes en Python. En el caso de este proyecto, se ha usado para cargar las diferentes imágenes de la interfaz gráfica\cite{Pillow}.
 
 \subsection{SkImage}
 Otra biblioteca para el procesamiento de imágenes en Python. En este proyecto se ha usado para facilitar el flujo de trabajo desde la imagen hiperespectral hasta las imágenes normales .png resultado del análisis.
@@ -43,7 +43,7 @@ Biblioteca centrada específicamente en el análisis de imágenes hiperespectral
 Esta biblioteca permite la creación de páginas web interactivas de manera sencilla y rápida. Es una gran herramienta ya que permite crear las páginas web sin conocimientos avanzados de programación web (HTML, JavaScript o CSS). Es el motor principal de la aplicación web de este proyecto sobre la que se ha implementado todo el funcionamiento y visualización de los datos\cite{Streamlit}.
 
 
- \subsection{Css (Cascade Style Sheets):} 
+ \subsection{Css (Cascade Style Sheets):}
 Lenguaje de programación utilizado principalmente para la representación visual de los elementos en una página web\cite{alvarez2017manual}. En este caso la aplicación implementada es una aplicación web basada en los recursos de la librería Streamlit, pero que para todo el aspecto visual, colores, títulos, organización de los contenidos en la página ,etc, ha sido realizado en CSS.
 
 
@@ -67,7 +67,7 @@ Se trata de una aplicación que permite crear, ejecutar y gestionar aplicaciones
 
 \section{Herramientas de IA y ayuda}
 
-\subsection{ChatGPT} 
+\subsection{ChatGPT}
 Ampliamente conocida, esta plataforma de la empresa OpenAI permite el acceso a sus modelos para poder uso de ellos, a través de la aplicación de escritorio o de la versión web. Esta herramienta permite resolver dudas técnicas, investigar conceptos, aportar ideas de resolución de problemas de manera sencilla y rápida. Permite al usuario economizar esfuerzos y optimizar flujos de trabajo para mejorar la eficiencia y calidad del producto final obtenido\cite{ChatGPT2025}. Su principal uso en este proyecto ha sido como apoyo y ayuda a la explicación de diversos conceptos tanto teóricos como de programación así como la propuesta de posibles soluciones a los problemas encontrados durante la realización del proyecto.
 
 \subsection{Gemini}
@@ -75,12 +75,3 @@ Se trata de otra herramienta de IA. En este caos propiedad de google, con utilid
 
 \subsection{Perpelxity}
 Se trata de un buscador que integra herramientas de inteligencia artificial para mejorar los resultados de las búsquedas\cite{PerplexityAI2025}. La principal ventaja sobre otros buscadores o herramientas de IA y por la que he decidido usar esta herramienta, es que permite al usuario elegir si la búsqueda se realiza de fuentes generales (internet, wikipedia ...) o si así se desea permite que la búsqueda solo se haga a partir de fuentes meramente académicas como papers científicos o proyectos reglados incluidos en plataformas reconocidas como por ejemplo \textit{Semantic Scholar}\cite{SemanticScholar} o \textit{Arxiv}\cite{arXiv}. Esta herramienta facilita mucho el trabajo de investigación de conceptos teóricos, sabiendo que la información proporcionada está contrastada y es veraz.
-
-
-
-
-
-
-
-
-

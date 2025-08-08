@@ -1,14 +1,9 @@
-from .archivos import limpiar_carpeta, guardar_archivos_subidos
-from .procesamiento import (
-    to_rgb,
-    aplicar_procesamiento_dual,
-)
-from .alignment import (
-    compute_affine_transform,
-    align_and_substract
-)
-from .csv import generar_datos_csv
-from .interfaz import (
-    mostrar_subida_archivos,
-    mostrar_previsualizacion_y_resultados
-)
+"""Módulos utilitarios del proyecto.
+
+Este archivo se mantiene ligero para evitar dependencias pesadas en importación
+de submódulos. Importa explícitamente desde los submódulos cuando lo necesites, por ejemplo:
+
+from funciones.procesamiento import aplicar_procesamiento_dual
+"""
+
+__all__ = []

@@ -10,5 +10,3 @@ Resumen del cambio y referencia a issue (cierra #N).
 - [ ] Bench/capturas si el cambio es visible o de rendimiento
 
 ## Notas
-
-
