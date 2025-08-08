@@ -1,3 +1,21 @@
+Metadata-Version: 2.4
+Name: ecovid
+Version: 0.1.0
+Summary: Pipeline de análisis para imágenes hiperespectrales del proyecto EcoVid
+Author: Diego Urbaneja Portal
+Project-URL: Homepage, https://github.com/
+Requires-Python: >=3.10
+Description-Content-Type: text/markdown
+License-File: LICENSE
+Requires-Dist: numpy>=1.24
+Requires-Dist: opencv-python-headless>=4.8
+Requires-Dist: pandas>=2.0
+Requires-Dist: Pillow<11
+Requires-Dist: scikit-image>=0.22
+Requires-Dist: spectral==0.23.1
+Requires-Dist: typer[all]>=0.12.0
+Dynamic: license-file
+
 <div align="center">
   <img src="https://raw.githubusercontent.com/Urbii22/TFG_Dig4Vitis_V2/interfaz_new/src/recursos/EcoVid_logo.png" alt="EcoVid Logo" width="150"/>
   <h1>🌱 EcoVid: Detección de Cobre en Viñedos con Visión Hiperespectral</h1>
@@ -87,7 +105,7 @@ Para ejecutar EcoVid en tu máquina local, sigue estos pasos. El método recomen
 
 4.  **Ejecuta el contenedor**:
     ```bash
-    docker run -p 8501:8501 ecovid-app
+    docker run -p 8502:8502 ecovid-app
     ```
 
 5.  **Abre la aplicación**:
@@ -118,7 +136,7 @@ Para ejecutar EcoVid en tu máquina local, sigue estos pasos. El método recomen
 
 4.  **Ejecuta la aplicación**:
     ```bash
-    streamlit run src/main.py --server.port=8501
+    streamlit run src/main.py
     ```
 
 ---

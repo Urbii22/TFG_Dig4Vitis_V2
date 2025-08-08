@@ -1,0 +1,74 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "ecovid"
+version = "0.1.0"
+description = "Pipeline de análisis para imágenes hiperespectrales del proyecto EcoVid"
+readme = "README.md"
+requires-python = ">=3.10"
+authors = [
+  { name = "Diego Urbaneja Portal" }
+]
+dependencies = [
+  "numpy>=1.24",
+  "opencv-python-headless>=4.8",
+  "pandas>=2.0",
+  "Pillow<11",
+  "scikit-image>=0.22",
+  "spectral==0.23.1",
+  "typer>=0.12.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/"
+
+[project.scripts]
+ecovid = "ecovid.cli:app"
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]
+include = ["ecovid*", "funciones*"]
+
+[tool.black]
+line-length = 100
+target-version = ["py311"]
+
+[tool.ruff]
+line-length = 100
+select = ["E", "F", "W", "I", "UP", "B"]
+ignore = ["E501"]
+src = ["src", "tests"]
+
+[tool.ruff.isort]
+known-first-party = ["ecovid", "funciones"]
+
+[tool.mypy]
+python_version = "3.11"
+warn_unused_ignores = true
+ignore_missing_imports = true
+strict_optional = false
+check_untyped_defs = true
+disallow_untyped_defs = false
+
+[project.optional-dependencies]
+dev = [
+  "pytest>=8.0",
+  "pytest-cov>=5.0",
+  "pre-commit>=3.6",
+  "ruff>=0.5",
+  "black>=24.4",
+  "mypy>=1.10",
+]
+
+[[tool.mypy.overrides]]
+module = [
+  "funciones.*",
+]
+ignore_errors = true
+
+

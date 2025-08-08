@@ -1,0 +1,7 @@
+numpy>=1.24
+opencv-python-headless>=4.8
+pandas>=2.0
+Pillow<11
+scikit-image>=0.22
+spectral==0.23.1
+typer[all]>=0.12.0
