@@ -88,3 +88,38 @@ def demo(outdir: Path = OPT_DEMO_OUTDIR):
     paths = write_envi_pair(outdir)
     typer.echo(f"SIN: {paths.sin_hdr} / {paths.sin_bil}")
     typer.echo(f"CON: {paths.con_hdr} / {paths.con_bil}")
+
+
+@app.command("bench")
+def bench(
+    repeat: int = typer.Option(3, min=1, help="Número de repeticiones"),
+    use_demo: bool = typer.Option(True, help="Usar dataset demo sintético"),
+    sin_hdr: Path | None = OPT_SIN_HDR if False else None,
+    sin_bil: Path | None = OPT_SIN_BIL if False else None,
+    con_hdr: Path | None = OPT_CON_HDR if False else None,
+    con_bil: Path | None = OPT_CON_BIL if False else None,
+):
+    """Benchmark simple del pipeline (tiempo promedio)."""
+    import statistics
+    import time
+
+    if use_demo:
+        demo_paths = write_envi_pair("demo_bench")
+        sin_hdr_p, sin_bil_p = demo_paths.sin_hdr, demo_paths.sin_bil
+        con_hdr_p, con_bil_p = demo_paths.con_hdr, demo_paths.con_bil
+    else:
+        if not all([sin_hdr, sin_bil, con_hdr, con_bil]):
+            raise typer.BadParameter("Debe proporcionar rutas SIN/CON cuando use_demo es False")
+        sin_hdr_p, sin_bil_p = sin_hdr, sin_bil
+        con_hdr_p, con_bil_p = con_hdr, con_bil
+
+    times = []
+    for _ in range(repeat):
+        t0 = time.perf_counter()
+        res = process_pair(sin_hdr_p, sin_bil_p, con_hdr_p, con_bil_p)
+        t = time.perf_counter() - t0
+        times.append(t)
+        typer.echo(f"Run: {t:.3f}s, coverage={res.coverage_percent:.2f}%")
+    typer.echo(
+        f"Avg: {statistics.mean(times):.3f}s | Median: {statistics.median(times):.3f}s | Min: {min(times):.3f}s"
+    )

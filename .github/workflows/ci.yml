@@ -34,3 +34,15 @@ jobs:
         run: |
           cd src
           docker build -t ecovid-app .
+      - name: Login to GHCR
+        if: github.event_name == 'push'
+        env:
+          CR_PAT: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo $CR_PAT | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+      - name: Tag & Push
+        if: github.event_name == 'push'
+        run: |
+          IMAGE=ghcr.io/${{ github.repository_owner }}/ecovid-app:latest
+          docker tag ecovid-app $IMAGE
+          docker push $IMAGE
