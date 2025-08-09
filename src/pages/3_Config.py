@@ -13,7 +13,7 @@ st.title("Configuración")
 st.write("Parámetros de alineación (aplicados en próximas ejecuciones):")
 
 st.session_state.setdefault("orb_nfeatures", 4000)
-st.session_state.setdefault("detection_scale_factor", 1.0)
+st.session_state.setdefault("detection_scale_factor", 0.75)
 st.session_state.setdefault("ransac_reproj_thresh", 3.0)
 st.session_state.setdefault("ransac_max_iters", 5000)
 st.session_state.setdefault("ransac_confidence", 0.995)

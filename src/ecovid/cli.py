@@ -4,6 +4,7 @@ from pathlib import Path
 
 import typer
 
+from .demo import write_envi_pair
 from .pipeline import export_outputs, process_pair
 
 app = typer.Typer(help="CLI del pipeline EcoVid")
@@ -78,3 +79,12 @@ def batch(
 
 if __name__ == "__main__":
     app()
+# Registrar un comando extra para generar un dataset demo (opciones a nivel módulo para B008)
+OPT_DEMO_OUTDIR = typer.Option("demo_data", help="Carpeta de salida para datos demo")
+
+
+@app.command("demo")
+def demo(outdir: Path = OPT_DEMO_OUTDIR):
+    paths = write_envi_pair(outdir)
+    typer.echo(f"SIN: {paths.sin_hdr} / {paths.sin_bil}")
+    typer.echo(f"CON: {paths.con_hdr} / {paths.con_bil}")

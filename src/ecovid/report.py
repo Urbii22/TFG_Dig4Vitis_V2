@@ -17,7 +17,10 @@ def build_zip_report(
     metrics: dict | None = None,
     output_zip: str | Path = "reporte.zip",
 ) -> Path:
-    """Empaqueta un ZIP autocontenido con imagen, máscara y metadatos reproducibles."""
+    """Empaqueta un ZIP autocontenido con imagen, máscara y metadatos reproducibles.
+
+    Incluye también un reporte HTML simple para visualización rápida offline.
+    """
     png_bytes = cv2.imencode(".png", cv2.cvtColor(result_image_rgb, cv2.COLOR_RGB2BGR))[1].tobytes()
     mask_bytes = cv2.imencode(".png", (final_drops_mask.astype(np.uint8) * 255))[1].tobytes()
 
@@ -33,4 +36,15 @@ def build_zip_report(
         zf.writestr("resultado.png", png_bytes)
         zf.writestr("mask_gotas.png", mask_bytes)
         zf.writestr("metadata.json", meta_bytes)
+        # Reporte HTML básico
+        html = (
+            "<!doctype html><meta charset='utf-8'>"
+            "<h1>Reporte EcoVid</h1>"
+            f"<p>Porcentaje de recubrimiento: {coverage_percent:.2f}%</p>"
+            "<p>Imagen resultante:</p>"
+            "<img src='resultado.png' style='max-width:100%;height:auto'>"
+            "<p>Máscara de gotas:</p>"
+            "<img src='mask_gotas.png' style='max-width:100%;height:auto'>"
+        )
+        zf.writestr("reporte.html", html.encode("utf-8"))
     return out
