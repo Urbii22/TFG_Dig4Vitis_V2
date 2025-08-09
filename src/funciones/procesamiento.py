@@ -1,3 +1,5 @@
+import time
+
 import cv2
 import numpy as np
 from skimage.morphology import (
@@ -82,8 +84,23 @@ def to_rgb(im, wl_r: float = 639.1, wl_g: float = 548.4, wl_b: float = 459.2) ->
 # Procesamientos principales
 # -------------------------------------------------------------------
 def aplicar_procesamiento_dual(
-    img_con: np.ndarray, img_sin: np.ndarray
-) -> tuple[np.ndarray, np.ndarray, np.ndarray, tuple[int, int], np.ndarray, np.ndarray]:
+    img_con: np.ndarray,
+    img_sin: np.ndarray,
+    *,
+    orb_nfeatures: int | None = None,
+    detection_scale_factor: float | None = None,
+    ransac_reproj_thresh: float | None = None,
+    ransac_max_iters: int | None = None,
+    ransac_confidence: float | None = None,
+) -> tuple[
+    np.ndarray,
+    np.ndarray,
+    np.ndarray,
+    tuple[int, int],
+    np.ndarray,
+    np.ndarray,
+    dict,
+]:
     """
     Flujo completo SIN/CON con alineación por ORB/RANSAC.
     """
@@ -109,6 +126,7 @@ def aplicar_procesamiento_dual(
     # 3) Alineación por ORB/RANSAC sobre los lienzos del mismo tamaño
     warp_mat = np.eye(2, 3, dtype=np.float32)
 
+    t0 = time.perf_counter()
     try:
         limbo_con = _remove_petiole(ref_mask_on_canvas)
         limbo_sin = _remove_petiole(to_align_mask_on_canvas)
@@ -116,11 +134,30 @@ def aplicar_procesamiento_dual(
         edges_con = cv2.Canny(limbo_con, 50, 150)
         edges_sin = cv2.Canny(limbo_sin, 50, 150)
 
-        warp_mat = compute_affine_transform(edges_con, edges_sin)
+        kwargs = {}
+        if orb_nfeatures is not None:
+            kwargs["nfeatures"] = int(orb_nfeatures)
+        if detection_scale_factor is not None:
+            kwargs["detection_scale_factor"] = float(detection_scale_factor)
+        if ransac_reproj_thresh is not None:
+            kwargs["reproj_thresh"] = float(ransac_reproj_thresh)
+        if ransac_max_iters is not None:
+            kwargs["max_iters"] = int(ransac_max_iters)
+        if ransac_confidence is not None:
+            kwargs["confidence"] = float(ransac_confidence)
+
+        result = compute_affine_transform(edges_con, edges_sin, return_metrics=True, **kwargs)
+        if isinstance(result, tuple):
+            warp_mat, metrics = result
+        else:
+            warp_mat = result
+            metrics = {}
 
     except (RuntimeError, cv2.error) as e:
         print(f"Fallo en la alineación: {e}. Se usará la matriz identidad.")
-        pass
+        metrics = {"error": str(e)}
+    t1 = time.perf_counter()
+    metrics["alignment_time_s"] = t1 - t0
 
     # 4) Aplicar Warp a las máscaras SIN sobre el lienzo grande para evitar cortes
     dsize = (max_w, max_h)
@@ -155,4 +192,5 @@ def aplicar_procesamiento_dual(
         (max_h, max_w),
         hoja_comun,
         gotas_final,
+        metrics,
     )

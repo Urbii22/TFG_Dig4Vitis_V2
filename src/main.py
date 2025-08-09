@@ -105,6 +105,7 @@ def main():
         unsafe_allow_html=True,
     )
 
+    # Multipágina: redirigir a páginas si existen, pero mantener fallback por compatibilidad
     tab1, tab2 = st.tabs([" Cargar y Procesar Imágenes ", " Acerca del TFG "])
 
     with tab1:

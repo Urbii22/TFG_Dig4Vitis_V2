@@ -37,5 +37,44 @@ def run(
     typer.echo(f"✅ CSV:         {csv_path}")
 
 
+ARG_CSV = typer.Argument(
+    ..., exists=True, readable=True, help="CSV con columnas sin_hdr,sin_bil,con_hdr,con_bil"
+)
+OPT_OUTDIR_BATCH = typer.Option("salida_lotes", help="Carpeta base de salida")
+
+
+@app.command("batch")
+def batch(
+    csv_path: Path = ARG_CSV,
+    outdir: Path = OPT_OUTDIR_BATCH,
+):
+    """Procesa múltiples pares indicados en un CSV y genera un resumen."""
+    import csv as _csv
+
+    import pandas as _pd
+
+    rows = list(_csv.DictReader(csv_path.read_text(encoding="utf-8").splitlines()))
+    outdir.mkdir(parents=True, exist_ok=True)
+    resumen = []
+    for idx, row in enumerate(rows, start=1):
+        stem = f"item_{idx:03d}"
+        try:
+            res = process_pair(row["sin_hdr"], row["sin_bil"], row["con_hdr"], row["con_bil"])
+            png, mask, csvp = export_outputs(res, outdir / stem, stem)
+            resumen.append(
+                {
+                    "stem": stem,
+                    "png": str(png),
+                    "mask": str(mask),
+                    "csv": str(csvp),
+                    "coverage": res.coverage_percent,
+                }
+            )
+        except Exception as e:
+            resumen.append({"stem": stem, "error": str(e)})
+    _pd.DataFrame(resumen).to_csv(outdir / "resumen.csv", index=False)
+    typer.echo(f"✅ Lote completado en {outdir}")
+
+
 if __name__ == "__main__":
     app()

@@ -47,7 +47,8 @@ def compute_affine_transform(
     confidence: float = 0.995,
     nfeatures: int = 4000,  # Nuevo parámetro para nfeatures de ORB
     detection_scale_factor: float = 1.0,  # Nuevo parámetro para escalado
-) -> np.ndarray:
+    return_metrics: bool = False,
+) -> np.ndarray | tuple[np.ndarray, dict]:
 
     current_reproj_thresh = reproj_thresh
 
@@ -82,7 +83,7 @@ def compute_affine_transform(
 
     # M_estimated transforma coordenadas del espacio de edges2_proc al espacio de edges1_proc
     # pts2_matched (de edges2_proc) son origen, pts1_matched (de edges1_proc) son destino.
-    M_estimated, _ = cv2.estimateAffinePartial2D(
+    M_estimated, inliers_mask = cv2.estimateAffinePartial2D(
         pts2_matched,
         pts1_matched,
         method=cv2.RANSAC,
@@ -94,15 +95,55 @@ def compute_affine_transform(
     if M_estimated is None:
         raise RuntimeError("No pudo estimarse la matriz afín")
 
+    # Ajustar traslación si se trabajó a escala
     if detection_scale_factor < 1.0 and detection_scale_factor > 0.0:
-        # M_estimated es para imágenes escaladas. Ajustar su parte de traslación para el tamaño original.
         final_M = M_estimated.copy()
-        final_M[0, 2] /= detection_scale_factor  # tx_original = tx_escalado / factor_escala
-        final_M[1, 2] /= detection_scale_factor  # ty_original = ty_escalado / factor_escala
-        return final_M
+        final_M[0, 2] /= detection_scale_factor
+        final_M[1, 2] /= detection_scale_factor
     else:
-        # M_estimated ya es para el tamaño de imagen original (o detection_scale_factor fue 1.0)
-        return M_estimated
+        final_M = M_estimated
+
+    if not return_metrics:
+        return final_M
+
+    # Cálculo de métricas de alineación
+    n_matches = len(pts1_matched)
+    n_inliers = int(inliers_mask.sum()) if inliers_mask is not None else 0
+    inlier_ratio = (n_inliers / n_matches) if n_matches > 0 else 0.0
+
+    # Error medio de reproyección (en píxeles originales aproximados)
+    if inliers_mask is not None and n_inliers > 0:
+        inliers_bool = inliers_mask.ravel().astype(bool)
+        pts2_in = pts2_matched[inliers_bool]
+        pts1_in = pts1_matched[inliers_bool]
+        # Reproyectar pts2 -> espacio de pts1
+        ones = np.ones((pts2_in.shape[0], 1), dtype=np.float32)
+        pts2_aug = np.hstack([pts2_in, ones])
+        warped = (pts2_aug @ M_estimated.T).astype(np.float32)
+        diffs = warped - pts1_in
+        err = np.sqrt((diffs**2).sum(axis=1))
+        mean_err_scaled = float(err.mean())
+        mean_err = (
+            mean_err_scaled / detection_scale_factor
+            if detection_scale_factor > 0
+            else mean_err_scaled
+        )
+    else:
+        mean_err = float("nan")
+
+    metrics = {
+        "n_matches": n_matches,
+        "n_inliers": n_inliers,
+        "inlier_ratio": inlier_ratio,
+        "mean_reproj_error_px": mean_err,
+        "orb_nfeatures": nfeatures,
+        "scale_factor": detection_scale_factor,
+        "ransac_reproj_thresh": reproj_thresh,
+        "ransac_max_iters": max_iters,
+        "ransac_confidence": confidence,
+    }
+
+    return final_M, metrics
 
 
 # --------------------------------------------------

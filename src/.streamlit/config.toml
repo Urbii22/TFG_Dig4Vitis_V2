@@ -1,17 +1,14 @@
 [server]
 port = 8501
 address = "0.0.0.0"
+enableXsrfProtection = false
+enableCORS = false
+maxUploadSize = 5120
 
 [theme]
 base = "dark"
-[server]
-enableXsrfProtection = false
-enableCORS = false
-maxUploadSize=5120
-port = 8502
-[theme]
-primaryColor="#D9895B"
-backgroundColor="#161616"
-secondaryBackgroundColor="#353535"
-textColor="#FAFAFA"
-font="sans serif"
+primaryColor = "#D9895B"
+backgroundColor = "#161616"
+secondaryBackgroundColor = "#353535"
+textColor = "#FAFAFA"
+font = "sans serif"

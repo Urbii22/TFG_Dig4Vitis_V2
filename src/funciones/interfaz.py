@@ -1,4 +1,5 @@
 import io
+import time
 
 import cv2
 import numpy as np
@@ -12,6 +13,11 @@ from .procesamiento import _obtener_mascaras, aplicar_procesamiento_dual, to_rgb
 # Inicializar session_state si no existe
 if "processed" not in st.session_state:
     st.session_state.processed = False
+
+
+@st.cache_resource(show_spinner=False)
+def _abrir_cubos(hdr_sin: str, bil_sin: str, hdr_con: str, bil_con: str):
+    return envi.open(hdr_sin, bil_sin), envi.open(hdr_con, bil_con)
 
 
 def mostrar_subida_archivos():
@@ -53,22 +59,58 @@ def mostrar_subida_archivos():
                 )
                 return
 
-            # Abrir cubos hiperespectrales y procesar
-            cube_sin = envi.open(hdr_sin, bil_sin)
-            cube_con = envi.open(hdr_con, bil_con)
+            # Validación temprana de archivos y apertura cacheada
+            import os
+
+            for p in (hdr_sin, bil_sin, hdr_con, bil_con):
+                if not os.path.exists(p):
+                    st.error(f"Fichero no encontrado: {p}")
+                    return
+            for p in (hdr_sin, hdr_con):
+                if not p.lower().endswith(".hdr"):
+                    st.error(f"Metadatos no válidos (se esperaba .hdr): {p}")
+                    return
+            for p in (bil_sin, bil_con):
+                if not p.lower().endswith(".bil"):
+                    st.error(f"Datos no válidos (se esperaba .bil): {p}")
+                    return
+
+            # Abrir cubos hiperespectrales y procesar (cacheado)
+            cube_sin, cube_con = _abrir_cubos(hdr_sin, bil_sin, hdr_con, bil_con)
 
             # Conversión a RGB y máscaras iniciales
-            rgb_sin = to_rgb(cube_sin)
-            rgb_con = to_rgb(cube_con)
+            @st.cache_data(show_spinner=False)
+            def _to_rgb_cached(hdr: str, bil: str):
+                ds = envi.open(hdr, bil)
+                return to_rgb(ds)
+
+            rgb_sin = _to_rgb_cached(hdr_sin, bil_sin)
+            rgb_con = _to_rgb_cached(hdr_con, bil_con)
             leaf_sin, drops_sin_raw = _obtener_mascaras(cube_sin)
             leaf_con, drops_con_raw = _obtener_mascaras(cube_con)
             trin_sin = trinarizar_final(leaf_sin, drops_sin_raw & leaf_sin, np.zeros_like(leaf_sin))
             trin_con = trinarizar_final(leaf_con, drops_con_raw & leaf_con, np.zeros_like(leaf_con))
 
-            # Procesamiento dual completo
-            resultado, leaf_con_crop, leaf_sin_aligned, common_shape, hoja_comun, gotas_final = (
-                aplicar_procesamiento_dual(cube_con, cube_sin)
+            # Procesamiento dual completo con métricas y tiempo
+            t0 = time.perf_counter()
+            (
+                resultado,
+                leaf_con_crop,
+                leaf_sin_aligned,
+                common_shape,
+                hoja_comun,
+                gotas_final,
+                align_metrics,
+            ) = aplicar_procesamiento_dual(
+                cube_con,
+                cube_sin,
+                orb_nfeatures=st.session_state.get("orb_nfeatures"),
+                detection_scale_factor=st.session_state.get("detection_scale_factor"),
+                ransac_reproj_thresh=st.session_state.get("ransac_reproj_thresh"),
+                ransac_max_iters=st.session_state.get("ransac_max_iters"),
+                ransac_confidence=st.session_state.get("ransac_confidence"),
             )
+            total_time_s = time.perf_counter() - t0
 
             # Guardar todo en session_state
             st.session_state.update(
@@ -84,6 +126,13 @@ def mostrar_subida_archivos():
                     "common_shape": common_shape,
                     "hoja_comun": hoja_comun,
                     "gotas_final": gotas_final,
+                    "align_metrics": align_metrics,
+                    "total_time_s": total_time_s,
+                    # Rutas para inspección posterior
+                    "hdr_sin_path": hdr_sin,
+                    "bil_sin_path": bil_sin,
+                    "hdr_con_path": hdr_con,
+                    "bil_con_path": bil_con,
                 }
             )
             st.success("¡Procesamiento completado con éxito!")
@@ -107,6 +156,8 @@ def mostrar_previsualizacion_y_resultados():
         if num_pixeles_hoja_comun > 0
         else 0.0
     )
+    align_metrics = st.session_state.get("align_metrics", {})
+    total_time_s = st.session_state.get("total_time_s", None)
 
     # --- Presentación de resultados ---
     col_res1, col_res2 = st.columns([1, 1])
@@ -119,6 +170,25 @@ def mostrar_previsualizacion_y_resultados():
 
     with col_res2:
         st.metric(label="Porcentaje de Recubrimiento", value=f"{porcentaje:.2f}%")
+        # Panel de métricas de alineación y tiempo
+        with st.container(border=True):
+            st.markdown("##### Métricas del Proceso")
+            cols = st.columns(2)
+            with cols[0]:
+                st.metric("Matches totales", f"{align_metrics.get('n_matches', '—')}")
+                st.metric("Inliers", f"{align_metrics.get('n_inliers', '—')}")
+            with cols[1]:
+                inlier_ratio = align_metrics.get("inlier_ratio")
+                st.metric(
+                    "Ratio inliers",
+                    f"{inlier_ratio*100:.1f}%" if isinstance(inlier_ratio, (float | int)) else "—",
+                )
+                err = align_metrics.get("mean_reproj_error_px")
+                st.metric(
+                    "Error reproy. (px)", f"{err:.2f}" if isinstance(err, (float | int)) else "—"
+                )
+            if total_time_s is not None:
+                st.metric("Tiempo total", f"{total_time_s:.2f} s")
         st.markdown(
             "El recubrimiento se calcula como el porcentaje de píxeles con producto detectado sobre el total de píxeles de la hoja común."
         )
@@ -155,6 +225,13 @@ def mostrar_previsualizacion_y_resultados():
             width=450,
         )
         st.markdown("---")
+        # Comparador simple (antes/después) con slider de opacidad
+        st.markdown("##### Comparador Antes/Después (opacidad)")
+        alpha = st.slider("Opacidad de la trinarizada CON", 0.0, 1.0, 0.6, 0.05)
+        base = st.session_state.rgb_con.copy().astype(np.float32)
+        overlay = st.session_state.trin_con.copy().astype(np.float32)
+        blend = (alpha * overlay + (1 - alpha) * base).clip(0, 255).astype(np.uint8)
+        st.image(blend, caption="Comparación opaca sobre RGB CON")
 
         TARGET_SIZE = (550, 800)
 

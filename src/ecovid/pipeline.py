@@ -35,9 +35,15 @@ def process_pair(
     ds_without = load_envi_dataset(hdr_without, bil_without)
     ds_with = load_envi_dataset(hdr_with, bil_with)
 
-    result_rgb, _leaf_con, _leaf_sin_aligned, _shape, common_leaf, final_drops = (
-        aplicar_procesamiento_dual(ds_with, ds_without)
-    )
+    (
+        result_rgb,
+        _leaf_con,
+        _leaf_sin_aligned,
+        _shape,
+        common_leaf,
+        final_drops,
+        _metrics,
+    ) = aplicar_procesamiento_dual(ds_with, ds_without)
 
     coverage = compute_coverage_percentage(common_leaf, final_drops)
 
