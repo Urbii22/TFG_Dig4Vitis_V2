@@ -1,3 +1,4 @@
+import numpy as np
 import streamlit as st
 
 from ecovid.report import build_pdf_report, build_zip_report
@@ -20,12 +21,33 @@ if st.session_state.get("processed", False):
             hoja = st.session_state["hoja_comun"]
             gotas = st.session_state["gotas_final"]
             pct = float((gotas.sum() / hoja.sum()) * 100.0) if hoja.sum() else 0.0
+
+            # Overlay de alineación
+            overlay = None
+            try:
+                h, w = st.session_state["common_shape"]
+                overlay = np.zeros((h, w, 3), dtype=np.uint8)
+                overlay[st.session_state["leaf_con_crop"]] = [0, 255, 0]
+                overlay[st.session_state["leaf_sin_aligned"]] = [255, 0, 0]
+            except Exception:
+                overlay = None
+
             zpath = build_zip_report(
                 result_image_rgb=res,
                 final_drops_mask=gotas,
                 coverage_percent=pct,
                 metrics=st.session_state.get("align_metrics", {}),
                 output_zip="reporte.zip",
+                rgb_sin=st.session_state.get("rgb_sin"),
+                rgb_con=st.session_state.get("rgb_con"),
+                trin_sin=st.session_state.get("trin_sin"),
+                trin_con=st.session_state.get("trin_con"),
+                overlay_alignment=overlay,
+                stats={
+                    "pixeles_hoja_comun": int(st.session_state["hoja_comun"].sum()),
+                    "pixeles_gotas_final": int(st.session_state["gotas_final"].sum()),
+                    **st.session_state.get("align_metrics", {}),
+                },
             )
             with open(zpath, "rb") as f:
                 st.download_button(
@@ -44,6 +66,16 @@ if st.session_state.get("processed", False):
                 else 0.0
             ),
             metrics=st.session_state.get("align_metrics", {}),
+            rgb_sin=st.session_state.get("rgb_sin"),
+            rgb_con=st.session_state.get("rgb_con"),
+            trin_sin=st.session_state.get("trin_sin"),
+            trin_con=st.session_state.get("trin_con"),
+            overlay_alignment=overlay if "overlay" in locals() else None,
+            stats={
+                "pixeles_hoja_comun": int(st.session_state["hoja_comun"].sum()),
+                "pixeles_gotas_final": int(st.session_state["gotas_final"].sum()),
+                **st.session_state.get("align_metrics", {}),
+            },
         )
         st.download_button(
             "🖨️ Exportar PDF",
