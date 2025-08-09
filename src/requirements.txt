@@ -6,3 +6,4 @@ scikit-image
 spectral==0.23.1
 streamlit==1.36.0
 typer[all]==0.12.5
+reportlab>=4.2.5

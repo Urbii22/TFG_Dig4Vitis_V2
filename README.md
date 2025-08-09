@@ -131,7 +131,14 @@ La interfaz web te guiará de forma sencilla:
 2.  **Carga de Imágenes CON Tratamiento**: En el panel derecho, haz lo mismo para la hoja tratada.
 3.  **Iniciar Procesamiento**: Haz clic en el botón "🚀 Iniciar Procesamiento". El sistema analizará las imágenes.
 4.  **Analizar Resultados**: La aplicación mostrará la imagen final con el producto detectado en rojo y el porcentaje de cobertura.
-5.  **Explorar y Descargar**: Utiliza el desplegable "Ver detalles" para inspeccionar la calidad del alineamiento y descarga las imágenes que necesites para tus informes.
+5.  **Explorar y Descargar**: Utiliza el desplegable "Ver detalles" para:
+    - Ver la superposición de máscaras alineadas (verde: CON, rojo: SIN alineada).
+    - Ver un comparador con opacidad entre RGB y trinarizada.
+    - Descargar trinarizadas y el resultado.
+6.  **Reportes**: En la página de Procesar, puedes descargar:
+    - **ZIP** con `resultado.png`, `mask_gotas.png`, `metadata.json` y `reporte.html`.
+    - **PDF** con resumen de métricas e imágenes.
+7.  **Inspección**: Página con curvas espectrales por píxel/ROI (SIN vs CON) y exportación a CSV.
 
 ---
 
@@ -141,20 +148,47 @@ El código está organizado de forma modular para facilitar su mantenimiento y e
 
 ```
 TFG_Dig4Vitis_V2/
-└── TFG_Dig4Vitis_V2-interfaz_new/
-    ├── src/
-    │   ├── funciones/         # Módulos con la lógica del backend
-    │   │   ├── alignment.py   # Algoritmos de alineación (ORB, RANSAC)
-    │   │   ├── archivos.py    # Gestión de carga de archivos
-    │   │   ├── interfaz.py    # Componentes de la interfaz de usuario
-    │   │   └── procesamiento.py # Pipeline de análisis principal
-    │   ├── recursos/          # Logos e imágenes de la UI
-    │   ├── main.py            # Punto de entrada de la aplicación Streamlit
-    │   ├── estilos.css        # Hoja de estilos para la apariencia visual
-    │   └── requirements.txt   # Dependencias de Python
-    ├── Memoria_TFG.pdf
-    └── Anexos_TFG.pdf
+└── src/
+    ├── funciones/           # Lógica de UI/procesamiento existente (Streamlit)
+    ├── ecovid/              # Paquete con pipeline/CLI/reportes/fixtures demo
+    │   ├── pipeline.py      # process_pair() y export_outputs()
+    │   ├── metrics.py       # métricas de cobertura
+    │   ├── cli.py           # comandos ecovid run/batch/demo
+    │   ├── report.py        # ZIP/PDF/HTML
+    │   └── demo.py          # dataset sintético reproducible
+    ├── pages/               # Páginas multipágina (Inicio, Procesar, Lotes, Config, Ayuda, Inspección)
+    ├── recursos/            # Logos e imágenes de la UI
+    ├── main.py              # Entrada Streamlit (pestañas básicas)
+    ├── estilos.css          # Estilos
+    └── requirements.txt     # Dependencias de la app web
 ```
+## 📈 Significado de los Resultados y Métricas
+
+- **Resultado (RGB)**: Visualización trinarizada de la hoja común (verde) y gotas detectadas (rojo) tras la sustracción de ruido entre CON y SIN.
+- **Porcentaje de recubrimiento**: `(pixeles_gotas_final / pixeles_hoja_comun) * 100`. Representa la fracción de la hoja donde se detecta producto tras eliminar falsos positivos.
+- **Matches totales (ORB)**: número de correspondencias de características detectadas entre contornos de hojas.
+- **Inliers (RANSAC)**: subconjunto de matches coherentes con la transformación estimada. Cuantos más inliers, mayor fiabilidad de la alineación.
+- **Ratio inliers**: `inliers / matches`. Un valor alto (por ejemplo >40–60%) indica alineación consistente.
+- **Error de reproyección (px)**: distancia media entre puntos correspondientes tras aplicar la transformación; más bajo es mejor (<2–3 px suele ser razonable).
+- **Tiempo total (s)**: duración del procesamiento en la ejecución actual.
+
+Consejo: si la alineación no es estable (pocos inliers, error alto), prueba a subir `ORB nfeatures` o bajar el `detection_scale_factor` en Configuración.
+
+## 🧰 CLI del Paquete `ecovid`
+
+- Procesar un par:
+  ```bash
+  ecovid run --sin-hdr SIN.hdr --sin-bil SIN.bil --con-hdr CON.hdr --con-bil CON.bil --outdir salida
+  ```
+- Procesamiento por lotes (CSV con columnas `sin_hdr,sin_bil,con_hdr,con_bil`):
+  ```bash
+  ecovid batch lote.csv --outdir salida_lotes
+  ```
+- Generar dataset demo sintético:
+  ```bash
+  ecovid demo --outdir demo_data
+  ```
+
 
 ---
 
