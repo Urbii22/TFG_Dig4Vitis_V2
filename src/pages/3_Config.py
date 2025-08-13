@@ -10,7 +10,7 @@ if BASE_DIR not in sys.path:
 st.set_page_config(page_title="EcoVid – Configuración", layout="wide")
 st.title("Configuración")
 
-st.write("Parámetros de alineación (aplicados en próximas ejecuciones):")
+st.write("Parámetros aplicados al pipeline de alineación y detección en próximas ejecuciones.")
 
 st.session_state.setdefault("orb_nfeatures", 4000)
 st.session_state.setdefault("detection_scale_factor", 0.75)
@@ -34,6 +34,27 @@ st.number_input(
 )
 st.slider("RANSAC confidence", min_value=0.80, max_value=0.999, step=0.001, key="ransac_confidence")
 
-st.info(
-    "La app actual aún no aplica estos parámetros; se conectarán al pipeline en el siguiente sprint."
-)
+
+cols_actions = st.columns(2)
+with cols_actions[0]:
+    if st.button("Guardar perfil actual"):
+        st.session_state["_config_saved"] = {
+            "orb_nfeatures": st.session_state["orb_nfeatures"],
+            "detection_scale_factor": st.session_state["detection_scale_factor"],
+            "ransac_reproj_thresh": st.session_state["ransac_reproj_thresh"],
+            "ransac_max_iters": st.session_state["ransac_max_iters"],
+            "ransac_confidence": st.session_state["ransac_confidence"],
+        }
+        st.success("Perfil guardado en la sesión.")
+with cols_actions[1]:
+    if st.button("Restaurar valores por defecto"):
+        st.session_state.update(
+            {
+                "orb_nfeatures": 4000,
+                "detection_scale_factor": 0.75,
+                "ransac_reproj_thresh": 3.0,
+                "ransac_max_iters": 5000,
+                "ransac_confidence": 0.995,
+            }
+        )
+        st.info("Se restauraron los valores por defecto.")

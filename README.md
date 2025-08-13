@@ -80,9 +80,9 @@ Para ejecutar EcoVid en tu máquina local, sigue estos pasos. El método recomen
     ```
 
 3.  **Construye la imagen de Docker**:
-    Este comando creará un contenedor con todas las dependencias necesarias. Puede tardar unos minutos la primera vez.
+    Este comando creará una imagen con todas las dependencias necesarias usando el Dockerfile de `src/`.
     ```bash
-    docker build -t ecovid-app ./TFG_Dig4Vitis_V2-interfaz_new/src/
+    docker build -f src/Dockerfile -t ecovid-app .
     ```
 
 4.  **Ejecuta el contenedor**:
@@ -98,7 +98,7 @@ Para ejecutar EcoVid en tu máquina local, sigue estos pasos. El método recomen
 1.  **Clona el repositorio**:
     ```bash
     git clone [https://github.com/Urbii22/TFG_Dig4Vitis_V2.git](https://github.com/Urbii22/TFG_Dig4Vitis_V2.git)
-    cd TFG_Dig4Vitis_V2/TFG_Dig4Vitis_V2-interfaz_new/
+    cd TFG_Dig4Vitis_V2/
     ```
 
 2.  **Crea un entorno virtual (recomendado)**:
@@ -184,6 +184,16 @@ Consejo: si la alineación no es estable (pocos inliers, error alto), prueba a s
   ```bash
   ecovid batch lote.csv --outdir salida_lotes
   ```
+- Benchmark de rendimiento (usa dataset demo si no se dan rutas):
+  ```bash
+  ecovid bench --repeat 5
+  ```
+
+### Lotes desde carpetas (UI)
+
+- En la página Lotes, pestaña "Desde Carpetas":
+  - Indica carpeta de SIN y carpeta de CON (cada una con sus `.hdr`+`.bil`).
+  - Se emparejan por nombre base y se genera `resumen.csv`.
 - Generar dataset demo sintético:
   ```bash
   ecovid demo --outdir demo_data

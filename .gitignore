@@ -5,3 +5,4 @@ src/archivos_subidos/
 __pycache__/
 *.py[cod]
 *$py.class
+.venv/

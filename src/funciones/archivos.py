@@ -38,6 +38,18 @@ def _limpiar_base(nombre: str) -> str:
 # ------------------------------------------------------------------
 
 
+def get_temp_dir() -> str:
+    """Devuelve la carpeta temporal única y consistente para archivos subidos.
+
+    Se resuelve como <raiz_src>/archivos_subidos para evitar inconsistencias
+    de CWD. Crea la carpeta si no existe.
+    """
+    base_src = os.path.dirname(os.path.dirname(__file__))
+    temp_dir = os.path.join(base_src, "archivos_subidos")
+    os.makedirs(temp_dir, exist_ok=True)
+    return temp_dir
+
+
 def limpiar_carpeta(carpeta: str) -> None:
     """Borra todos los ficheros de la carpeta temporal al cerrar la app."""
     if os.path.exists(carpeta):
@@ -67,7 +79,7 @@ def guardar_archivos_subidos(archivos_subidos, prefijo: str = ""):
     hdr_file = bil_file = None
     nombre_base = ""
 
-    os.makedirs("archivos_subidos", exist_ok=True)
+    temp_dir = get_temp_dir()
 
     with st.spinner("Procesando archivos..."):
         for archivo in archivos_subidos:
@@ -84,7 +96,7 @@ def guardar_archivos_subidos(archivos_subidos, prefijo: str = ""):
 
             unique = uuid.uuid4().hex
             nombre_almac = f"{prefijo}{unique}{ext}"
-            ruta = os.path.join("archivos_subidos", nombre_almac)
+            ruta = os.path.join(temp_dir, nombre_almac)
 
             # Guardar en disco
             with open(ruta, "wb") as f:
@@ -106,7 +118,5 @@ def guardar_archivos_subidos(archivos_subidos, prefijo: str = ""):
                     """,
                     unsafe_allow_html=True,
                 )
-
-    return hdr_file, bil_file, nombre_base
 
     return hdr_file, bil_file, nombre_base
