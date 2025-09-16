@@ -1,17 +1,16 @@
 import os
-import sys
 from pathlib import Path
 
 import streamlit as st
 
-BASE_DIR = os.path.dirname(os.path.dirname(__file__))
-if BASE_DIR not in sys.path:
-    sys.path.insert(0, BASE_DIR)
-
-from ecovid.pipeline import export_outputs, process_pair  # type: ignore  # noqa: E402
+from ecovid.pipeline import export_outputs, process_pair  # type: ignore
+from funciones.interfaz import aplicar_tema, render_footer, render_header, render_top_nav
 
 st.set_page_config(page_title="EcoVid – Lotes", layout="wide")
-st.title("Procesamiento por Lotes (beta)")
+
+aplicar_tema()
+render_header(title="EcoVid", subtitle="Procesamiento por Lotes (beta)")
+render_top_nav()
 
 st.markdown(
     "Sube un CSV con columnas: sin_hdr,sin_bil,con_hdr,con_bil; o bien procesa por carpetas."
@@ -112,3 +111,5 @@ with tab_dirs:
         df = pd.DataFrame(resumen_rows)
         df.to_csv(out_base / "resumen.csv", index=False)
         st.success(f"Lote completado. Resumen en {out_base / 'resumen.csv'}")
+
+render_footer()

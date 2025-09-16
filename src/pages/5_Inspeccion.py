@@ -5,8 +5,15 @@ import plotly.graph_objects as go
 import streamlit as st
 from spectral.io import envi
 
+from funciones.interfaz import aplicar_tema, render_footer, render_header, render_top_nav
+
 st.set_page_config(page_title="EcoVid – Inspección", layout="wide")
-st.title("Inspección y Curvas Espectrales")
+
+aplicar_tema()
+render_header(title="EcoVid", subtitle="Inspección y Curvas Espectrales")
+render_top_nav()
+
+st.markdown("---")
 
 if not st.session_state.get("processed"):
     st.info("Procesa primero un par en la página Procesar.")
@@ -74,3 +81,5 @@ st.download_button(
     file_name="curva_espectral.csv",
     mime="text/csv",
 )
+
+render_footer()

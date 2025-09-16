@@ -1,15 +1,14 @@
-import os
-import sys
-
 import streamlit as st
 
-BASE_DIR = os.path.dirname(os.path.dirname(__file__))
-if BASE_DIR not in sys.path:
-    sys.path.insert(0, BASE_DIR)
+from funciones.interfaz import aplicar_tema, render_header, render_top_nav
 
 st.set_page_config(page_title="EcoVid – Configuración", layout="wide")
-st.title("Configuración")
 
+aplicar_tema()
+render_header(title="EcoVid", subtitle="Configuración")
+render_top_nav()
+
+st.markdown("---")
 st.write("Parámetros aplicados al pipeline de alineación y detección en próximas ejecuciones.")
 
 st.session_state.setdefault("orb_nfeatures", 4000)

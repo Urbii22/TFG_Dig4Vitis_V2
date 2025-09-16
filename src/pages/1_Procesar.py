@@ -3,12 +3,21 @@ import streamlit as st
 
 from ecovid.report import build_pdf_report, build_zip_report
 from funciones.interfaz import (
+    aplicar_tema,
     mostrar_previsualizacion_y_resultados,
     mostrar_subida_archivos,
+    render_footer,
+    render_header,
+    render_top_nav,
 )
 
 st.set_page_config(page_title="EcoVid – Procesar", layout="wide")
-st.title("Procesamiento de Imágenes")
+
+aplicar_tema()
+render_header(title="EcoVid", subtitle="Procesamiento de Imágenes")
+render_top_nav()
+
+st.markdown("---")
 
 mostrar_subida_archivos()
 if st.session_state.get("processed", False):
@@ -84,3 +93,5 @@ if st.session_state.get("processed", False):
             mime="application/pdf",
             use_container_width=True,
         )
+
+render_footer()

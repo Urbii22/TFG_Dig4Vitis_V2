@@ -1,4 +1,6 @@
+import base64
 import io
+import os
 import time
 
 import cv2
@@ -13,6 +15,161 @@ from .procesamiento import _obtener_mascaras, aplicar_procesamiento_dual, to_rgb
 # Inicializar session_state si no existe
 if "processed" not in st.session_state:
     st.session_state.processed = False
+
+# Rutas base
+BASE_DIR = os.path.dirname(os.path.dirname(__file__))
+
+
+def aplicar_tema():
+    """Inyecta el CSS global y aplica variables según el tema (claro/oscuro)."""
+    css_path = os.path.join(BASE_DIR, "estilos.css")
+    try:
+        with open(css_path, encoding="utf-8") as f:
+            st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
+    except FileNotFoundError:
+        st.warning(f"No se encontró el archivo de estilos en: {css_path}")
+
+    # Inyectar variables del tema elegido
+    theme = st.session_state.get("theme", "dark")
+    _inject_theme_vars(theme)
+
+
+def _inject_theme_vars(theme: str) -> None:
+    """Sobrescribe variables CSS (:root) para el tema seleccionado.
+
+    Args:
+        theme: "light" o "dark".
+    """
+    if theme == "light":
+        vars_css = {
+            "--bg": "#FAFAFA",
+            "--text": "#1A1A1A",
+            "--surface": "#FFFFFF",
+            "--surface-2": "#F3F3F3",
+            "--border": "#E6E6E6",
+            "--primary": "#B76E3A",  # cobre más sobrio para claro
+            "--primary-2": "#8C4F1A",
+            "--accent": "#2E7D32",
+            "--accent-2": "#1B5E20",
+            "--muted": "#5C5C5C",
+            "--thead-bg": "#F3F3F3",
+            "--hover-row": "#EFEFEF",
+        }
+    else:  # dark
+        vars_css = {
+            "--bg": "#121212",
+            "--text": "#EAEAEA",
+            "--surface": "#1E1E1E",
+            "--surface-2": "#242424",
+            "--border": "#2F2F2F",
+            "--primary": "#D9895B",
+            "--primary-2": "#B5651D",
+            "--accent": "#66BB6A",
+            "--accent-2": "#2E7D32",
+            "--muted": "#B8B8B8",
+            "--thead-bg": "#2F2F2F",
+            "--hover-row": "#333333",
+        }
+
+    vars_block = ":root{" + "".join([f"{k}:{v};" for k, v in vars_css.items()]) + "}"
+    st.markdown(f"<style>{vars_block}</style>", unsafe_allow_html=True)
+
+
+def render_header(title: str = "EcoVid", subtitle: str | None = None):
+    """Renderiza una cabecera compacta con logotipo y título.
+
+    - Muestra el logotipo `recursos/EcoVid_logo.png` si está disponible.
+    - Permite un subtítulo opcional para contexto.
+    """
+    logo_path = os.path.join(BASE_DIR, "recursos", "EcoVid_logo.png")
+    logo_tag = ""
+    if os.path.exists(logo_path):
+        try:
+            with open(logo_path, "rb") as f:
+                logo_b64 = base64.b64encode(f.read()).decode()
+            logo_tag = f'<img src="data:image/png;base64,{logo_b64}" alt="EcoVid" style="width:56px;height:auto;"/>'
+        except Exception:
+            logo_tag = ""
+
+    subtitle_html = (
+        f'<p class="subtitle">{subtitle}</p>' if isinstance(subtitle, str) and subtitle else ""
+    )
+
+    header_html = f"""
+    <header class="app-header">
+      <div class="inner">
+        <div class="brand">
+          {logo_tag}
+          <div>
+            <h1>{title}</h1>
+            {subtitle_html}
+          </div>
+        </div>
+      </div>
+    </header>
+    """
+    st.markdown(header_html, unsafe_allow_html=True)
+
+
+def render_footer():
+    """Muestra el pie con logotipos institucionales y créditos."""
+    logos = [
+        ("imagen_logo_UE.png", "logo-ue"),
+        ("escudo_ubu.jpg", "logo-ubu"),
+        ("gicap_logo.jpeg", "logo-gicap"),
+    ]
+    img_tags: list[str] = []
+    for filename, css_class in logos:
+        img_path = os.path.join(BASE_DIR, "recursos", filename)
+        if os.path.exists(img_path):
+            try:
+                with open(img_path, "rb") as img_file:
+                    img_b64 = base64.b64encode(img_file.read()).decode()
+                mime = "image/png" if filename.lower().endswith(".png") else "image/jpeg"
+                img_tags.append(
+                    f"<img src='data:{mime};base64,{img_b64}' class='{css_class}' alt='{filename}'/>"
+                )
+            except Exception as e:
+                st.warning(f"Error al procesar el logo {filename}: {e}")
+        else:
+            st.warning(f"Advertencia: No se encontró el logo en la ruta esperada: {img_path}")
+
+    footer_html = f"""
+    <footer>
+        {''.join(img_tags)}
+        <p style='margin-top: 15px;'>© 2025 | TFG Universidad de Burgos</p>
+    </footer>
+    """
+    st.markdown(footer_html, unsafe_allow_html=True)
+
+
+def render_top_nav():
+    """Barra de navegación superior con enlaces y conmutador de tema."""
+    with st.container(border=False):
+        cols = st.columns([1, 1, 1, 1, 1, 1, 1.2])
+        with cols[0]:
+            st.page_link("pages/0_Inicio.py", label="Inicio", icon="🏠")
+        with cols[1]:
+            st.page_link("pages/1_Procesar.py", label="Procesar", icon="🚀")
+        with cols[2]:
+            st.page_link("pages/2_Lotes.py", label="Lotes", icon="📦")
+        with cols[3]:
+            st.page_link("pages/3_Config.py", label="Config", icon="⚙️")
+        with cols[4]:
+            st.page_link("pages/5_Inspeccion.py", label="Inspección", icon="🔎")
+        with cols[5]:
+            st.page_link("pages/4_Ayuda.py", label="Ayuda", icon="❓")
+        with cols[6]:
+            render_theme_toggle()
+
+
+def render_theme_toggle():
+    """Conmutador claro/oscuro con persistencia en la sesión."""
+    st.session_state.setdefault("theme", "dark")
+    is_light = st.toggle("Tema claro", value=(st.session_state["theme"] == "light"))
+    new_theme = "light" if is_light else "dark"
+    if new_theme != st.session_state["theme"]:
+        st.session_state["theme"] = new_theme
 
 
 @st.cache_resource(show_spinner=False)

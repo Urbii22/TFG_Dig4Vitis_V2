@@ -1,8 +1,14 @@
 import streamlit as st
 
-st.set_page_config(page_title="EcoVid – Ayuda", layout="wide")
-st.title("Ayuda")
+from funciones.interfaz import aplicar_tema, render_footer, render_header, render_top_nav
 
+st.set_page_config(page_title="EcoVid – Ayuda", layout="wide")
+
+aplicar_tema()
+render_header(title="EcoVid", subtitle="Ayuda")
+render_top_nav()
+
+st.markdown("---")
 st.markdown(
     """
     - Carga pares ENVI correctos: cada imagen requiere `.bil` y `.hdr`.
@@ -11,3 +17,5 @@ st.markdown(
     - La CLI `ecovid run` permite ejecutar el pipeline sin UI.
     """
 )
+
+render_footer()
