@@ -16,6 +16,18 @@ from .procesamiento import _obtener_mascaras, aplicar_procesamiento_dual, to_rgb
 if "processed" not in st.session_state:
     st.session_state.processed = False
 
+# Valores de configuración predeterminados
+st.session_state.setdefault("leaf_band", 10)
+st.session_state.setdefault("leaf_threshold", 2000.0)
+st.session_state.setdefault("product_band", 165)
+st.session_state.setdefault(
+    "product_ranges",
+    [
+        {"min": 3900.0, "max": 4300.0},
+        {"min": 4900.0, "max": 5200.0},
+    ],
+)
+
 # Rutas base
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 
@@ -235,6 +247,29 @@ def mostrar_subida_archivos():
             # Abrir cubos hiperespectrales y procesar (cacheado)
             cube_sin, cube_con = _abrir_cubos(hdr_sin, bil_sin, hdr_con, bil_con)
 
+            raw_ranges = st.session_state.get("product_ranges", [])
+            product_ranges: list[tuple[float, float]] = []
+            for rng in raw_ranges:
+                if isinstance(rng, dict):
+                    min_val = rng.get("min")
+                    max_val = rng.get("max")
+                else:
+                    try:
+                        min_val, max_val = rng
+                    except (TypeError, ValueError):
+                        continue
+                if min_val is None or max_val is None:
+                    continue
+                product_ranges.append((float(min_val), float(max_val)))
+
+            if not product_ranges:
+                st.error("Configura al menos un rango válido para la detección de producto.")
+                return
+
+            leaf_band = st.session_state.get("leaf_band")
+            leaf_threshold = st.session_state.get("leaf_threshold")
+            product_band = st.session_state.get("product_band")
+
             # Conversión a RGB y máscaras iniciales
             @st.cache_data(show_spinner=False)
             def _to_rgb_cached(hdr: str, bil: str):
@@ -243,8 +278,25 @@ def mostrar_subida_archivos():
 
             rgb_sin = _to_rgb_cached(hdr_sin, bil_sin)
             rgb_con = _to_rgb_cached(hdr_con, bil_con)
-            leaf_sin, drops_sin_raw = _obtener_mascaras(cube_sin)
-            leaf_con, drops_con_raw = _obtener_mascaras(cube_con)
+            try:
+                leaf_sin, drops_sin_raw = _obtener_mascaras(
+                    cube_sin,
+                    banda_hoja=leaf_band,
+                    umbral_hoja=leaf_threshold,
+                    banda_producto=product_band,
+                    rangos_producto=product_ranges,
+                )
+                leaf_con, drops_con_raw = _obtener_mascaras(
+                    cube_con,
+                    banda_hoja=leaf_band,
+                    umbral_hoja=leaf_threshold,
+                    banda_producto=product_band,
+                    rangos_producto=product_ranges,
+                )
+            except ValueError as exc:
+                st.error(f"Configuración de bandas no válida: {exc}")
+                return
+
             trin_sin = trinarizar_final(leaf_sin, drops_sin_raw & leaf_sin, np.zeros_like(leaf_sin))
             trin_con = trinarizar_final(leaf_con, drops_con_raw & leaf_con, np.zeros_like(leaf_con))
 
@@ -266,6 +318,10 @@ def mostrar_subida_archivos():
                 ransac_reproj_thresh=st.session_state.get("ransac_reproj_thresh"),
                 ransac_max_iters=st.session_state.get("ransac_max_iters"),
                 ransac_confidence=st.session_state.get("ransac_confidence"),
+                leaf_band=leaf_band,
+                leaf_threshold=leaf_threshold,
+                product_band=product_band,
+                product_ranges=product_ranges,
             )
             total_time_s = time.perf_counter() - t0
 

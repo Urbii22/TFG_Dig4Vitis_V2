@@ -1,4 +1,5 @@
 import time
+from collections.abc import Sequence
 
 import cv2
 import numpy as np
@@ -13,18 +14,69 @@ from .alignment import _remove_petiole, compute_affine_transform
 # -------------------------------------------------------------------
 # Máscaras básicas
 # -------------------------------------------------------------------
-def _obtener_mascaras(imagen):
+def _obtener_mascaras(
+    imagen,
+    *,
+    banda_hoja: int | None = None,
+    umbral_hoja: float | None = None,
+    banda_producto: int | None = None,
+    rangos_producto: Sequence[tuple[float, float]] | None = None,
+    factor: float = 10000.0,
+):
     """
     Calcula dos máscaras binarias a partir del cubo hiperespectral.
+
+    Args:
+        imagen: Cubo hiperespectral con forma (alto, ancho, bandas).
+        banda_hoja: Número de banda (1-indexado) para segmentar la hoja.
+        umbral_hoja: Umbral aplicado sobre la banda de la hoja.
+        banda_producto: Número de banda (1-indexado) para detectar producto.
+        rangos_producto: Secuencia de pares (mín, máx) sobre la intensidad escalada.
+        factor: Escala aplicada a las reflectancias antes de comparar.
     """
-    factor = 10000
-    b10 = imagen[:, :, 9].squeeze() * factor
-    b164 = imagen[:, :, 164].squeeze() * factor
+    if len(imagen.shape) < 3:
+        raise ValueError("La imagen debe contener una dimensión espectral.")
 
-    leaf = remove_small_holes(b10 < 2000, area_threshold=200)
+    _, _, total_bandas = imagen.shape
+    if total_bandas <= 0:
+        raise ValueError("La imagen no contiene bandas espectrales.")
 
-    # cuporantol duo
-    drops = ((b164 >= 3900) & (b164 <= 4300)) | ((b164 >= 4900) & (b164 <= 5200))
+    banda_hoja = 10 if banda_hoja is None else int(banda_hoja)
+    banda_producto = 165 if banda_producto is None else int(banda_producto)
+    umbral_hoja_val = 2000.0 if umbral_hoja is None else float(umbral_hoja)
+
+    hoja_idx = banda_hoja - 1
+    producto_idx = banda_producto - 1
+
+    if not 0 <= hoja_idx < total_bandas:
+        raise ValueError(
+            f"La banda seleccionada para la hoja ({banda_hoja}) está fuera del rango 1-{total_bandas}."
+        )
+    if not 0 <= producto_idx < total_bandas:
+        raise ValueError(
+            f"La banda seleccionada para el producto ({banda_producto}) está fuera del rango 1-{total_bandas}."
+        )
+
+    b_hoja = imagen[:, :, hoja_idx].squeeze() * factor
+    b_producto = imagen[:, :, producto_idx].squeeze() * factor
+
+    leaf = remove_small_holes(b_hoja < umbral_hoja_val, area_threshold=200)
+
+    if rangos_producto is None:
+        rangos = ((3900.0, 4300.0), (4900.0, 5200.0))
+    else:
+        rangos = []
+        for minimo, maximo in rangos_producto:
+            if minimo is None or maximo is None:
+                continue
+            low = float(min(minimo, maximo))
+            high = float(max(minimo, maximo))
+            rangos.append((low, high))
+        rangos = tuple(rangos)
+
+    drops = np.zeros_like(b_producto, dtype=bool)
+    for low, high in rangos:
+        drops |= (b_producto >= low) & (b_producto <= high)
 
     return leaf, drops
 
@@ -92,6 +144,11 @@ def aplicar_procesamiento_dual(
     ransac_reproj_thresh: float | None = None,
     ransac_max_iters: int | None = None,
     ransac_confidence: float | None = None,
+    leaf_band: int | None = None,
+    leaf_threshold: float | None = None,
+    product_band: int | None = None,
+    product_ranges: Sequence[tuple[float, float]] | None = None,
+    intensity_scale: float = 10000.0,
 ) -> tuple[
     np.ndarray,
     np.ndarray,
@@ -105,8 +162,22 @@ def aplicar_procesamiento_dual(
     Flujo completo SIN/CON con alineación por ORB/RANSAC.
     """
     # 1) Máscaras crudas a tamaño original
-    leaf_con, drops_con_raw = _obtener_mascaras(img_con)
-    leaf_sin, drops_sin_raw = _obtener_mascaras(img_sin)
+    leaf_con, drops_con_raw = _obtener_mascaras(
+        img_con,
+        banda_hoja=leaf_band,
+        umbral_hoja=leaf_threshold,
+        banda_producto=product_band,
+        rangos_producto=product_ranges,
+        factor=intensity_scale,
+    )
+    leaf_sin, drops_sin_raw = _obtener_mascaras(
+        img_sin,
+        banda_hoja=leaf_band,
+        umbral_hoja=leaf_threshold,
+        banda_producto=product_band,
+        rangos_producto=product_ranges,
+        factor=intensity_scale,
+    )
 
     # 2) Determinar un lienzo común (el más grande) y colocar las máscaras en él
     h_con, w_con = leaf_con.shape
